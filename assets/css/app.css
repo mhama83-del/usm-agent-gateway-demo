@@ -18,6 +18,14 @@
 
 * { -webkit-tap-highlight-color: transparent; }
 
+/* Teks panjang tanpa ruang (laluan CONFIG_DRAFT, ID, e-mel, URL) tidak boleh
+   memaksa halaman menjadi lebih lebar daripada skrin. */
+body, .card, td, dd, .usm-log-item, .usm-doc-row, .kpi-sub, .form-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.usm-nav { max-width: 100%; }
+
 body {
   background: #f7f6fb;
   color: var(--ink);
@@ -236,25 +244,25 @@ h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
     box-shadow: var(--shadow-sm);
   }
   .table-stack tbody tr:hover { background: #fff; }
+  /* Label di atas, nilai di bawah — lebih selamat pada 360px daripada susunan
+     kiri/kanan, kerana lencana dan teks panjang tidak boleh memaksa lebar. */
   .table-stack tbody td {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px;
+    display: block;
     border: 0;
-    padding: 5px 10px;
-    text-align: right;
+    padding: 6px 10px;
+    text-align: left;
   }
   .table-stack tbody td::before {
     content: attr(data-label);
-    font-size: 0.68rem;
+    display: block;
+    font-size: 0.66rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--muted);
     font-weight: 600;
-    flex: 0 0 40%;
-    text-align: left;
+    margin-bottom: 2px;
   }
+  .table-stack tbody td .badge { white-space: normal; }
   .table-stack tbody td:empty { display: none; }
   .table-responsive { overflow-x: visible; }
 }
