@@ -40,7 +40,10 @@ function findChrome() {
   return null;
 }
 
-var TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
+var TYPES = {
+  '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
+  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp'
+};
 
 var HARNESS = '<!doctype html><meta charset="utf-8"><title>ukur</title>'
   + '<style>body{margin:0}iframe{width:360px;height:1000px;border:0;display:block}</style>'

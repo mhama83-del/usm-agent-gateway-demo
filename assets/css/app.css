@@ -57,7 +57,18 @@ h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
 }
 .usm-topbar a { color: #fff; text-decoration: none; }
 .usm-topbar a:hover { color: #fff; opacity: .9; }
-.usm-logo { height: 40px; width: auto; background: #fff; border-radius: 9px; padding: 2px 8px 2px 2px; }
+/* Logo rasmi ialah artwork ungu/oren gelap dengan latar telus, jadi ia perlu
+   plat putih supaya kekal terbaca di atas top bar ungu. Jangan buang plat itu
+   tanpa menguji semula. */
+.usm-logo {
+  height: 46px;
+  width: auto;
+  max-width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 5px 9px;
+  box-sizing: content-box;
+}
 .usm-brand-title { font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
 .usm-brand-sub { font-size: 0.72rem; opacity: 0.85; }
 
@@ -320,7 +331,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
   .card-body { padding: .85rem; }
   .trail-step { flex: 1 1 100%; min-width: 0; }
   .usm-brand-sub { display: none; }
-  .usm-logo { height: 34px; }
+  .usm-logo { height: 34px; padding: 4px 7px; }
   .toast-host { left: 12px; right: 12px; max-width: none; }
   .btn { white-space: normal; }
 }

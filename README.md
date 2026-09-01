@@ -121,7 +121,7 @@ Penutup: buka **Tetapan (DRAF)**, tukar *Kadar komisen UG* daripada 15 kepada
 ```
 index.html                    Landing → pages/dashboard.html
 assets/css/app.css            Tema ungu USM + APEX di atas Bootstrap 5
-assets/img/usm-apex-logo.svg  Logo PLACEHOLDER (lihat assets/img/README.txt)
+assets/img/usm-apex-logo.svg  Logo rasmi USM + APEX (PNG terbenam dalam SVG)
 data/seed.js                  Semua data rekaan + CONFIG_DRAFT
 js/store.js                   State demo dalam localStorage + Reset Demo
 js/workflow.js                Semua transisi status + peraturan perniagaan
