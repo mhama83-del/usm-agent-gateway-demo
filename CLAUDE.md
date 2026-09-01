@@ -40,12 +40,36 @@ dengan **Bootstrap 5 bersih**. Seed data sudah dikemas dalam `data/seed.js`.
 - **Data palsu** dalam JS (`data/seed.js`). State demo disimpan dalam
   **`localStorage`** supaya transisi status **kekal** semasa demo.
 - Sediakan butang **"Reset Demo"** yang memulihkan state ke keadaan asal seed.
-- Guna Bootstrap 5 (CDN dibenarkan; atau vendor tempatan jika lebih stabil).
+- Guna **Bootstrap 5 dari CDN** (jsDelivr) — ini keputusan muktamad; demo
+  dijalankan melalui pelayan statik, jadi CDN sentiasa boleh dicapai.
 - **JANGAN** guna framework front-end berat (React/Vue). Vanilla JS sahaja —
   ini menjaga kebolehgunaan semula sebagai views server-rendered kemudian.
-- **JANGAN** guna ES module `import`/`export` yang bergantung pada server;
-  guna `<script>` global (contoh namespace `window.USMDEMO`) supaya demo
-  berfungsi walau dibuka terus (`file://`) atau di hosting statik biasa.
+- **JANGAN** guna ES module `import`/`export`; guna `<script>` global (namespace
+  `window.USMDEMO`) supaya setiap skrin kekal mudah dipindah menjadi view CI4.
+- **Cara demo dijalankan (muktamad):** demo dijalankan melalui **pelayan statik
+  lokal** (lihat README) dengan **Bootstrap 5 dari CDN**. Syarat "mesti berfungsi
+  dari `file://`" **digugurkan** (keputusan owner, 1 Sep 2026). Di Hostinger ia
+  dilayan sebagai laman statik biasa — keadaan yang sama seperti pelayan lokal.
+
+---
+
+### 3.1 Keputusan owner — 1 Sep 2026 (mengatasi teks lama di atas)
+
+1. **Amaun komisen mesti bergerak.** Amaun tuntutan **dikira** daripada
+   `CONFIG_DRAFT.commission` — `amaun = yuran tahun pertama × kadar (UG/PG)`.
+   Ia bukan angka mati. Menukar kadar dalam skrin **Tetapan (DRAF)** mesti
+   menukar amaun serta-merta di semua skrin.
+2. **Data rekaan tambahan dibenarkan** dalam `data/seed.js` untuk menyokong
+   perjanjian, notifikasi, log aktiviti dan status dokumen — dengan syarat semua
+   rekaan, dilabel demo, disenaraikan kepada owner, dan rekod sedia ada tidak
+   diubah tanpa memberitahu.
+3. **Chip SLA — dua sumber:**
+   - permohonan **baharu yang dicipta semasa demo**: chip **dikira** daripada
+     `CONFIG_DRAFT.sla` + tarikh, supaya ia bergerak;
+   - ejen **sedia ada dalam seed**: medan `sla` ialah sumber paparan (keadaan
+     yang dikurasi untuk cerita demo). Jika bercanggah dengan kiraan, **medan
+     `sla` menang** untuk ejen seed.
+4. **Cara jalan:** pelayan statik lokal + CDN (lihat §3). `file://` digugurkan.
 
 ---
 

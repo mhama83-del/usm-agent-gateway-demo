@@ -25,17 +25,31 @@ kepada pihak pengurusan USM.
 
 ## Cara buka demo (lokal)
 
-Oleh sebab ia laman statik, cukup buka `index.html` dalam pelayar. Untuk hasil
-paling stabil (elak sekatan `file://` pada sesetengah pelayar), jalankan pelayan
-statik ringkas:
+Demo ini **mesti dijalankan melalui pelayan statik**, bukan dibuka terus sebagai
+fail (`file://`). Sebabnya: Bootstrap 5 dimuatkan dari CDN dan sesetengah
+pelayar menyekat CDN, `localStorage` serta laluan relatif apabila halaman dibuka
+dari `file://`. Syarat "mesti berfungsi dari `file://`" telah digugurkan
+(keputusan owner, 1 Sep 2026).
+
+Pilih salah satu:
 
 ```bash
-# Python (biasanya sudah ada)
+# Python 3
 python3 -m http.server 8000
-# kemudian buka http://localhost:8000
+
+# atau Node.js
+npx serve -l 8000
 ```
 
-Atau guna sambungan "Live Server" dalam VS Code.
+Kemudian buka **http://localhost:8000**.
+
+Atau guna sambungan **"Live Server"** dalam VS Code (klik kanan `index.html` →
+*Open with Live Server*).
+
+> **Perlukan internet.** Bootstrap 5 (CSS + JS) dimuatkan dari CDN jsDelivr.
+> Ini keputusan muktamad projek — lihat `CLAUDE.md` §3 dan §3.1.
+> Di Hostinger, subdomain `agents.durianbytes.com` melayan fail ini sebagai laman
+> statik biasa, jadi keadaannya sama seperti pelayan lokal.
 
 ---
 
