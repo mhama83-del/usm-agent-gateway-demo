@@ -1,6 +1,7 @@
 /*
- * responsive-360.chrome.js — Semak setiap skrin tidak melimpah mendatar pada
- * skrin 360px (keperluan CLAUDE.md §7.7).
+ * responsive-360.chrome.js — Semak dalam PELAYAR SEBENAR bahawa setiap skrin
+ * (a) dirender tanpa ralat dengan Bootstrap dari CDN, dan
+ * (b) tidak melimpah mendatar pada skrin 360px (keperluan CLAUDE.md §7.7).
  *
  * Ia menghidupkan pelayan statik sementara, memuatkan setiap halaman dalam
  * iframe selebar tepat 360px, dan membandingkan scrollWidth dengan clientWidth.
@@ -60,6 +61,10 @@ var HARNESS = '<!doctype html><meta charset="utf-8"><title>ukur</title>'
   + '     var cls=(all[j].className&&all[j].className.baseVal===undefined)?String(all[j].className).split(" ").slice(0,3).join("."):"";'
   + '     over.push(all[j].tagName.toLowerCase()+(cls?"."+cls:"")+"@"+Math.round(r.right));'
   + '     if(over.length>=4)break;}}}'
+  + '  var pg=d.getElementById("page");var html=pg?pg.innerHTML:"";'
+  + '  if(!pg||html.length<200)over.push("SKRIN-KOSONG");'
+  + '  if(html.indexOf("Ralat skrin")>=0)over.push("RALAT-SKRIN");'
+  + '  if(html.indexOf("belum dibina")>=0)over.push("SKRIN-BELUM-DIBINA");'
   + '  results.push(key+"="+sw+"/"+cw+(over.length?" ["+over.join(", ")+"]":""));'
   + '  document.body.removeChild(f);i++;next();},350);};'
   + ' document.body.appendChild(f);}'

@@ -352,6 +352,35 @@ for (var p = 0; p < PAGES.length; p++) {
     html.slice(0, 120));
 }
 
+console.log('\n== 20. Tiada link mati (setiap skrin × setiap peranan) ==');
+var ROLES = ['agent', 'usains', 'leap', 'payment', 'admin'];
+var dead = [];
+var checked = 0;
+for (var rr = 0; rr < ROLES.length; rr++) {
+  for (var pp = 0; pp < PAGES.length; pp++) {
+    openPage(PAGES[pp]);
+    S().setRole(ROLES[rr]);
+    openPage(PAGES[pp]);
+    var anchors = win.document.querySelectorAll('a[href]');
+    for (var an = 0; an < anchors.length; an++) {
+      var href = anchors[an].getAttribute('href');
+      if (!href || href.charAt(0) === '#' || /^(https?:|mailto:|tel:)/.test(href)) continue;
+      var file = href.split('?')[0].split('#')[0];
+      // pautan relatif dari dalam pages/, atau '../' ke akar repo
+      var abs = file.indexOf('../') === 0
+        ? path.join(REPO, file.replace('../', ''))
+        : path.join(REPO, 'pages', file);
+      checked++;
+      if (!fs.existsSync(abs)) {
+        var key = ROLES[rr] + ':' + PAGES[pp] + ' → ' + href;
+        if (dead.indexOf(key) < 0) dead.push(key);
+      }
+    }
+  }
+}
+check(checked + ' pautan disemak merentas 10 skrin × 5 peranan — tiada yang mati',
+  dead.length === 0, dead.slice(0, 6).join(' | '));
+
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);
 process.exit(fail ? 1 : 0);
