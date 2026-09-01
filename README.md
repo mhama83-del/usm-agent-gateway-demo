@@ -38,7 +38,7 @@ Pilih salah satu:
 python3 -m http.server 8000
 
 # atau Node.js
-npx serve -l 8000
+npx http-server -p 8000 -c-1
 ```
 
 Kemudian buka **http://localhost:8000**.
