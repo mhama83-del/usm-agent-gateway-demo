@@ -95,6 +95,25 @@ a:hover { color: var(--usm-purple-dark); }
   cursor: help;
 }
 
+/* Penanda "demo vs produksi" pada amaun komisen (snapshot kadar). */
+.snap-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--usm-purple-soft);
+  color: var(--usm-purple);
+  border: 1px solid var(--usm-purple-line);
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-style: italic;
+  vertical-align: middle;
+  margin-left: 4px;
+  cursor: help;
+}
+.snap-mark:focus { outline: 2px solid var(--usm-purple); outline-offset: 1px; }
+
 /* --- Chip SLA --------------------------------------------------------- */
 .sla-chip {
   display: inline-block;

@@ -257,6 +257,35 @@ click('[data-action="restore"]');
 check('pulih ke 15%', S().config().commission.ug.ratePercent === 15);
 check('amaun kembali ' + before, W().commissionOf(S().claim(newClaimId)) === before);
 
+console.log('\n== 16b. Ambang SLA + penanda snapshot kelihatan di UI ==');
+openPage('settings-draft');
+check('ambang "Approaching Deadline" tersenarai di Tetapan (DRAF)',
+  body().indexOf('Approaching Deadline') >= 0);
+var slaField = null;
+var fields = win.document.querySelectorAll('[data-field]');
+for (var q = 0; q < fields.length; q++) {
+  var rowTxt = fields[q].parentNode.parentNode.textContent || '';
+  if (rowTxt.indexOf('Approaching Deadline') >= 0) slaField = fields[q];
+}
+check('medan ambang boleh diedit', !!slaField && slaField.value === '2', slaField && slaField.value);
+slaField.value = '20';
+slaField.dispatchEvent(new win.Event('change', { bubbles: true }));
+check('ambang disimpan ke config', S().config().sla.approachingWithinDays === 20);
+setRole('usains');
+openPage('dashboard');
+check('chip SLA bertukar warning selepas ambang dinaikkan',
+  (body().match(/Approaching Deadline/g) || []).length >= 2);
+openPage('settings-draft');
+click('[data-action="restore"]');
+check('ambang pulih ke 2', S().config().sla.approachingWithinDays === 2);
+
+openPage('claims');
+check('penanda snapshot pada amaun tuntutan', body().indexOf('snap-mark') >= 0);
+check('teks demo-vs-produksi ada pada tooltip',
+  body().indexOf('Produksi membekukan kadar pada setiap claim') >= 0);
+check('chip SLA membawa lencana DRAF', body().indexOf('sla-chip') >= 0
+  && body().indexOf('draf-badge') >= 0);
+
 console.log('\n== 17. Penukar peranan menukar navigasi ==');
 setRole('agent');
 openPage('dashboard');

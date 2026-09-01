@@ -24,6 +24,25 @@
     return esc(value) + draf(hint);
   }
 
+  // Penanda "demo vs produksi" untuk amaun komisen.
+  // Spesifikasi §15.9 menghendaki kadar DIBEKUKAN (snapshot) pada setiap claim.
+  // Demo sengaja memaparkan kadar SEMASA supaya kesan menukar kadar kelihatan.
+  var SNAPSHOT_NOTE = 'Demo memaparkan kadar semasa supaya kesan tukar kadar kelihatan. '
+    + 'Produksi membekukan kadar pada setiap claim (snapshot).';
+  function snapMark(extra) {
+    var t = SNAPSHOT_NOTE + (extra ? ' ' + extra : '');
+    return '<span class="snap-mark" tabindex="0" role="note" title="' + esc(t)
+      + '" aria-label="' + esc(t) + '">i</span>';
+  }
+
+  // Amaun komisen + lencana DRAF kadar + penanda snapshot.
+  function amountWithNotes(amountHtml, level, ratePercent, snapshotPercent) {
+    var extra = (snapshotPercent != null && snapshotPercent !== ratePercent)
+      ? 'Kadar snapshot ketika claim dihantar: ' + snapshotPercent + '%.'
+      : '';
+    return amountHtml + draf('Kadar komisen ' + level + ' ' + ratePercent + '% — DRAF') + snapMark(extra);
+  }
+
   function kpi(label, value, sub) {
     return '<div class="col-6 col-lg-3">'
       + '<div class="card h-100 usm-kpi"><div class="card-body py-3">'
@@ -98,6 +117,9 @@
   C.esc = esc;
   C.draf = draf;
   C.drafValue = drafValue;
+  C.snapMark = snapMark;
+  C.SNAPSHOT_NOTE = SNAPSHOT_NOTE;
+  C.amountWithNotes = amountWithNotes;
   C.kpi = kpi;
   C.statusBadge = statusBadge;
   C.table = table;

@@ -33,6 +33,7 @@
       usainsReviewDays: 7,   // hari kalendar
       leapDecisionDays: 7,   // hari kalendar
       claimDecisionDays: 14, // hari
+      approachingWithinDays: 2, // baki hari <= nilai ini -> chip "Approaching Deadline"
       expiryAlertsDays: [90, 60, 30]
     },
     eligibility: {

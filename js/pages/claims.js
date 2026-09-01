@@ -31,9 +31,15 @@
         + '<div class="fw-semibold mb-1">Kiraan komisen</div>'
         + App.money(c.firstYearFee) + ' (yuran tahun pertama) × <strong>' + rate + '%</strong> '
         + C.draf('Kadar komisen ' + c.level + ' — DRAF') + ' = <strong>' + App.money(amount) + '</strong>'
+        + C.snapMark()
+        + '<div class="mt-2 pt-2 border-top text-muted">'
+        + '<strong>Demo vs produksi:</strong> ' + C.esc(C.SNAPSHOT_NOTE)
+        + ' (spesifikasi §15.9 — kadar baharu tidak boleh mengubah claim lama secara senyap.)'
+        + '</div>'
         + (c.rateSnapshot != null && c.rateSnapshot !== rate
-            ? '<div class="text-danger mt-1">Kadar snapshot ketika dihantar: ' + c.rateSnapshot + '%. '
-              + 'Dalam produksi, kadar snapshot yang digunakan (spesifikasi §15.9).</div>'
+            ? '<div class="text-danger mt-2">Kadar snapshot ketika claim ini dihantar: <strong>'
+              + c.rateSnapshot + '%</strong> — produksi akan membayar ' + App.money(Math.round(c.firstYearFee * c.rateSnapshot / 100))
+              + ', bukan ' + App.money(amount) + '.</div>'
             : '')
         + '</div>';
 
@@ -124,7 +130,7 @@
         rows.push([
           '<a href="claims.html?id=' + C.esc(c.id) + '">' + C.esc(c.id) + '</a>',
           '<div class="fw-semibold">' + C.esc(c.student) + '</div><div class="small text-muted">' + C.esc(c.level) + ' · ' + C.esc(c.program) + '</div>',
-          App.money(W.commissionOf(c)) + ' ' + C.draf('Kadar ' + W.ratePercent(c.level) + '% — DRAF'),
+          C.amountWithNotes(App.money(W.commissionOf(c)), c.level, W.ratePercent(c.level), c.rateSnapshot),
           C.statusBadge(c.claimStatus, W.CLAIM_LABEL[c.claimStatus]),
           C.esc(c.submittedLabel),
           C.slaChipForClaim(c)

@@ -21,6 +21,8 @@
       note: 'Menggerakkan chip SLA bagi permohonan yang dicipta semasa demo.' },
     { g: 'SLA', path: 'sla.leapDecisionDays', label: 'SLA keputusan USM LEAP', unit: 'hari kalendar', type: 'number' },
     { g: 'SLA', path: 'sla.claimDecisionDays', label: 'SLA keputusan tuntutan', unit: 'hari', type: 'number' },
+    { g: 'SLA', path: 'sla.approachingWithinDays', label: 'Ambang "Approaching Deadline"', unit: 'hari sebelum tarikh akhir', type: 'number',
+      note: 'Baki hari kurang atau sama dengan nilai ini menukar chip SLA daripada hijau kepada kuning.' },
     { g: 'SLA', path: 'sla.expiryAlertsDays', label: 'Amaran tamat', unit: 'hari', type: 'list' },
 
     { g: 'Kelayakan &amp; pembaharuan', path: 'eligibility.minStudyMonths', label: 'Tempoh pengajian minimum (claim)', unit: 'bulan', type: 'number' },

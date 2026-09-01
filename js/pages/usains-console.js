@@ -39,7 +39,7 @@
           C.esc(c.id),
           '<div class="fw-semibold">' + C.esc(c.student) + '</div><div class="small text-muted">' + C.esc(ag ? ag.name : c.agentId) + '</div>',
           C.esc(c.level) + ' · ' + C.esc(c.program),
-          App.money(W.commissionOf(c)) + ' ' + C.draf('Amaun = yuran tahun 1 × kadar DRAF'),
+          C.amountWithNotes(App.money(W.commissionOf(c)), c.level, W.ratePercent(c.level), c.rateSnapshot),
           C.statusBadge(c.claimStatus, W.CLAIM_LABEL[c.claimStatus]),
           C.slaChipForClaim(c),
           '<a class="btn btn-sm btn-usm" href="claims.html?id=' + C.esc(c.id) + '">Semak kelayakan</a>'

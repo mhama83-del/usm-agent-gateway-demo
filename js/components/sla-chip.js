@@ -13,24 +13,40 @@
     late: 'Overdue'
   };
 
+  // Semua input chip SLA (tempoh semakan + ambang "approaching") ialah nilai
+  // DRAF, jadi chip membawa lencana DRAF sendiri.
+  function drafHint() {
+    var sla = NS.Store.config().sla;
+    return 'Chip dikira dari nilai DRAF: semakan USAINS ' + sla.usainsReviewDays
+      + ' hari, keputusan LEAP ' + sla.leapDecisionDays + ' hari, keputusan tuntutan '
+      + sla.claimDecisionDays + ' hari, ambang "Approaching Deadline" '
+      + sla.approachingWithinDays + ' hari.';
+  }
+
   // state: 'ok' | 'warning' | 'late'
-  function slaChip(state, extra) {
+  function slaChip(state, extra, opts) {
+    opts = opts || {};
     var s = TEXT[state] ? state : 'ok';
     var tail = extra ? ' · ' + extra : '';
-    return '<span class="sla-chip sla-' + s + '">' + TEXT[s] + tail + '</span>';
+    var chip = '<span class="sla-chip sla-' + s + '">' + TEXT[s] + tail + '</span>';
+    return opts.noDraf ? chip : chip + NS.C.draf(drafHint());
   }
 
   // Chip untuk satu ejen, termasuk baki hari jika dikira.
+  // Ejen SEED: medan `sla` yang dikurasi menang (keputusan owner 1 Sep 2026).
   function slaChipForAgent(a) {
     var W = NS.WF;
     var state = W.slaOf(a);
+    if (a.slaSource === 'seed') {
+      return '<span class="sla-chip sla-' + state + '">' + TEXT[state] + '</span>'
+        + NS.C.draf('Keadaan SLA yang dikurasi untuk cerita demo (medan seed). '
+          + 'Permohonan yang dicipta semasa demo dikira dari nilai DRAF.');
+    }
     var extra = '';
-    if (a.slaSource !== 'seed') {
-      var dl = W.slaDeadline(a);
-      if (dl) {
-        var left = W.daysUntil(dl);
-        extra = (left < 0) ? (Math.abs(left) + ' hari lewat') : (left + ' hari lagi');
-      }
+    var dl = W.slaDeadline(a);
+    if (dl) {
+      var left = W.daysUntil(dl);
+      extra = (left < 0) ? (Math.abs(left) + ' hari lewat') : (left + ' hari lagi');
     }
     return slaChip(state, extra);
   }

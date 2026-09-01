@@ -117,7 +117,9 @@
     if (!deadlineIso) return 'ok';
     var left = daysUntil(deadlineIso);
     if (left < 0) return 'late';
-    if (left <= 2) return 'warning';
+    // Ambang "Approaching Deadline" ialah nilai DRAF, bukan nombor tersembunyi.
+    var within = S.config().sla.approachingWithinDays;
+    if (left <= (within == null ? 2 : within)) return 'warning';
     return 'ok';
   }
   function slaOf(a) {

@@ -62,6 +62,16 @@ S.config().sla.usainsReviewDays = 1;
 check('SLA jadi warning bila tempoh DRAF = 1 hari', W.slaOf(a) === 'warning', W.slaOf(a));
 S.config().sla.usainsReviewDays = 7;
 
+// Ambang "Approaching Deadline" kini nilai DRAF, bukan nombor tersembunyi
+step('1c', 'Ambang Approaching Deadline dari CONFIG_DRAFT');
+check('ambang lalai = 2 hari', S.config().sla.approachingWithinDays === 2);
+check('SLA ok pada ambang 2', W.slaOf(a) === 'ok', W.slaOf(a));
+S.config().sla.approachingWithinDays = 7;
+check('ambang 7 menjadikan chip warning', W.slaOf(a) === 'warning', W.slaOf(a));
+S.config().sla.approachingWithinDays = 0;
+check('ambang 0 menjadikan chip ok semula', W.slaOf(a) === 'ok', W.slaOf(a));
+S.config().sla.approachingWithinDays = 2;
+
 // --- peranan salah tidak boleh bertindak ---
 step('1b', 'Kawalan peranan');
 var threw = false;

@@ -32,7 +32,7 @@
         claimRows.push([
           C.esc(c.id),
           '<div class="fw-semibold">' + C.esc(c.student) + '</div><div class="small text-muted">' + C.esc(ag ? ag.name : c.agentId) + '</div>',
-          App.money(W.commissionOf(c)) + ' ' + C.draf('Kadar ' + W.ratePercent(c.level) + '% — DRAF'),
+          C.amountWithNotes(App.money(W.commissionOf(c)), c.level, W.ratePercent(c.level), c.rateSnapshot),
           C.slaChipForClaim(c),
           '<button class="btn btn-sm btn-usm" data-action="claim-approve" data-id="' + C.esc(c.id) + '">Luluskan</button> '
           + '<button class="btn btn-sm btn-outline-danger" data-action="claim-reject" data-id="' + C.esc(c.id) + '">Tolak</button>'

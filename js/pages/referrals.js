@@ -41,7 +41,7 @@
           '<div>' + C.esc(r.program) + '</div><div class="small text-muted">' + C.esc(r.level) + ' · ' + C.esc(r.semester) + '</div>',
           C.esc(ag ? ag.name : r.agentId),
           C.statusBadge(r.refStatus, W.REF_LABEL[r.refStatus] || r.refStatus),
-          App.money(r.firstYearFee) + '<div class="small text-muted">Komisen: ' + App.money(W.commissionOf(r)) + ' ' + C.draf('Kadar ' + W.ratePercent(r.level) + '% — DRAF') + '</div>',
+          App.money(r.firstYearFee) + '<div class="small text-muted">Komisen: ' + C.amountWithNotes(App.money(W.commissionOf(r)), r.level, W.ratePercent(r.level), null) + '</div>',
           acts || '<span class="text-muted small">—</span>'
         ]);
       }
