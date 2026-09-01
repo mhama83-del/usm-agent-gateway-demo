@@ -243,10 +243,21 @@ check('ejen demo masih RENEWED', S().agent(newAgentId).agentStatus === 'RENEWED'
 check('tuntutan masih PAID', S().claim(newClaimId).claimStatus === 'PAID');
 check('perjanjian masih FULLY_SIGNED', S().agreement(agrId).status === 'FULLY_SIGNED');
 
+// Cari input tetapan mengikut laluan CONFIG_DRAFT yang dipaparkan pada barisnya.
+function settingInput(pathText) {
+  var fields = win.document.querySelectorAll('[data-field]');
+  for (var q = 0; q < fields.length; q++) {
+    var row = fields[q].closest ? fields[q].closest('tr') : fields[q].parentNode.parentNode;
+    if (row && (row.textContent || '').indexOf(pathText) >= 0) return fields[q];
+  }
+  return null;
+}
+
 console.log('\n== 16. Tetapan (DRAF) menggerakkan amaun ==');
 openPage('settings-draft');
 var before = W().commissionOf(S().claim(newClaimId));
-var input = win.document.querySelector('[data-field="0"]');
+var input = settingInput('CONFIG_DRAFT.commission.ug.ratePercent');
+check('medan kadar UG dijumpai', !!input);
 input.value = '30';
 input.dispatchEvent(new win.Event('change', { bubbles: true }));
 check('kadar UG jadi 30%', S().config().commission.ug.ratePercent === 30);
@@ -261,12 +272,7 @@ console.log('\n== 16b. Ambang SLA + penanda snapshot kelihatan di UI ==');
 openPage('settings-draft');
 check('ambang "Approaching Deadline" tersenarai di Tetapan (DRAF)',
   body().indexOf('Approaching Deadline') >= 0);
-var slaField = null;
-var fields = win.document.querySelectorAll('[data-field]');
-for (var q = 0; q < fields.length; q++) {
-  var rowTxt = fields[q].parentNode.parentNode.textContent || '';
-  if (rowTxt.indexOf('Approaching Deadline') >= 0) slaField = fields[q];
-}
+var slaField = settingInput('CONFIG_DRAFT.sla.approachingWithinDays');
 check('medan ambang boleh diedit', !!slaField && slaField.value === '2', slaField && slaField.value);
 slaField.value = '20';
 slaField.dispatchEvent(new win.Event('change', { bubbles: true }));
@@ -285,6 +291,30 @@ check('teks demo-vs-produksi ada pada tooltip',
   body().indexOf('Produksi membekukan kadar pada setiap claim') >= 0);
 check('chip SLA membawa lencana DRAF', body().indexOf('sla-chip') >= 0
   && body().indexOf('draf-badge') >= 0);
+
+console.log('\n== 16c. Liputan: SEMUA nilai CONFIG_DRAFT ada di Tetapan (DRAF) ==');
+openPage('settings-draft');
+var pageHtml = body();
+var leaves = [];
+(function walk(node, prefix) {
+  for (var key in node) {
+    if (!Object.prototype.hasOwnProperty.call(node, key)) continue;
+    var v = node[key];
+    var p = prefix ? prefix + '.' + key : key;
+    if (v && typeof v === 'object' && !Array.isArray(v)) walk(v, p);
+    else leaves.push(p);
+  }
+})(win.USMDEMO.SEED.CONFIG_DRAFT, '');
+check('CONFIG_DRAFT mempunyai ' + leaves.length + ' nilai daun', leaves.length >= 19,
+  String(leaves.length));
+var missing = [];
+for (var lf = 0; lf < leaves.length; lf++) {
+  if (pageHtml.indexOf('CONFIG_DRAFT.' + leaves[lf]) < 0) missing.push(leaves[lf]);
+}
+check('setiap nilai CONFIG_DRAFT dipaparkan', missing.length === 0, missing.join(', '));
+var drafCount = (pageHtml.match(/draf-badge/g) || []).length;
+check('setiap nilai membawa lencana DRAF (' + drafCount + ' >= ' + leaves.length + ')',
+  drafCount >= leaves.length, String(drafCount));
 
 console.log('\n== 17. Penukar peranan menukar navigasi ==');
 setRole('agent');
