@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (jika ada tooling pembangunan sahaja; demo tidak perlu build)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Logs & sementara
+*.log
+tmp/
+.cache/
+
+# Fail persekitaran (tiada dalam demo, tetapi jaga-jaga)
+.env
+.env.*
+
+# Artifak pelayan / upload (jangan commit)
+*.zip
+*.tar.gz
