@@ -18,7 +18,9 @@ kepada pihak pengurusan USM.
 - [Cara buka demo (lokal)](#cara-buka-demo-lokal)
 - [Cara reset demo](#cara-reset-demo)
 - [Cara upload ke Hostinger](#cara-upload-ke-hostinger)
+- [Golden path demo (jalan cerita)](#golden-path-demo-jalan-cerita)
 - [Struktur fail](#struktur-fail)
+- [Ujian (untuk pembangun sahaja)](#ujian-untuk-pembangun-sahaja)
 - [Untuk pembangun](#untuk-pembangun)
 
 ---
@@ -82,24 +84,81 @@ mungkin berbeza sedikit ikut versi):
 5. **Uji:** buka `https://agents.durianbytes.com` dan larikan seluruh golden path
    serta butang **Reset Demo**.
 
-> Nota: `README.md`, `CLAUDE.md`, dan `.gitignore` tidak perlu diupload ke
-> Hostinger — ia untuk repo sahaja.
+> Nota: `README.md`, `CLAUDE.md`, `.gitignore`, `docs/` dan `tests/` tidak perlu
+> diupload ke Hostinger — ia untuk repo sahaja. Yang perlu naik hanyalah
+> `index.html`, `assets/`, `js/`, `data/` dan `pages/`.
+
+---
+
+## Golden path demo (jalan cerita)
+
+Mula sebagai peranan **Agent**, dan tukar peranan di bar atas mengikut arahan
+kad *"Langkah seterusnya"* pada Dashboard:
+
+| # | Peranan | Tindakan |
+|---|---|---|
+| 1 | Agent | Mohon / Renew → isi wizard 4 langkah → terima deklarasi ABC → hantar |
+| 2 | USAINS | Fail permohonan → **Pulangkan** satu dokumen (sebab wajib) |
+| 3 | Agent | Fail permohonan → **Hantar semula** dokumen itu |
+| 4 | USAINS | Sahkan semua 9 dokumen → **Verify & forward ke LEAP** |
+| 5 | USM LEAP | Konsol LEAP → **Luluskan** → draf perjanjian dijana automatik |
+| 6 | USAINS → LEAP → Agent | Perjanjian → tandatangan tiga pihak → ejen jadi **AKTIF** |
+| 7 | Agent | Rujukan Pelajar → hantar rujukan baharu |
+| 8 | USAINS | Rujukan Pelajar → majukan status sehingga **Yuran dibayar** |
+| 9 | Agent | **Bina tuntutan** → **Hantar tuntutan** |
+| 10 | USAINS | Tuntutan → tanda 5 syarat kelayakan → **Hantar untuk keputusan LEAP** |
+| 11 | USM LEAP | Tuntutan → **Luluskan** |
+| 12 | Payment Officer | Tuntutan → **Rekod bayaran** (amaun, tarikh, rujukan) |
+| 13 | USM LEAP | Annual Review → **Buka review** → **Renew** |
+
+Penutup: buka **Tetapan (DRAF)**, tukar *Kadar komisen UG* daripada 15 kepada
+20, dan tunjukkan setiap amaun tuntutan berubah serta-merta.
 
 ---
 
 ## Struktur fail
 
 ```
-index.html            Landing → dashboard
-assets/css/app.css    Tema ungu USM atas Bootstrap 5
-assets/img/           Logo USM+APEX, ikon
-js/app.js             Bootstrap + chrome bersama + router ringan
-js/store.js           State demo (localStorage)
-js/workflow.js        Logik transisi status
-js/components/         Topbar, nav, SLA chip, status trail, list card
-data/seed.js          Data palsu + CONFIG_DRAFT (nilai boleh-konfigurasi)
-pages/                Setiap skrin = satu fail HTML
+index.html                    Landing → pages/dashboard.html
+assets/css/app.css            Tema ungu USM + APEX di atas Bootstrap 5
+assets/img/usm-apex-logo.svg  Logo PLACEHOLDER (lihat assets/img/README.txt)
+data/seed.js                  Semua data rekaan + CONFIG_DRAFT
+js/store.js                   State demo dalam localStorage + Reset Demo
+js/workflow.js                Semua transisi status + peraturan perniagaan
+js/app.js                     Bootstrap halaman, suntik chrome, utiliti UI
+js/components/topbar.js       Jenama, penukar peranan, notifikasi, Reset Demo
+js/components/sidenav.js      Navigasi ikut peranan + kiraan tugasan
+js/components/sla-chip.js     Chip SLA (Within / Approaching / Overdue)
+js/components/status-trail.js Status trail 5-peringkat
+js/components/list-card.js    Kad, jadual boleh-tindan, lencana DRAF
+js/pages/<skrin>.js           Logik setiap skrin (satu fail satu skrin)
+pages/<skrin>.html            Setiap skrin = satu fail HTML (10 skrin)
+tests/                        Ujian pembangunan sahaja — tidak perlu diupload
 ```
+
+---
+
+## Ujian (untuk pembangun sahaja)
+
+Demo tidak memerlukan Node atau sebarang build. Ujian di bawah pula memerlukan
+Node, dan dua daripadanya memerlukan pakej/pelayar tambahan:
+
+```bash
+# 1. Logik workflow hujung ke hujung (tiada kebergantungan)
+node tests/golden-path.node.js
+
+# 2. Golden path dengan klik sebenar pada UI yang dirender
+npm i jsdom && node tests/ui-golden-path.jsdom.js
+
+# 3. Tiada limpahan mendatar pada skrin 360px (perlu Google Chrome)
+node tests/responsive-360.chrome.js
+```
+
+> Nota untuk sesiapa yang menguji responsif secara manual: bendera
+> `--window-size` Chrome headless **tidak** menetapkan lebar viewport kecil
+> dengan tepat (ia terhad kepada lebih kurang 526px), jadi tangkapan skrin
+> "360px" boleh menipu. Guna DevTools device toolbar, atau ujian nombor 3 di
+> atas yang memuatkan setiap halaman dalam iframe selebar tepat 360px.
 
 ---
 
@@ -110,6 +169,18 @@ sistem produksi (CodeIgniter 4 + MySQL). Setiap fail dalam `pages/` memetakan
 kepada satu *view* CI4; chrome bersama memetakan kepada *layout/partial*. Lihat
 `CLAUDE.md` untuk brief pembangunan penuh dan `Spesifikasi Pembangunan v1.0`
 untuk keperluan sistem sebenar.
+
+Pemetaan yang dicadangkan ke CI4:
+
+| Demo | CodeIgniter 4 |
+|---|---|
+| `pages/<skrin>.html` | satu view setiap satu (`app/Views/agent/<skrin>.php`) |
+| chrome bersama (`topbar.js` + `sidenav.js`) | `app/Views/layouts/main.php` + partial |
+| `js/components/*.js` | view cell / partial (chip SLA, status trail, kad senarai) |
+| `js/workflow.js` | satu Workflow Service; setiap fungsi jadi satu kaedah |
+| `js/store.js` | Model + Repository di atas MySQL |
+| `data/seed.js` `CONFIG_DRAFT` | jadual konfigurasi berversi (Modul Konfigurasi) |
+| log aktiviti demo | jadual audit trail |
 
 Nilai dalam `CONFIG_DRAFT` (`data/seed.js`) ialah **titik keputusan owner** —
 dipaparkan dengan lencana **DRAF** sepanjang demo dan diringkaskan dalam skrin
