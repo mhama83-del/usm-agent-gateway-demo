@@ -46,9 +46,9 @@
   function kpi(label, value, sub) {
     return '<div class="col-6 col-lg-3">'
       + '<div class="card h-100 usm-kpi"><div class="card-body py-3">'
-      + '<div class="text-muted small">' + label + '</div>'
-      + '<div class="display-6">' + value + '</div>'
-      + (sub ? '<div class="small text-muted">' + sub + '</div>' : '')
+      + '<div class="kpi-label">' + label + '</div>'
+      + '<div class="kpi-value">' + value + '</div>'
+      + (sub ? '<div class="kpi-sub">' + sub + '</div>' : '')
       + '</div></div></div>';
   }
 
