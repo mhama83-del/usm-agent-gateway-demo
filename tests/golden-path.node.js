@@ -1,6 +1,6 @@
 // Ujian golden path tanpa pelayar (node) — mengesahkan logik workflow.
 var path = require('path');
-var REPO = require('path').join(__dirname, '..').replace(/\/g, '/');
+var REPO = path.join(__dirname, '..').split(path.sep).join('/');
 var mem = {};
 global.window = {
   localStorage: {
