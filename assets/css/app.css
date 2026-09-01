@@ -1,48 +1,71 @@
 /* app.css — tema ungu USM + APEX di atas Bootstrap 5.
-   Semua warna rekaan demo; sahkan dengan panduan jenama USM sebenar. */
+   Palet rekaan demo; sahkan dengan panduan jenama USM sebenar sebelum
+   penggunaan rasmi (lihat assets/img/README.txt). */
 
 :root {
   --usm-purple: #5b2c86;
   --usm-purple-dark: #3f1f5e;
-  --usm-purple-soft: #f3eefa;
+  --usm-purple-mid: #7443a8;
+  --usm-purple-soft: #f4effa;
   --usm-purple-line: #ddd0ee;
   --apex-gold: #c9a227;
-  --ink: #212129;
+  --apex-gold-soft: #fdf6df;
+  --ink: #1f1f27;
   --muted: #6b6b78;
+  --shadow-sm: 0 1px 2px rgba(63, 31, 94, .06);
+  --shadow-md: 0 4px 16px rgba(63, 31, 94, .08);
 }
+
+* { -webkit-tap-highlight-color: transparent; }
 
 body {
   background: #f7f6fb;
   color: var(--ink);
   font-size: 0.95rem;
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
 
-a { color: var(--usm-purple); }
+a { color: var(--usm-purple); text-underline-offset: 2px; }
 a:hover { color: var(--usm-purple-dark); }
 
-/* --- Top bar ---------------------------------------------------------- */
-.usm-topbar {
-  background: linear-gradient(90deg, var(--usm-purple-dark), var(--usm-purple));
-  color: #fff;
-}
-.usm-topbar a { color: #fff; text-decoration: none; }
-.usm-brand-mark {
-  width: 38px; height: 38px; border-radius: 9px;
-  background: #fff; color: var(--usm-purple);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.8rem; letter-spacing: -0.5px;
-  border-bottom: 3px solid var(--apex-gold);
-}
-.usm-brand-title { font-weight: 600; line-height: 1.15; }
-.usm-brand-sub { font-size: 0.72rem; opacity: 0.85; }
+h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
 
+:focus-visible { outline: 2px solid var(--usm-purple); outline-offset: 2px; }
+
+/* --- Jalur demo + top bar --------------------------------------------- */
 .usm-demo-strip {
   background: var(--apex-gold);
   color: #2b2405;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  line-height: 1.35;
 }
+
+.usm-topbar {
+  background: linear-gradient(100deg, var(--usm-purple-dark) 0%, var(--usm-purple) 55%, var(--usm-purple-mid) 100%);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+.usm-topbar a { color: #fff; text-decoration: none; }
+.usm-topbar a:hover { color: #fff; opacity: .9; }
+.usm-logo { height: 40px; width: auto; background: #fff; border-radius: 9px; padding: 2px 8px 2px 2px; }
+.usm-brand-title { font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
+.usm-brand-sub { font-size: 0.72rem; opacity: 0.85; }
+
+.usm-whoami {
+  background: rgba(255, 255, 255, .12);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  padding: 3px 10px;
+}
+
+.usm-topbar .form-select-sm,
+.usm-topbar .btn-sm { font-size: 0.82rem; }
+
+.notif-item { max-width: 320px; white-space: normal; }
+.notif-item + .notif-item { border-top: 1px solid #eee; }
+.notif-unread { border-left: 3px solid var(--usm-purple); }
 
 /* --- Navigasi --------------------------------------------------------- */
 .usm-nav {
@@ -50,50 +73,86 @@ a:hover { color: var(--usm-purple-dark); }
   border-bottom: 1px solid var(--usm-purple-line);
   overflow-x: auto;
   white-space: nowrap;
+  scrollbar-width: thin;
 }
+.usm-nav::-webkit-scrollbar { height: 3px; }
+.usm-nav::-webkit-scrollbar-thumb { background: var(--usm-purple-line); }
 .usm-nav .nav-link {
   color: var(--muted);
   font-size: 0.88rem;
-  padding: 0.65rem 0.85rem;
+  padding: 0.7rem 0.9rem;
   border-bottom: 3px solid transparent;
+  transition: color .12s ease, border-color .12s ease;
 }
-.usm-nav .nav-link:hover { color: var(--usm-purple); }
+.usm-nav .nav-link:hover { color: var(--usm-purple); background: var(--usm-purple-soft); }
 .usm-nav .nav-link.active {
   color: var(--usm-purple);
   font-weight: 600;
   border-bottom-color: var(--usm-purple);
 }
+.usm-nav .nav-link .nav-count {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--usm-purple);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: 1px;
+}
+
+/* --- Tajuk halaman ---------------------------------------------------- */
+.page-head { border-bottom: 1px solid var(--usm-purple-line); padding-bottom: .75rem; }
+.page-head h1 { font-size: 1.3rem; margin-bottom: .2rem; }
+.breadcrumb-mini { font-size: .74rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
 
 /* --- Kad -------------------------------------------------------------- */
-.card { border: 1px solid var(--usm-purple-line); border-radius: 12px; }
+.card {
+  border: 1px solid var(--usm-purple-line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
 .card-header {
   background: var(--usm-purple-soft);
   border-bottom: 1px solid var(--usm-purple-line);
   font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--usm-purple-dark);
+  border-radius: 12px 12px 0 0 !important;
 }
-.usm-kpi .display-6 { color: var(--usm-purple); font-weight: 600; }
+.card-accent { border-left: 4px solid var(--usm-purple); }
+
+.usm-kpi .kpi-value { color: var(--usm-purple); font-weight: 600; font-size: 1.9rem; line-height: 1.1; }
+.usm-kpi .kpi-label { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.usm-kpi .kpi-sub { font-size: .76rem; color: var(--muted); }
 
 .btn-usm { background: var(--usm-purple); border-color: var(--usm-purple); color: #fff; }
-.btn-usm:hover { background: var(--usm-purple-dark); border-color: var(--usm-purple-dark); color: #fff; }
-.btn-outline-usm { border-color: var(--usm-purple); color: var(--usm-purple); }
+.btn-usm:hover, .btn-usm:focus { background: var(--usm-purple-dark); border-color: var(--usm-purple-dark); color: #fff; }
+.btn-outline-usm { border-color: var(--usm-purple); color: var(--usm-purple); background: #fff; }
 .btn-outline-usm:hover { background: var(--usm-purple); color: #fff; }
 
 /* --- Lencana DRAF ------------------------------------------------------ */
 .draf-badge {
   display: inline-block;
-  background: #fff3cd;
+  background: var(--apex-gold-soft);
   color: #7a5b00;
   border: 1px solid #e6c34a;
   border-radius: 4px;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   padding: 0 4px;
+  line-height: 1.45;
   vertical-align: middle;
   margin-left: 4px;
   text-transform: uppercase;
   cursor: help;
+  white-space: nowrap;
 }
+.draf-badge:focus { outline: 2px solid var(--apex-gold); }
 
 /* Penanda "demo vs produksi" pada amaun komisen (snapshot kadar). */
 .snap-mark {
@@ -128,37 +187,42 @@ a:hover { color: var(--usm-purple-dark); }
 .sla-warning { background: #fff5e0; color: #7a5100; border-color: #f0d08a; }
 .sla-late { background: #fdeaea; color: #8c1d1d; border-color: #f2b7b7; }
 
-/* --- Status trail ----------------------------------------------------- */
+/* --- Status trail 5-peringkat ----------------------------------------- */
 .trail { display: flex; gap: 6px; flex-wrap: wrap; }
 .trail-step {
   flex: 1 1 130px;
-  min-width: 120px;
+  min-width: 118px;
   border-radius: 8px;
-  padding: 6px 10px;
+  padding: 7px 10px;
   font-size: 0.74rem;
   line-height: 1.25;
   background: #eeecf3;
   color: var(--muted);
   border: 1px solid #e0dde8;
 }
-.trail-step .trail-num { font-weight: 700; display: block; font-size: 0.66rem; opacity: 0.8; }
+.trail-step .trail-num { font-weight: 700; display: block; font-size: 0.63rem; opacity: 0.85; letter-spacing: .05em; }
 .trail-step.done { background: var(--usm-purple-soft); color: var(--usm-purple-dark); border-color: var(--usm-purple-line); }
+.trail-step.done .trail-num::after { content: ' ✓'; }
 .trail-step.current {
   background: var(--usm-purple); color: #fff; border-color: var(--usm-purple-dark);
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 /* --- Jadual → kad pada mobile ----------------------------------------- */
-.table-usm { font-size: 0.88rem; }
+.table-usm { font-size: 0.88rem; margin-bottom: 0; }
 .table-usm thead th {
   background: var(--usm-purple-soft);
   color: var(--usm-purple-dark);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 1px solid var(--usm-purple-line);
   white-space: nowrap;
+  font-weight: 600;
 }
+.table-usm tbody tr:hover { background: #fbfaff; }
+.table-usm td { vertical-align: middle; }
 
 @media (max-width: 767.98px) {
   .table-stack thead { display: none; }
@@ -168,30 +232,49 @@ a:hover { color: var(--usm-purple-dark); }
     border-radius: 10px;
     margin-bottom: 10px;
     background: #fff;
-    padding: 6px 4px;
+    padding: 6px 2px;
+    box-shadow: var(--shadow-sm);
   }
+  .table-stack tbody tr:hover { background: #fff; }
   .table-stack tbody td {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    align-items: baseline;
+    gap: 10px;
     border: 0;
     padding: 5px 10px;
+    text-align: right;
   }
   .table-stack tbody td::before {
     content: attr(data-label);
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--muted);
     font-weight: 600;
-    flex: 0 0 42%;
+    flex: 0 0 40%;
+    text-align: left;
   }
+  .table-stack tbody td:empty { display: none; }
+  .table-responsive { overflow-x: visible; }
 }
 
-/* --- Lain-lain -------------------------------------------------------- */
-.usm-doc-row { border-bottom: 1px solid #eee; padding: 10px 0; }
-.usm-doc-row:last-child { border-bottom: 0; }
-.usm-log-item { border-left: 3px solid var(--usm-purple-line); padding: 4px 0 10px 12px; }
+/* --- Dokumen, log, footer --------------------------------------------- */
+.usm-doc-row { border-bottom: 1px solid #efedf4; padding: 10px 0; }
+.usm-doc-row:first-child { padding-top: 0; }
+.usm-doc-row:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.usm-log-item { border-left: 3px solid var(--usm-purple-line); padding: 2px 0 12px 12px; position: relative; }
+.usm-log-item::before {
+  content: '';
+  position: absolute;
+  left: -6px; top: 5px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--usm-purple);
+}
+.usm-log-item:last-child { padding-bottom: 0; }
 .usm-log-item small { color: var(--muted); }
 
 .usm-footer {
@@ -203,10 +286,41 @@ a:hover { color: var(--usm-purple-dark); }
 
 .toast-host { position: fixed; right: 12px; bottom: 12px; z-index: 1080; max-width: 340px; }
 
+/* --- Wizard ----------------------------------------------------------- */
 .wizard-step { display: none; }
 .wizard-step.active { display: block; }
+.wizard-rail { display: flex; gap: 4px; margin-bottom: 1rem; }
+.wizard-rail .rail-item {
+  flex: 1;
+  font-size: .7rem;
+  text-align: center;
+  padding: 5px 2px;
+  border-radius: 6px;
+  background: #eeecf3;
+  color: var(--muted);
+  border: 1px solid #e0dde8;
+  line-height: 1.2;
+}
+.wizard-rail .rail-item.done { background: var(--usm-purple-soft); color: var(--usm-purple-dark); border-color: var(--usm-purple-line); }
+.wizard-rail .rail-item.current { background: var(--usm-purple); color: #fff; border-color: var(--usm-purple-dark); font-weight: 600; }
 
-@media (max-width: 400px) {
+/* --- 360px ------------------------------------------------------------ */
+@media (max-width: 575.98px) {
+  body { font-size: 0.92rem; }
+  .page-head h1 { font-size: 1.12rem; }
+  .usm-kpi .kpi-value { font-size: 1.5rem; }
+  .card-body { padding: .85rem; }
+  .trail-step { flex: 1 1 100%; min-width: 0; }
   .usm-brand-sub { display: none; }
-  body { font-size: 0.9rem; }
+  .usm-logo { height: 34px; }
+  .toast-host { left: 12px; right: 12px; max-width: none; }
+  .btn { white-space: normal; }
+}
+@media (max-width: 400px) {
+  .usm-topbar .form-select-sm, .usm-topbar .btn-sm { font-size: 0.76rem; }
+  .container-xl { padding-left: .7rem; padding-right: .7rem; }
+}
+
+@media print {
+  .usm-topbar, .usm-nav, .toast-host, .usm-demo-strip { display: none !important; }
 }

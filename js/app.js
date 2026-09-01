@@ -63,12 +63,14 @@
     root.location.href = url;
   }
 
-  function pageTitle(title, sub, right) {
-    return '<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">'
-      + '<div><h1 class="h4 mb-1">' + title + '</h1>'
+  function pageTitle(title, sub, right, crumb) {
+    return '<div class="page-head d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">'
+      + '<div>'
+      + (crumb ? '<div class="breadcrumb-mini">' + crumb + '</div>' : '')
+      + '<h1 class="mb-1">' + title + '</h1>'
       + (sub ? '<div class="text-muted small">' + sub + '</div>' : '')
       + '</div>'
-      + (right ? '<div class="d-flex gap-2 flex-wrap">' + right + '</div>' : '')
+      + (right ? '<div class="d-flex gap-2 flex-wrap align-items-start">' + right + '</div>' : '')
       + '</div>';
   }
 
@@ -84,10 +86,13 @@
     var bottom = el('chrome-bottom');
     if (bottom) {
       bottom.innerHTML = '<footer class="usm-footer mt-4 py-3"><div class="container-xl">'
-        + 'USM Agent Gateway — <strong>DEMO</strong>. Semua data rekaan; tiada backend, '
-        + 'tiada e-mel, tiada e-signature sah undang-undang. Nilai <span class="draf-badge">DRAF</span> '
-        + 'menunggu keputusan owner. Domain demo: agents.durianbytes.com'
-        + '</div></footer>';
+        + '<div class="row g-2">'
+        + '<div class="col-md-8">USM Agent Gateway — <strong>DEMO</strong>. Semua data rekaan; '
+        + 'tiada backend, tiada e-mel, tiada e-signature sah undang-undang. '
+        + 'Nilai <span class="draf-badge">DRAF</span> menunggu keputusan owner.</div>'
+        + '<div class="col-md-4 text-md-end">Tarikh demo: <strong>' + C.esc(NS.WF.fmt(S.now())) + '</strong>'
+        + '<br>agents.durianbytes.com</div>'
+        + '</div></div></footer>';
     }
 
     var host = el('page');
