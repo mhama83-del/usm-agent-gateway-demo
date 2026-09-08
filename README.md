@@ -69,6 +69,25 @@ semula bersih sebelum sesi demo baharu:
 - Kosongkan storan tapak dalam DevTools pelayar (Application → Local Storage →
   padam kunci `usm_demo_state`).
 
+### Naik taraf automatik selepas kemas kini demo
+
+State tersimpan membawa satu nombor **versi** (`VERSION` dalam `js/store.js`).
+Apabila versi dalam kod lebih tinggi daripada versi dalam `localStorage`, state
+lama **dibuang secara automatik** dan seed baharu dimuatkan pada muat halaman
+berikutnya. Pengguna tidak perlu buat apa-apa.
+
+Ini penting kerana state menyimpan **salinan penuh** data seed — termasuk label,
+notifikasi, log aktiviti dan label tarikh — serta teks yang dijana semasa demo
+berjalan. Tanpa kenaikan versi, pelayar yang pernah menjalankan keluaran lama
+akan terus memaparkan teks lama itu walaupun kodnya sudah dikemas kini.
+
+> **Untuk pembangun:** naikkan `VERSION` setiap kali `data/seed.js` berubah
+> dengan cara yang menjadikan state tersimpan usang — **termasuk perubahan teks
+> semata-mata**, bukan hanya perubahan struktur.
+>
+> - `1` — keluaran asal (UI Bahasa Melayu)
+> - `2` — UI English (keputusan owner 8 Sep 2026)
+
 ---
 
 ## Cara upload ke Hostinger

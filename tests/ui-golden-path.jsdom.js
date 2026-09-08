@@ -380,31 +380,208 @@ for (var rr = 0; rr < ROLES.length; rr++) {
 }
 check(checked + ' pautan disemak merentas 10 skrin × 5 peranan — tiada yang mati',
   dead.length === 0, dead.slice(0, 6).join(' | '));
-
 console.log('\n== 21. UI English (tiada teks BM tertinggal) ==');
-// Perkataan BM yang PASTI tidak sepatutnya muncul dalam UI English.
-var BM_WORDS = ['Tiada ', 'Semua data', 'Peringkat ', 'Sebab:', 'Menunggu',
-  'Dihantar', 'Disahkan', 'Diluluskan', 'Ditolak', 'Dipulangkan', 'Perjanjian',
-  'Tuntutan', 'Rujukan', 'Permohonan', 'Dokumen', 'Konsol', 'Tetapan',
-  'Mohon / Renew', 'wajib', 'hari kalendar', 'yuran', 'Kadar komisen', 'DRAF<'];
+
+// Penanda BM. Nama bulan yang SAMA dalam English (April, Jun, September,
+// November) sengaja tidak disenaraikan; hanya yang benar-benar BM.
+var BM_WORDS = [
+  // kata kerja pasif / proses
+  'dijana', 'diterima', 'dihantar', 'dipulangkan', 'dimulakan', 'diluluskan',
+  'ditolak', 'disahkan', 'ditandatangani', 'dikira', 'dibina', 'ditamatkan',
+  'diperbaharui', 'menunggu', 'merujuk',
+  // kata nama domain
+  'semakan', 'tuntutan', 'permohonan', 'perjanjian', 'pelajar', 'ejen',
+  'bayaran', 'tarikh', 'hari', 'tamat', 'sehingga', 'yuran', 'kadar',
+  'komisen', 'dokumen', 'peranan', 'peringkat', 'sebab', 'lencana', 'tetapan',
+  'rujukan', 'kelayakan', 'syarat', 'ambang', 'prestasi', 'notifikasi',
+  'aktiviti', 'tandatangan', 'konsol', 'skrin', 'ralat',
+  // kata tugas
+  'tiada', 'tidak', 'wajib', 'belum', 'sudah', 'kepada', 'daripada', 'dengan',
+  'untuk', 'dalam', 'semua', 'setiap', 'anda', 'sila',
+  // nama bulan BM yang berbeza daripada English
+  'Januari', 'Februari', 'Julai', 'Ogos', 'Oktober', 'Disember',
+  'Mei', 'Mac', 'Okt', 'Dis',
+  // lencana lama
+  'DRAF<', '>DRAF<', 'AKTIF'
+];
+
+function bmWordIn(text) {
+  for (var w = 0; w < BM_WORDS.length; w++) {
+    var word = BM_WORDS[w];
+    var re = new RegExp('(^|[^A-Za-z])' + word.replace(/[<>]/g, '\\$&') + '([^A-Za-z]|$)');
+    if (re.test(text)) return word;
+  }
+  return null;
+}
+
+// --- 21a. UI dirender: 10 skrin x 5 peranan (chrome + badan + footer) ---
 var bmHits = [];
 for (var bp = 0; bp < PAGES.length; bp++) {
   for (var br = 0; br < ROLES.length; br++) {
     openPage(PAGES[bp]);
     S().setRole(ROLES[br]);
     openPage(PAGES[bp]);
-    var full = chrome() + body();
-    for (var bw = 0; bw < BM_WORDS.length; bw++) {
-      if (full.indexOf(BM_WORDS[bw]) >= 0) {
-        var hit = PAGES[bp] + ' [' + ROLES[br] + '] → "' + BM_WORDS[bw] + '"';
-        if (bmHits.indexOf(hit) < 0) bmHits.push(hit);
-      }
+    var regions = [
+      ['chrome', win.document.getElementById('chrome-top').textContent],
+      ['body', win.document.getElementById('page').textContent],
+      ['footer', win.document.getElementById('chrome-bottom').textContent]
+    ];
+    for (var rg = 0; rg < regions.length; rg++) {
+      var word = bmWordIn(regions[rg][1] || '');
+      if (!word) continue;
+      var hit = PAGES[bp] + ' [' + ROLES[br] + '] ' + regions[rg][0] + ' → "' + word + '"';
+      if (bmHits.indexOf(hit) < 0) bmHits.push(hit);
     }
   }
 }
-check('tiada perkataan BM pada 10 skrin x 5 peranan', bmHits.length === 0,
-  bmHits.slice(0, 8).join(' | '));
+check('tiada perkataan BM pada 10 skrin x 5 peranan (chrome + badan + footer)',
+  bmHits.length === 0, bmHits.slice(0, 8).join(' | '));
+
+// --- 21b. Kandungan yang DIJANA semasa larian: notifikasi, log, aktiviti ---
+// Reset dahulu, kemudian larikan golden path penuh sekali lagi supaya setiap
+// notify() dan logIt() dalam workflow.js menghasilkan teks untuk diimbas.
+openPage('dashboard');
+S().reset();
+setRole('agent');
+openPage('application-wizard');
+click('button', 'Next'); click('button', 'Next'); click('button', 'Next');
+win.document.getElementById('abc').checked = true;
+click('button', 'Submit application');
+var gAgent = S().agents()[0].id;
+setRole('usains');
+openPage('application-detail', '?id=' + gAgent);
+setPrompt('Financial statements cover 1 year only.');
+click('[data-action="doc-return"]');
+setRole('agent');
+openPage('application-detail', '?id=' + gAgent);
+setPrompt('Audited statements uploaded.');
+click('[data-action="doc-resubmit"]');
+setRole('usains');
+openPage('application-detail', '?id=' + gAgent);
+var gN = 0;
+while (clickIf('[data-action="doc-verify"]') && gN < 25) { gN++; }
+click('[data-action="forward"]');
+setRole('leap');
+openPage('leap-console');
+click('[data-action="approve"][data-id="' + gAgent + '"]');
+var gAgr = (S().agreementForAgent(gAgent) || {}).id;
+setRole('usains'); openPage('agreement', '?id=' + gAgr); click('[data-action="sign"]');
+setRole('leap');   openPage('agreement', '?id=' + gAgr); click('[data-action="sign"]');
+setRole('agent');  openPage('agreement', '?id=' + gAgr); click('[data-action="sign"]');
+openPage('referrals');
+click('[data-action="add"]');
+var gRef = S().referrals()[0].refId;
+setRole('usains');
+for (var gk = 0; gk < 3; gk++) { openPage('referrals'); clickIf('[data-action="advance"][data-id="' + gRef + '"]'); }
+setRole('agent');
+openPage('referrals');
+click('[data-action="claim"][data-id="' + gRef + '"]');
+var gClaim = S().claims()[0].id;
+openPage('claims', '?id=' + gClaim);
+click('[data-action="submit"]');
+setRole('usains');
+openPage('claims', '?id=' + gClaim);
+for (var ge = 0; ge < 5; ge++) {
+  var gcb = win.document.querySelector('[data-elig][data-idx="' + ge + '"]');
+  gcb.checked = true;
+  gcb.dispatchEvent(new win.Event('change', { bubbles: true }));
+}
+click('[data-action="forward"]');
+setRole('leap');
+openPage('claims', '?id=' + gClaim);
+click('[data-action="approve"]');
+setRole('payment');
+openPage('claims', '?id=' + gClaim);
+click('[data-action="pay"]');
+setRole('leap');
+openPage('annual-review');
+click('[data-action="open"][data-id="' + gAgent + '"]');
+setPrompt('Performance satisfactory.');
+click('[data-action="renew"][data-id="' + gAgent + '"]');
+
+check('golden path dijalankan semula untuk menjana teks masa larian',
+  S().claim(gClaim).claimStatus === 'PAID' && S().agent(gAgent).agentStatus === 'RENEWED');
+
+var notifHits = [], notifs = S().notifications();
+for (var nn = 0; nn < notifs.length; nn++) {
+  var nWord = bmWordIn(notifs[nn].title + ' ' + notifs[nn].body + ' ' + notifs[nn].timeLabel);
+  if (nWord) notifHits.push(notifs[nn].id + ' "' + notifs[nn].title + '" → ' + nWord);
+}
+check(notifs.length + ' notifikasi (seed + dijana) semuanya English',
+  notifHits.length === 0, notifHits.slice(0, 5).join(' | '));
+
+var logHits = [], logs = S().log();
+for (var lg = 0; lg < logs.length; lg++) {
+  var lWord = bmWordIn(logs[lg].note + ' ' + logs[lg].tsLabel + ' ' + logs[lg].actor);
+  if (lWord) logHits.push(logs[lg].id + ' "' + logs[lg].note + '" → ' + lWord);
+}
+check(logs.length + ' entri log aktiviti (seed + dijana) semuanya English',
+  logHits.length === 0, logHits.slice(0, 5).join(' | '));
+
+var actHits = [], allAgents = S().agents();
+for (var ag = 0; ag < allAgents.length; ag++) {
+  var acts = allAgents[ag].activities || [];
+  for (var ac = 0; ac < acts.length; ac++) {
+    var aWord = bmWordIn(acts[ac].action + ' ' + acts[ac].time + ' ' + acts[ac].actor);
+    if (aWord) actHits.push(allAgents[ag].id + ' "' + acts[ac].action + '" → ' + aWord);
+  }
+}
+check('log aktiviti setiap fail ejen semuanya English',
+  actHits.length === 0, actHits.slice(0, 5).join(' | '));
+
+// --- 21c. Seluruh state tersimpan (jaring keselamatan menyeluruh) ---
+var stateWord = bmWordIn(JSON.stringify(S().state()).replace(/[{}",\[\]]/g, ' '));
+check('tiada perkataan BM di mana-mana dalam state tersimpan',
+  stateWord === null, 'dijumpai: ' + stateWord);
+
+// --- 21d. Label tarikh guna nama bulan English ---
+var badMonth = null;
+var MS = ['Januari', 'Februari', 'Julai', 'Ogos', 'Oktober', 'Disember', 'Mei', 'Mac', 'Okt', 'Dis'];
+var allDates = [];
+for (var dq = 0; dq < notifs.length; dq++) allDates.push(notifs[dq].timeLabel);
+for (var dl = 0; dl < logs.length; dl++) allDates.push(logs[dl].tsLabel);
+allDates.push(W().fmt('2026-08-31'), W().fmt('2026-10-15'), W().fmt('2026-12-01'), W().fmt('2026-03-14'));
+for (var dm = 0; dm < allDates.length; dm++) {
+  for (var mm = 0; mm < MS.length; mm++) {
+    if (String(allDates[dm]).indexOf(MS[mm]) >= 0) badMonth = allDates[dm] + ' (' + MS[mm] + ')';
+  }
+}
+check(allDates.length + ' label tarikh guna nama bulan English', badMonth === null, badMonth);
+check('fmt() memberi bulan English', W().fmt('2026-08-31') === '31 Aug 2026', W().fmt('2026-08-31'));
+
 check('lencana memaparkan DRAFT, bukan DRAF', body().indexOf('>DRAFT<') >= 0);
+
+console.log('\n== 22. State lama (versi 1) dibuang, bukan dipapar ==');
+// Punca sebenar aduan "teks BM masih ada": pelayar yang pernah menjalankan
+// demo versi BM menyimpan state penuh dalam localStorage. Tanpa kenaikan
+// VERSION, kod English akan membaca semula teks BM yang tersimpan itu.
+var staleState = {
+  version: 1,
+  nowIso: '2026-08-31',
+  role: 'agent',
+  config: { commission: { ug: { label: 'Ijazah Sarjana Muda (UG)', ratePercent: 15, basis: 'Yuran tahun pertama' } } },
+  agents: [],
+  referrals: [],
+  claims: [],
+  agreements: [],
+  notifications: [{ id: 'NT-0101', audience: 'all', title: 'Draf perjanjian dijana',
+    body: 'AGR-0901 menunggu tandatangan tiga pihak.', timeLabel: '31 Ogos 2026', read: false, link: null }],
+  log: [{ id: 'LG-0101', tsLabel: '31 Ogos 2026', actor: 'Nurul Ain Zulkifli', role: 'agent',
+    entity: 'agent', entityId: 'AG-2101', from: 'VERIFIED', to: 'APPROVED_AWAITING_AGREEMENT',
+    note: 'Permohonan diluluskan — draf perjanjian AGR-0901 dijana' }],
+  demoAgentId: 'AG-2101',
+  seq: { agent: 2101, ref: 300, claim: 200, agreement: 901, log: 101, notif: 101 }
+};
+store['usm_demo_state'] = JSON.stringify(staleState);
+openPage('dashboard');
+check('state versi 1 dibuang dan diganti seed', S().state().version === 2, String(S().state().version));
+check('6 ejen seed dimuatkan semula', S().agents().length === 6, String(S().agents().length));
+check('notifikasi BM lama hilang', bmWordIn(JSON.stringify(S().notifications())) === null);
+check('log BM lama hilang', bmWordIn(JSON.stringify(S().log())) === null);
+check('label CONFIG_DRAFT BM lama hilang',
+  S().config().commission.ug.label === 'Undergraduate (UG)', S().config().commission.ug.label);
+check('tiada teks BM pada dashboard selepas naik taraf',
+  bmWordIn(chrome() + body()) === null, String(bmWordIn(chrome() + body())));
 
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);

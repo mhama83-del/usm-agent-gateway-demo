@@ -11,7 +11,19 @@
   var NS = root.USMDEMO = root.USMDEMO || {};
   var SEED = NS.SEED;
   var KEY = 'usm_demo_state';
-  var VERSION = 1;
+
+  // NAIKKAN nombor ini setiap kali data/seed.js berubah dengan cara yang
+  // menjadikan state tersimpan usang — termasuk perubahan TEKS semata-mata.
+  //
+  // State menyimpan salinan penuh seed (label, notifikasi, log aktiviti,
+  // label tarikh) DAN teks yang dijana semasa demo berjalan. Jika versi tidak
+  // dinaikkan, pelayar yang pernah menjalankan demo lama akan terus memaparkan
+  // teks lama itu walaupun kod sudah dikemas kini — kod baharu, data lama.
+  //
+  //   1 — keluaran asal (UI Bahasa Melayu)
+  //   2 — UI English (keputusan owner 8 Sep 2026); state versi 1 dibuang
+  //       kerana ia mengandungi teks BM yang tersimpan.
+  var VERSION = 2;
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
