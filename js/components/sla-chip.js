@@ -23,6 +23,9 @@
       + sla.approachingWithinDays + ' days.';
   }
 
+  // "1 day" vs "2 days" — UI English, jadi bilangan tunggal perlu bentuk tunggal.
+  function days(n) { return n + (n === 1 ? ' day' : ' days'); }
+
   // state: 'ok' | 'warning' | 'late'
   function slaChip(state, extra, opts) {
     opts = opts || {};
@@ -46,7 +49,7 @@
     var dl = W.slaDeadline(a);
     if (dl) {
       var left = W.daysUntil(dl);
-      extra = (left < 0) ? (Math.abs(left) + ' days late') : (left + ' days left');
+      extra = (left < 0) ? (days(Math.abs(left)) + ' late') : (days(left) + ' left');
     }
     return slaChip(state, extra);
   }
@@ -57,7 +60,7 @@
     var extra = '';
     if (c.deadlineIso && c.claimStatus !== 'PAID' && c.claimStatus !== 'REJECTED') {
       var left = W.daysUntil(c.deadlineIso);
-      extra = (left < 0) ? (Math.abs(left) + ' days late') : (left + ' days left');
+      extra = (left < 0) ? (days(Math.abs(left)) + ' late') : (days(left) + ' left');
     }
     return slaChip(state, extra);
   }

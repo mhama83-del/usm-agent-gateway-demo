@@ -18,6 +18,13 @@
       return null;
     }
 
+    // "1 day" vs "2 days", dan lepas vs baki.
+    function dayCount(d) {
+      var n = Math.abs(d);
+      var unit = n + (n === 1 ? ' day' : ' days');
+      return d < 0 ? unit + ' ago' : unit + ' left';
+    }
+
     function render() {
       var role = S.role();
       var me = S.currentAgent();
@@ -57,7 +64,7 @@
             + (band ? '<div class="small text-danger">Within the ' + band + '-day alert window '
                 + C.draf('Agreement expiry alerts — DRAFT') + '</div>' : '')
             + (days != null
-                ? '<div class="small text-muted">' + (days < 0 ? Math.abs(days) + ' days ago' : days + ' days left') + '</div>'
+                ? '<div class="small text-muted">' + dayCount(days) + '</div>'
                 : ''),
           '<span class="' + (below ? 'text-danger fw-semibold' : 'text-success fw-semibold') + '">' + refs + '</span>'
             + ' / ' + threshold + C.draf('Referral threshold for renewal — DRAFT')
