@@ -87,10 +87,10 @@
     if (bottom) {
       bottom.innerHTML = '<footer class="usm-footer mt-4 py-3"><div class="container-xl">'
         + '<div class="row g-2">'
-        + '<div class="col-md-8">USM Agent Gateway — <strong>DEMO</strong>. Semua data rekaan; '
-        + 'tiada backend, tiada e-mel, tiada e-signature sah undang-undang. '
-        + 'Nilai <span class="draf-badge">DRAF</span> menunggu keputusan owner.</div>'
-        + '<div class="col-md-4 text-md-end">Tarikh demo: <strong>' + C.esc(NS.WF.fmt(S.now())) + '</strong>'
+        + '<div class="col-md-8">USM Agent Gateway — <strong>DEMO</strong>. All data is fictitious; '
+        + 'no backend, no e-mail, no legally valid e-signature. '
+        + 'Values marked <span class="draf-badge">DRAFT</span> await an owner decision.</div>'
+        + '<div class="col-md-4 text-md-end">Demo date: <strong>' + C.esc(NS.WF.fmt(S.now())) + '</strong>'
         + '<br>agents.durianbytes.com</div>'
         + '</div></div></footer>';
     }
@@ -99,18 +99,18 @@
     if (!host) return;
 
     if (!C.sidenav.allowed(key)) {
-      host.innerHTML = pageTitle('Skrin ini tidak tersedia untuk peranan anda')
-        + '<div class="alert alert-warning">Peranan <strong>' + C.esc(S.roleInfo().label)
-        + '</strong> tiada akses ke skrin ini. Tukar peranan di bar atas.</div>';
+      host.innerHTML = pageTitle('This screen is not available for your role')
+        + '<div class="alert alert-warning">The <strong>' + C.esc(S.roleInfo().label)
+        + '</strong> role has no access to this screen. Switch roles in the top bar.</div>';
       return;
     }
 
     var fn = PAGES[key];
-    if (!fn) { host.innerHTML = '<div class="alert alert-danger">Skrin belum dibina: ' + C.esc(key) + '</div>'; return; }
+    if (!fn) { host.innerHTML = '<div class="alert alert-danger">Screen not built: ' + C.esc(key) + '</div>'; return; }
     try {
       fn({ host: host, S: S, W: NS.WF, C: C, App: NS.App });
     } catch (e) {
-      host.innerHTML = '<div class="alert alert-danger"><strong>Ralat skrin:</strong> ' + C.esc(e.message) + '</div>';
+      host.innerHTML = '<div class="alert alert-danger"><strong>Screen error:</strong> ' + C.esc(e.message) + '</div>';
       if (root.console) root.console.error(e);
     }
   }

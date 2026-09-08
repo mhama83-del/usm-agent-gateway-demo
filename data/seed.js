@@ -19,8 +19,8 @@
   // --- Nilai keputusan owner (DRAF) --------------------------------------
   var CONFIG_DRAFT = {
     commission: {
-      ug: { label: 'Ijazah Sarjana Muda (UG)', ratePercent: 15, basis: 'Yuran tahun pertama' },
-      pg: { label: 'Pascasiswazah (PG)',        ratePercent: 10, basis: 'Yuran tahun pertama' },
+      ug: { label: 'Undergraduate (UG)', ratePercent: 15, basis: 'First-year fee' },
+      pg: { label: 'Postgraduate (PG)',        ratePercent: 10, basis: 'First-year fee' },
       paymentWindowDays: 30 // bayaran dalam 30 hari selepas claim approved (rujukan)
     },
     fees: {
@@ -50,24 +50,24 @@
   var CLAIM_STAGE_LABELS = ['Draft', 'Submitted', 'Processing (USAINS)', 'Decided (USM)', 'Paid'];
   var REFERRAL_STAGE_LABELS = ['Submitted', 'Offered', 'Enrolled', 'Fees Paid'];
   var ELIGIBILITY_LABELS = [
-    'Direkrut oleh ejen ini',
-    'Pelajar telah enrol',
-    'Yuran dibayar penuh',
-    'Lengkap 2 bulan pengajian',
-    'Tiada full refund'
+    'Recruited by this agent',
+    'Student has enrolled',
+    'Fees paid in full',
+    'Completed 2 months of study',
+    'No full refund issued'
   ];
 
   // Checklist dokumen (label DRAF di mana relevan)
   var DOC_CHECKLIST = [
-    'Sijil Pendaftaran Syarikat (SSM / setara luar negara)',
-    'Bukti Paid-Up Capital (min. RM' + CONFIG_DRAFT.fees.paidUpCapitalMin + ')',
-    'Penyata Kewangan Beraudit (2 tahun terkini)',
-    'Bukti Pengalaman Operasi (min. 2 tahun)',
-    'Senarai Staf Sepenuh Masa (min. 2) + Resume',
-    'Strategi & Pelan Perniagaan',
-    'Resume Pengarah',
-    'Bukti Bayaran Yuran Pendaftaran',
-    'Bukti Bayaran Performance Bond (RM' + CONFIG_DRAFT.fees.performanceBond + ')'
+    'Company Registration Certificate (SSM / foreign equivalent)',
+    'Proof of Paid-Up Capital (min. RM' + CONFIG_DRAFT.fees.paidUpCapitalMin + ')',
+    'Audited Financial Statements (latest 2 years)',
+    'Proof of Operating Experience (min. 2 years)',
+    'List of Full-Time Staff (min. 2) + Resumes',
+    'Business Strategy & Plan',
+    'Director Resume',
+    'Proof of Registration Fee Payment',
+    'Proof of Performance Bond Payment (RM' + CONFIG_DRAFT.fees.performanceBond + ')'
   ];
 
   // Status dokumen setiap permohonan (REKAAN - demo).
@@ -221,12 +221,12 @@
   var AGREEMENTS = [
     {
       id: 'AGR-2041', agentId: 'AG-2041', status: 'FULLY_SIGNED',
-      termYears: 2, startIso: '2024-10-15', startLabel: '15 Okt 2024',
-      endIso: '2026-10-15', endLabel: '15 Okt 2026', generatedLabel: '2 Okt 2024',
+      termYears: 2, startIso: '2024-10-15', startLabel: '15 Oct 2024',
+      endIso: '2026-10-15', endLabel: '15 Oct 2026', generatedLabel: '2 Oct 2024',
       signatures: {
-        usains: { signed: true, by: 'Aiman Rashid (USAINS)',     dateIso: '2024-10-08', dateLabel: '8 Okt 2024' },
-        leap:   { signed: true, by: 'Dr. Farah Idris (USM LEAP)', dateIso: '2024-10-11', dateLabel: '11 Okt 2024' },
-        agent:  { signed: true, by: 'Nurul Ain Zulkifli (Agent)', dateIso: '2024-10-15', dateLabel: '15 Okt 2024' }
+        usains: { signed: true, by: 'Aiman Rashid (USAINS)',     dateIso: '2024-10-08', dateLabel: '8 Oct 2024' },
+        leap:   { signed: true, by: 'Dr. Farah Idris (USM LEAP)', dateIso: '2024-10-11', dateLabel: '11 Oct 2024' },
+        agent:  { signed: true, by: 'Nurul Ain Zulkifli (Agent)', dateIso: '2024-10-15', dateLabel: '15 Oct 2024' }
       }
     },
     {
@@ -242,11 +242,11 @@
     {
       id: 'AGR-2019', agentId: 'AG-2019', status: 'AWAITING_USAINS_SIGNATURE',
       termYears: 2, startIso: null, startLabel: '—',
-      endIso: null, endLabel: '—', generatedLabel: '22 Ogos 2026',
+      endIso: null, endLabel: '—', generatedLabel: '22 Aug 2026',
       signatures: {
         usains: { signed: false, by: null, dateIso: null, dateLabel: '—' },
         leap:   { signed: false, by: null, dateIso: null, dateLabel: '—' },
-        agent:  { signed: true,  by: 'Rafiq Islam (Agent)', dateIso: '2026-08-24', dateLabel: '24 Ogos 2026' }
+        agent:  { signed: true,  by: 'Rafiq Islam (Agent)', dateIso: '2026-08-24', dateLabel: '24 Aug 2026' }
       }
     }
   ];
@@ -254,41 +254,41 @@
   // --- Notifikasi dalam-UI (REKAAN - demo; TIADA e-mel/SMS sebenar) -------
   // audience: kunci peranan, atau 'all'
   var NOTIFICATIONS = [
-    { id: 'NT-0011', audience: 'usains',  agentId: 'AG-2077', title: 'SLA semakan USAINS telah dilampaui',
-      body: 'Permohonan Al-Manar Education Consultancy (AG-2077) melepasi tempoh semakan.',
-      timeIso: '2026-08-20', timeLabel: '20 Ogos 2026', read: false, link: 'usains-console.html' },
-    { id: 'NT-0010', audience: 'leap',    agentId: 'AG-1875', title: 'Annual review dibuka',
-      body: 'EduBridge Africa Ltd (AG-1875) di bawah ambang rujukan minimum.',
-      timeIso: '2026-08-20', timeLabel: '20 Ogos 2026', read: false, link: 'annual-review.html' },
-    { id: 'NT-0009', audience: 'agent',   agentId: 'AG-2041', title: 'Peringatan pembaharuan — 45 hari',
-      body: 'Perjanjian AGR-2041 tamat pada 15 Okt 2026.',
-      timeIso: '2026-08-28', timeLabel: '28 Ogos 2026', read: false, link: 'annual-review.html' },
-    { id: 'NT-0008', audience: 'payment', agentId: 'AG-1988', title: 'Tuntutan menunggu rekod bayaran',
-      body: 'CL-0088 telah diluluskan dan menunggu rekod pembayaran manual.',
-      timeIso: '2026-08-26', timeLabel: '26 Ogos 2026', read: false, link: 'claims.html' },
-    { id: 'NT-0007', audience: 'usains',  agentId: 'AG-2041', title: 'Tuntutan baharu dihantar',
-      body: 'CL-0098 (Siriporn Boonmee) menunggu semakan kelayakan.',
-      timeIso: '2026-08-25', timeLabel: '25 Ogos 2026', read: false, link: 'claims.html' }
+    { id: 'NT-0011', audience: 'usains',  agentId: 'AG-2077', title: 'USAINS review SLA exceeded',
+      body: 'The Al-Manar Education Consultancy (AG-2077) application has passed the review deadline.',
+      timeIso: '2026-08-20', timeLabel: '20 Aug 2026', read: false, link: 'usains-console.html' },
+    { id: 'NT-0010', audience: 'leap',    agentId: 'AG-1875', title: 'Annual review opened',
+      body: 'EduBridge Africa Ltd (AG-1875) is below the minimum referral threshold.',
+      timeIso: '2026-08-20', timeLabel: '20 Aug 2026', read: false, link: 'annual-review.html' },
+    { id: 'NT-0009', audience: 'agent',   agentId: 'AG-2041', title: 'Renewal reminder — 45 days',
+      body: 'Agreement AGR-2041 expires on 15 Oct 2026.',
+      timeIso: '2026-08-28', timeLabel: '28 Aug 2026', read: false, link: 'annual-review.html' },
+    { id: 'NT-0008', audience: 'payment', agentId: 'AG-1988', title: 'Claim awaiting payment record',
+      body: 'CL-0088 has been approved and is awaiting a manual payment record.',
+      timeIso: '2026-08-26', timeLabel: '26 Aug 2026', read: false, link: 'claims.html' },
+    { id: 'NT-0007', audience: 'usains',  agentId: 'AG-2041', title: 'New claim submitted',
+      body: 'CL-0098 (Siriporn Boonmee) is awaiting an eligibility review.',
+      timeIso: '2026-08-25', timeLabel: '25 Aug 2026', read: false, link: 'claims.html' }
   ];
 
   // --- Log aktiviti global (REKAAN - demo) -------------------------------
   // Setiap transisi workflow menambah satu entri di sini melalui js/workflow.js
   var ACTIVITY_LOG = [
-    { id: 'LG-0031', tsIso: '2026-08-28', tsLabel: '28 Ogos 2026', actor: 'System', role: 'system',
+    { id: 'LG-0031', tsIso: '2026-08-28', tsLabel: '28 Aug 2026', actor: 'System', role: 'system',
       entity: 'agent', entityId: 'AG-2041', from: 'ACTIVE', to: 'ACTIVE',
-      note: 'Peringatan pembaharuan dijana — 45 hari ke tarikh tamat' },
-    { id: 'LG-0030', tsIso: '2026-08-25', tsLabel: '25 Ogos 2026', actor: 'Nurul Ain Zulkifli', role: 'agent',
+      note: 'Renewal reminder generated — 45 days to expiry' },
+    { id: 'LG-0030', tsIso: '2026-08-25', tsLabel: '25 Aug 2026', actor: 'Nurul Ain Zulkifli', role: 'agent',
       entity: 'claim', entityId: 'CL-0098', from: 'DRAFT', to: 'SUBMITTED',
-      note: 'Tuntutan komisen dihantar untuk semakan' },
-    { id: 'LG-0029', tsIso: '2026-08-24', tsLabel: '24 Ogos 2026', actor: 'Rafiq Islam', role: 'agent',
+      note: 'Commission claim submitted for review' },
+    { id: 'LG-0029', tsIso: '2026-08-24', tsLabel: '24 Aug 2026', actor: 'Rafiq Islam', role: 'agent',
       entity: 'agreement', entityId: 'AGR-2019', from: 'DRAFT', to: 'AWAITING_USAINS_SIGNATURE',
-      note: 'Ejen menandatangani draf perjanjian' },
-    { id: 'LG-0028', tsIso: '2026-08-22', tsLabel: '22 Ogos 2026', actor: 'Dr. Farah Idris', role: 'leap',
+      note: 'Agent signed the draft agreement' },
+    { id: 'LG-0028', tsIso: '2026-08-22', tsLabel: '22 Aug 2026', actor: 'Dr. Farah Idris', role: 'leap',
       entity: 'agent', entityId: 'AG-2019', from: 'VERIFIED', to: 'APPROVED_AWAITING_AGREEMENT',
-      note: 'Permohonan diluluskan — draf perjanjian dijana' },
-    { id: 'LG-0027', tsIso: '2026-08-20', tsLabel: '20 Ogos 2026', actor: 'System', role: 'system',
+      note: 'Application approved — agreement draft generated' },
+    { id: 'LG-0027', tsIso: '2026-08-20', tsLabel: '20 Aug 2026', actor: 'System', role: 'system',
       entity: 'agent', entityId: 'AG-2077', from: 'SUBMITTED', to: 'SUBMITTED',
-      note: 'SLA semakan USAINS dilampaui 5 hari bekerja' }
+      note: 'USAINS review SLA exceeded by 5 working days' }
   ];
 
   // --- Peranan (untuk penukar peranan) -----------------------------------

@@ -13,7 +13,7 @@
   var SEED = NS.SEED;
 
   // --- Tarikh ------------------------------------------------------------
-  var BULAN = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+  var BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   function toDate(iso) { return new Date(iso + 'T00:00:00'); }
   function toIso(d) {
@@ -63,40 +63,40 @@
   };
   function claimStageOf(c) { return CLAIM_STAGE[c.claimStatus] || 1; }
 
-  // --- Label BM ----------------------------------------------------------
+  // --- Label paparan -----------------------------------------------------
   var APP_LABEL = {
-    DRAFT: 'Draf', SUBMITTED: 'Dihantar', UNDER_USAINS_REVIEW: 'Dalam semakan USAINS',
-    RETURNED_TO_AGENT: 'Dipulangkan kepada ejen', VERIFIED: 'Disahkan USAINS',
-    UNDER_LEAP_REVIEW: 'Dalam keputusan LEAP',
-    APPROVED_AWAITING_AGREEMENT: 'Diluluskan — menunggu perjanjian',
-    AGREEMENT_SIGNED: 'Perjanjian lengkap ditandatangani',
-    REJECTED: 'Ditolak', WITHDRAWN: 'Ditarik balik', CANCELLED: 'Dibatalkan'
+    DRAFT: 'Draft', SUBMITTED: 'Submitted', UNDER_USAINS_REVIEW: 'Under USAINS review',
+    RETURNED_TO_AGENT: 'Returned to agent', VERIFIED: 'Verified by USAINS',
+    UNDER_LEAP_REVIEW: 'Awaiting LEAP decision',
+    APPROVED_AWAITING_AGREEMENT: 'Approved — awaiting agreement',
+    AGREEMENT_SIGNED: 'Agreement fully signed',
+    REJECTED: 'Rejected', WITHDRAWN: 'Withdrawn', CANCELLED: 'Cancelled'
   };
   var AGENT_LABEL = {
-    PENDING: 'Menunggu', ACTIVE: 'Aktif', SUSPENDED: 'Digantung',
-    REVIEW_DUE: 'Annual review', RENEWED: 'Diperbaharui',
-    NOT_RENEWED: 'Tidak diperbaharui', TERMINATED: 'Ditamatkan', EXPIRED: 'Luput'
+    PENDING: 'Pending', ACTIVE: 'Active', SUSPENDED: 'Suspended',
+    REVIEW_DUE: 'Annual review', RENEWED: 'Renewed',
+    NOT_RENEWED: 'Not renewed', TERMINATED: 'Terminated', EXPIRED: 'Expired'
   };
   var CLAIM_LABEL = {
-    DRAFT: 'Draf', SUBMITTED: 'Dihantar', UNDER_USAINS_REVIEW: 'Semakan USAINS',
-    RETURNED: 'Dipulangkan', PENDING_LEAP_DECISION: 'Menunggu keputusan LEAP',
-    APPROVED_PENDING_PAYMENT: 'Diluluskan — menunggu bayaran',
-    REJECTED: 'Ditolak', PAID: 'Telah dibayar', CANCELLED: 'Dibatalkan'
+    DRAFT: 'Draft', SUBMITTED: 'Submitted', UNDER_USAINS_REVIEW: 'USAINS review',
+    RETURNED: 'Returned', PENDING_LEAP_DECISION: 'Awaiting LEAP decision',
+    APPROVED_PENDING_PAYMENT: 'Approved — awaiting payment',
+    REJECTED: 'Rejected', PAID: 'Paid', CANCELLED: 'Cancelled'
   };
   var REF_LABEL = {
-    SUBMITTED: 'Dihantar', OFFERED: 'Ditawarkan', ENROLLED: 'Telah enrol',
-    FEES_PAID: 'Yuran dibayar', WITHDRAWN: 'Ditarik balik', NOT_PROCEED: 'Tidak diteruskan'
+    SUBMITTED: 'Submitted', OFFERED: 'Offered', ENROLLED: 'Enrolled',
+    FEES_PAID: 'Fees paid', WITHDRAWN: 'Withdrawn', NOT_PROCEED: 'Not proceeding'
   };
   var AGR_LABEL = {
-    NOT_GENERATED: 'Belum dijana', DRAFT: 'Draf',
-    AWAITING_USAINS_SIGNATURE: 'Menunggu tandatangan USAINS',
-    AWAITING_LEAP_SIGNATURE: 'Menunggu tandatangan USM LEAP',
-    AWAITING_AGENT_SIGNATURE: 'Menunggu tandatangan ejen',
-    FULLY_SIGNED: 'Lengkap ditandatangani', VOID: 'Terbatal', EXPIRED: 'Luput'
+    NOT_GENERATED: 'Not generated', DRAFT: 'Draft',
+    AWAITING_USAINS_SIGNATURE: 'Awaiting USAINS signature',
+    AWAITING_LEAP_SIGNATURE: 'Awaiting USM LEAP signature',
+    AWAITING_AGENT_SIGNATURE: 'Awaiting agent signature',
+    FULLY_SIGNED: 'Fully signed', VOID: 'Void', EXPIRED: 'Expired'
   };
   var DOC_LABEL = {
-    PENDING: 'Belum disemak', VERIFIED: 'Disahkan',
-    RETURNED: 'Dipulangkan', RESUBMITTED: 'Dihantar semula'
+    PENDING: 'Not reviewed', VERIFIED: 'Verified',
+    RETURNED: 'Returned', RESUBMITTED: 'Resubmitted'
   };
 
   // --- SLA ---------------------------------------------------------------
@@ -195,7 +195,7 @@
   }
   function guard(action) {
     if (!can(action)) {
-      throw new Error('Peranan ' + S.roleInfo().label + ' tiada kebenaran untuk tindakan ini.');
+      throw new Error('The ' + S.roleInfo().label + ' role is not permitted to perform this action.');
     }
   }
 
@@ -225,9 +225,9 @@
     st.agents.unshift(a);
     st.demoAgentId = a.id;
     logIt('agent', a.id, 'DRAFT', 'SUBMITTED',
-      'Permohonan ' + (a.mode === 'renewal' ? 'pembaharuan' : 'baharu') + ' dihantar');
-    notify('usains', 'Permohonan baharu diterima',
-      a.name + ' (' + a.id + ') menunggu semakan dokumen.', 'usains-console.html', a.id);
+      (a.mode === 'renewal' ? 'Renewal' : 'New') + ' application submitted');
+    notify('usains', 'New application received',
+      a.name + ' (' + a.id + ') is awaiting a document review.', 'usains-console.html', a.id);
     S.save();
     return a;
   }
@@ -236,10 +236,10 @@
     guard('startReview');
     var a = S.agent(agentId);
     if (a.appStatus !== 'SUBMITTED') {
-      throw new Error('Hanya permohonan berstatus "Dihantar" boleh dibuka untuk semakan.');
+      throw new Error('Only applications with status "Submitted" can be opened for review.');
     }
     a.appStatus = 'UNDER_USAINS_REVIEW';
-    logIt('agent', a.id, 'SUBMITTED', a.appStatus, 'Semakan dokumen dimulakan');
+    logIt('agent', a.id, 'SUBMITTED', a.appStatus, 'Document review started');
     S.save();
     return a;
   }
@@ -249,7 +249,7 @@
     var a = S.agent(agentId);
     if (a.appStatus === 'SUBMITTED') {
       a.appStatus = 'UNDER_USAINS_REVIEW';
-      logIt('agent', a.id, 'SUBMITTED', a.appStatus, 'Semakan dokumen dimulakan');
+      logIt('agent', a.id, 'SUBMITTED', a.appStatus, 'Document review started');
     }
     a.docs[idx].status = 'VERIFIED';
     a.docs[idx].note = '';
@@ -260,7 +260,7 @@
   function returnDocument(agentId, idx, reason) {
     guard('returnDocument');
     if (!reason || !reason.trim()) {
-      throw new Error('Sebab wajib diisi apabila memulangkan dokumen.');
+      throw new Error('A reason is required when returning a document.');
     }
     var a = S.agent(agentId);
     var from = a.appStatus;
@@ -268,8 +268,8 @@
     a.docs[idx].note = reason.trim();
     a.appStatus = 'RETURNED_TO_AGENT';
     logIt('agent', a.id, from, a.appStatus,
-      'Dokumen dipulangkan: ' + a.docs[idx].name + ' — ' + reason.trim());
-    notify('agent', 'Dokumen dipulangkan untuk pembetulan',
+      'Document returned: ' + a.docs[idx].name + ' — ' + reason.trim());
+    notify('agent', 'Document returned for correction',
       a.docs[idx].name + ': ' + reason.trim(), 'application-detail.html?id=' + a.id, a.id);
     S.save();
     return a;
@@ -279,19 +279,19 @@
     guard('resubmitDocument');
     var a = S.agent(agentId);
     if (a.docs[idx].status !== 'RETURNED') {
-      throw new Error('Dokumen ini tidak dipulangkan, jadi tiada apa untuk dibetulkan.');
+      throw new Error('This document was not returned, so there is nothing to correct.');
     }
     a.docs[idx].status = 'RESUBMITTED';
-    a.docs[idx].note = note || 'Dokumen digantikan oleh ejen';
+    a.docs[idx].note = note || 'Document replaced by the agent';
     var stillReturned = false;
     for (var i = 0; i < a.docs.length; i++) {
       if (a.docs[i].status === 'RETURNED') stillReturned = true;
     }
     var from = a.appStatus;
     if (!stillReturned) a.appStatus = 'UNDER_USAINS_REVIEW';
-    logIt('agent', a.id, from, a.appStatus, 'Dokumen dihantar semula: ' + a.docs[idx].name);
-    notify('usains', 'Dokumen pembetulan diterima',
-      a.name + ' menghantar semula ' + a.docs[idx].name + '.', 'usains-console.html', a.id);
+    logIt('agent', a.id, from, a.appStatus, 'Document resubmitted: ' + a.docs[idx].name);
+    notify('usains', 'Corrected document received',
+      a.name + ' resubmitted ' + a.docs[idx].name + '.', 'usains-console.html', a.id);
     S.save();
     return a;
   }
@@ -310,15 +310,15 @@
     var a = S.agent(agentId);
     var out = docsOutstanding(a);
     if (out.length) {
-      throw new Error('Masih ada ' + out.length + ' dokumen belum disahkan. USAINS hanya boleh forward apabila semua dokumen VERIFIED.');
+      throw new Error(out.length + ' document(s) are still unverified. USAINS can only forward once every document is VERIFIED.');
     }
     var from = a.appStatus;
     a.appStatus = 'VERIFIED';
     a.verifiedIso = S.state().nowIso;
     a.verifiedLabel = fmt(a.verifiedIso);
-    logIt('agent', a.id, from, a.appStatus, 'Dokumen disahkan dan dihantar kepada USM LEAP');
-    notify('leap', 'Kes menunggu keputusan LEAP',
-      a.name + ' (' + a.id + ') telah disahkan USAINS.', 'leap-console.html', a.id);
+    logIt('agent', a.id, from, a.appStatus, 'Documents verified and forwarded to USM LEAP');
+    notify('leap', 'Case awaiting LEAP decision',
+      a.name + ' (' + a.id + ') has been verified by USAINS.', 'leap-console.html', a.id);
     S.save();
     return a;
   }
@@ -327,7 +327,7 @@
     guard('approve');
     var a = S.agent(agentId);
     if (a.appStatus !== 'VERIFIED' && a.appStatus !== 'UNDER_LEAP_REVIEW') {
-      throw new Error('LEAP hanya boleh meluluskan permohonan berstatus VERIFIED.');
+      throw new Error('LEAP can only approve applications with status VERIFIED.');
     }
     var st = S.state();
     var from = a.appStatus;
@@ -346,9 +346,9 @@
     st.agreements.unshift(agr);
     a.agreementId = agr.id;
     logIt('agent', a.id, from, a.appStatus,
-      'Permohonan diluluskan — draf perjanjian ' + agr.id + ' dijana');
-    notify('all', 'Draf perjanjian dijana',
-      agr.id + ' untuk ' + a.name + ' menunggu tandatangan tiga pihak.',
+      'Application approved — agreement draft ' + agr.id + ' generated');
+    notify('all', 'Agreement draft generated',
+      agr.id + ' for ' + a.name + ' is awaiting signatures from all three parties.',
       'agreement.html?id=' + agr.id, a.id);
     S.save();
     return a;
@@ -356,12 +356,12 @@
 
   function rejectApplication(agentId, reason) {
     guard('rejectApplication');
-    if (!reason || !reason.trim()) throw new Error('Sebab wajib diisi untuk penolakan.');
+    if (!reason || !reason.trim()) throw new Error('A reason is required to reject an application.');
     var a = S.agent(agentId);
     var from = a.appStatus;
     a.appStatus = 'REJECTED';
-    logIt('agent', a.id, from, a.appStatus, 'Permohonan ditolak: ' + reason.trim());
-    notify('agent', 'Permohonan ditolak', reason.trim(),
+    logIt('agent', a.id, from, a.appStatus, 'Application rejected: ' + reason.trim());
+    notify('agent', 'Application rejected', reason.trim(),
       'application-detail.html?id=' + a.id, a.id);
     S.save();
     return a;
@@ -369,14 +369,14 @@
 
   // --- Transisi: perjanjian ---------------------------------------------
   var PARTY_ACTION = { usains: 'signUsains', leap: 'signLeap', agent: 'signAgent' };
-  var PARTY_LABEL = { usains: 'USAINS', leap: 'USM LEAP', agent: 'Ejen' };
+  var PARTY_LABEL = { usains: 'USAINS', leap: 'USM LEAP', agent: 'Agent' };
 
   function signParty(agreementId, party) {
     guard(PARTY_ACTION[party]);
     var agr = S.agreement(agreementId);
-    if (!agr) throw new Error('Perjanjian tidak dijumpai.');
-    if (agr.status === 'FULLY_SIGNED') throw new Error('Perjanjian sudah lengkap ditandatangani.');
-    if (agr.signatures[party].signed) throw new Error(PARTY_LABEL[party] + ' sudah menandatangani.');
+    if (!agr) throw new Error('Agreement not found.');
+    if (agr.status === 'FULLY_SIGNED') throw new Error('This agreement is already fully signed.');
+    if (agr.signatures[party].signed) throw new Error(PARTY_LABEL[party] + ' has already signed.');
     var st = S.state();
     var info = S.roleInfo();
     var from = agr.status;
@@ -398,19 +398,19 @@
         a.expiryIso = agr.endIso;
         a.expiryLabel = agr.endLabel;
         logIt('agent', a.id, 'PENDING', 'ACTIVE',
-          'Perjanjian lengkap ditandatangani — ejen kini AKTIF');
+          'Agreement fully signed — the agent is now ACTIVE');
       }
-      notify('all', 'Ejen kini AKTIF',
-        (a ? a.name : agr.agentId) + ' boleh mula merujuk pelajar.', 'referrals.html', agr.agentId);
+      notify('all', 'Agent is now ACTIVE',
+        (a ? a.name : agr.agentId) + ' can begin referring students.', 'referrals.html', agr.agentId);
     } else {
       agr.status = !agr.signatures.usains.signed ? 'AWAITING_USAINS_SIGNATURE'
         : (!agr.signatures.leap.signed ? 'AWAITING_LEAP_SIGNATURE' : 'AWAITING_AGENT_SIGNATURE');
-      notify('all', 'Tandatangan direkod',
-        PARTY_LABEL[party] + ' menandatangani ' + agr.id + '.',
+      notify('all', 'Signature recorded',
+        PARTY_LABEL[party] + ' signed ' + agr.id + '.',
         'agreement.html?id=' + agr.id, agr.agentId);
     }
     logIt('agreement', agr.id, from, agr.status,
-      'Tandatangan ' + PARTY_LABEL[party] + ' direkod (status demo, bukan e-signature sah)');
+      PARTY_LABEL[party] + ' signature recorded (demo status only, not a valid e-signature)');
     S.save();
     return agr;
   }
@@ -420,7 +420,7 @@
     guard('addReferral');
     var a = S.agent(agentId);
     if (a.agentStatus !== 'ACTIVE' && a.agentStatus !== 'RENEWED') {
-      throw new Error('Hanya ejen berstatus AKTIF boleh mencipta rujukan pelajar.');
+      throw new Error('Only agents with ACTIVE status can create student referrals.');
     }
     var st = S.state();
     var ref = {
@@ -434,9 +434,9 @@
       createdIso: st.nowIso, isDemoCreated: true
     };
     st.referrals.unshift(ref);
-    logIt('referral', ref.refId, '—', 'SUBMITTED', 'Rujukan pelajar baharu: ' + ref.name);
-    notify('usains', 'Rujukan pelajar baharu',
-      a.name + ' merujuk ' + ref.name + ' (' + ref.program + ').', 'referrals.html', a.id);
+    logIt('referral', ref.refId, '—', 'SUBMITTED', 'New student referral: ' + ref.name);
+    notify('usains', 'New student referral',
+      a.name + ' referred ' + ref.name + ' (' + ref.program + ').', 'referrals.html', a.id);
     S.save();
     return ref;
   }
@@ -445,14 +445,14 @@
   function advanceReferral(refId) {
     guard('advanceReferral');
     var ref = S.referral(refId);
-    if (!ref) throw new Error('Rujukan tidak dijumpai.');
+    if (!ref) throw new Error('Referral not found.');
     var i = REF_FLOW.indexOf(ref.refStatus);
-    if (i < 0 || i >= REF_FLOW.length - 1) throw new Error('Rujukan sudah di peringkat akhir.');
+    if (i < 0 || i >= REF_FLOW.length - 1) throw new Error('This referral is already at the final stage.');
     var from = ref.refStatus;
     ref.refStatus = REF_FLOW[i + 1];
     ref.status = ({ SUBMITTED: 'Submitted', OFFERED: 'Offered', ENROLLED: 'Enrolled', FEES_PAID: 'Fees Paid' })[ref.refStatus];
     logIt('referral', ref.refId, from, ref.refStatus,
-      'Status rujukan dikemas kini oleh pegawai berautoriti (' + ref.name + ')');
+      'Referral status updated by an authorised officer (' + ref.name + ')');
     S.save();
     return ref;
   }
@@ -462,13 +462,13 @@
     guard('createClaim');
     var a = S.agent(agentId);
     var ref = S.referral(refId);
-    if (!ref) throw new Error('Rujukan tidak dijumpai.');
+    if (!ref) throw new Error('Referral not found.');
     if (ref.refStatus !== 'FEES_PAID') {
-      throw new Error('Tuntutan hanya boleh dibina bagi rujukan berstatus "Yuran dibayar".');
+      throw new Error('A claim can only be built for referrals with status "Fees paid".');
     }
     var existing = S.claims();
     for (var i = 0; i < existing.length; i++) {
-      if (existing[i].refId === ref.refId) throw new Error('Rujukan ini sudah mempunyai tuntutan (' + existing[i].id + ').');
+      if (existing[i].refId === ref.refId) throw new Error('This referral already has a claim (' + existing[i].id + ').');
     }
     var st = S.state();
     var c = {
@@ -482,7 +482,7 @@
       isDemoCreated: true
     };
     st.claims.unshift(c);
-    logIt('claim', c.id, '—', 'DRAFT', 'Draf tuntutan dibina untuk ' + ref.name);
+    logIt('claim', c.id, '—', 'DRAFT', 'Claim draft built for ' + ref.name);
     S.save();
     return c;
   }
@@ -491,7 +491,7 @@
     guard('submitClaim');
     var c = S.claim(claimId);
     if (c.claimStatus !== 'DRAFT' && c.claimStatus !== 'RETURNED') {
-      throw new Error('Hanya tuntutan Draf atau Dipulangkan boleh dihantar.');
+      throw new Error('Only Draft or Returned claims can be submitted.');
     }
     var st = S.state();
     var from = c.claimStatus;
@@ -501,9 +501,9 @@
     c.deadlineIso = addDays(st.nowIso, st.config.sla.claimDecisionDays);
     c.deadlineLabel = fmt(c.deadlineIso);
     c.rateSnapshot = ratePercent(c.level);
-    logIt('claim', c.id, from, c.claimStatus, 'Tuntutan dihantar — RM ' + money(commissionOf(c)));
-    notify('usains', 'Tuntutan komisen baharu',
-      c.id + ' (' + c.student + ') menunggu semakan kelayakan.', 'claims.html', c.agentId);
+    logIt('claim', c.id, from, c.claimStatus, 'Claim submitted — RM ' + money(commissionOf(c)));
+    notify('usains', 'New commission claim',
+      c.id + ' (' + c.student + ') is awaiting an eligibility review.', 'claims.html', c.agentId);
     S.save();
     return c;
   }
@@ -512,10 +512,10 @@
     guard('startClaimReview');
     var c = S.claim(claimId);
     if (c.claimStatus !== 'SUBMITTED') {
-      throw new Error('Hanya tuntutan berstatus "Dihantar" boleh dibuka untuk semakan.');
+      throw new Error('Only claims with status "Submitted" can be opened for review.');
     }
     c.claimStatus = 'UNDER_USAINS_REVIEW';
-    logIt('claim', c.id, 'SUBMITTED', c.claimStatus, 'Semakan kelayakan dimulakan');
+    logIt('claim', c.id, 'SUBMITTED', c.claimStatus, 'Eligibility review started');
     S.save();
     return c;
   }
@@ -525,10 +525,10 @@
     var c = S.claim(claimId);
     if (c.claimStatus === 'SUBMITTED') {
       c.claimStatus = 'UNDER_USAINS_REVIEW';
-      logIt('claim', c.id, 'SUBMITTED', c.claimStatus, 'Semakan kelayakan dimulakan');
+      logIt('claim', c.id, 'SUBMITTED', c.claimStatus, 'Eligibility review started');
     }
     if (c.claimStatus !== 'UNDER_USAINS_REVIEW') {
-      throw new Error('Syarat kelayakan hanya boleh disemak semasa peringkat semakan USAINS.');
+      throw new Error('Eligibility conditions can only be reviewed during the USAINS review stage.');
     }
     c.eligibility[idx] = !!value;
     S.save();
@@ -540,14 +540,14 @@
     var c = S.claim(claimId);
     for (var i = 0; i < 5; i++) {
       if (!c.eligibility[i]) {
-        throw new Error('Syarat kelayakan #' + (i + 1) + ' belum disahkan: ' + SEED.ELIGIBILITY_LABELS[i]);
+        throw new Error('Eligibility condition #' + (i + 1) + ' is not yet confirmed: ' + SEED.ELIGIBILITY_LABELS[i]);
       }
     }
     var from = c.claimStatus;
     c.claimStatus = 'PENDING_LEAP_DECISION';
     logIt('claim', c.id, from, c.claimStatus,
-      '5 syarat kelayakan disahkan — dihantar untuk keputusan LEAP');
-    notify('leap', 'Tuntutan menunggu keputusan',
+      'All 5 eligibility conditions confirmed — sent for LEAP decision');
+    notify('leap', 'Claim awaiting decision',
       c.id + ' (' + c.student + ') — RM ' + money(commissionOf(c)), 'claims.html', c.agentId);
     S.save();
     return c;
@@ -555,13 +555,13 @@
 
   function returnClaim(claimId, reason) {
     guard('returnClaim');
-    if (!reason || !reason.trim()) throw new Error('Sebab wajib diisi untuk memulangkan tuntutan.');
+    if (!reason || !reason.trim()) throw new Error('A reason is required to return a claim.');
     var c = S.claim(claimId);
     var from = c.claimStatus;
     c.claimStatus = 'RETURNED';
     c.returnReason = reason.trim();
-    logIt('claim', c.id, from, c.claimStatus, 'Tuntutan dipulangkan: ' + reason.trim());
-    notify('agent', 'Tuntutan dipulangkan', c.id + ': ' + reason.trim(), 'claims.html', c.agentId);
+    logIt('claim', c.id, from, c.claimStatus, 'Claim returned: ' + reason.trim());
+    notify('agent', 'Claim returned', c.id + ': ' + reason.trim(), 'claims.html', c.agentId);
     S.save();
     return c;
   }
@@ -570,21 +570,21 @@
     guard('decideClaim');
     var c = S.claim(claimId);
     if (c.claimStatus !== 'PENDING_LEAP_DECISION') {
-      throw new Error('Tuntutan belum sampai ke peringkat keputusan LEAP.');
+      throw new Error('This claim has not yet reached the LEAP decision stage.');
     }
     var from = c.claimStatus;
     if (decision === 'reject') {
-      if (!reason || !reason.trim()) throw new Error('Sebab wajib diisi untuk penolakan tuntutan.');
+      if (!reason || !reason.trim()) throw new Error('A reason is required to reject a claim.');
       c.claimStatus = 'REJECTED';
       c.decision = 'Rejected';
       c.decisionReason = reason.trim();
-      logIt('claim', c.id, from, c.claimStatus, 'Tuntutan ditolak: ' + reason.trim());
-      notify('agent', 'Tuntutan ditolak', c.id + ': ' + reason.trim(), 'claims.html', c.agentId);
+      logIt('claim', c.id, from, c.claimStatus, 'Claim rejected: ' + reason.trim());
+      notify('agent', 'Claim rejected', c.id + ': ' + reason.trim(), 'claims.html', c.agentId);
     } else {
       c.claimStatus = 'APPROVED_PENDING_PAYMENT';
       c.decision = 'Approved';
-      logIt('claim', c.id, from, c.claimStatus, 'Tuntutan diluluskan — menunggu rekod bayaran');
-      notify('payment', 'Tuntutan sedia untuk bayaran',
+      logIt('claim', c.id, from, c.claimStatus, 'Claim approved — awaiting payment record');
+      notify('payment', 'Claim ready for payment',
         c.id + ' — RM ' + money(commissionOf(c)), 'claims.html', c.agentId);
     }
     S.save();
@@ -595,12 +595,12 @@
     guard('recordPayment');
     var c = S.claim(claimId);
     if (c.claimStatus !== 'APPROVED_PENDING_PAYMENT') {
-      throw new Error('Bayaran hanya boleh direkod selepas tuntutan DILULUSKAN.');
+      throw new Error('Payment can only be recorded after the claim is APPROVED.');
     }
     if (!data || !data.reference || !String(data.reference).trim()) {
-      throw new Error('Rujukan bayaran wajib diisi.');
+      throw new Error('A payment reference is required.');
     }
-    if (!data.amount) throw new Error('Amaun bayaran wajib diisi.');
+    if (!data.amount) throw new Error('A payment amount is required.');
     var from = c.claimStatus;
     var st = S.state();
     c.claimStatus = 'PAID';
@@ -613,9 +613,9 @@
       note: data.note || ''
     };
     logIt('claim', c.id, from, c.claimStatus,
-      'Bayaran direkod: RM ' + money(c.payment.amount) + ' · Ruj ' + c.payment.reference);
-    notify('agent', 'Tuntutan telah dibayar',
-      c.id + ' — RM ' + money(c.payment.amount) + ' (Ruj ' + c.payment.reference + ')',
+      'Payment recorded: RM ' + money(c.payment.amount) + ' · Ref ' + c.payment.reference);
+    notify('agent', 'Claim has been paid',
+      c.id + ' — RM ' + money(c.payment.amount) + ' (Ref ' + c.payment.reference + ')',
       'claims.html', c.agentId);
     S.save();
     return c;
@@ -636,16 +636,16 @@
     guard('openAnnualReview');
     var a = S.agent(agentId);
     if (a.agentStatus !== 'ACTIVE' && a.agentStatus !== 'RENEWED') {
-      throw new Error('Annual review hanya untuk ejen aktif.');
+      throw new Error('Annual review applies to active agents only.');
     }
     var from = a.agentStatus;
     a.agentStatus = 'REVIEW_DUE';
     a.typeLabel = 'Active · Annual Review';
     logIt('agent', a.id, from, a.agentStatus,
-      'Annual review dibuka — rujukan ' + referralCountThisYear(a.id) +
-      ' vs ambang ' + S.config().renewal.minReferralsPerYear);
-    notify('leap', 'Annual review dibuka',
-      a.name + ' memerlukan keputusan renew/terminate.', 'annual-review.html', a.id);
+      'Annual review opened — ' + referralCountThisYear(a.id) +
+      ' referrals vs a threshold of ' + S.config().renewal.minReferralsPerYear);
+    notify('leap', 'Annual review opened',
+      a.name + ' needs a renew/terminate decision.', 'annual-review.html', a.id);
     S.save();
     return a;
   }
@@ -654,7 +654,7 @@
     guard('renew');
     var a = S.agent(agentId);
     if (a.agentStatus !== 'REVIEW_DUE') {
-      throw new Error('Hanya ejen dalam annual review boleh diperbaharui.');
+      throw new Error('Only agents under annual review can be renewed.');
     }
     var st = S.state();
     var from = a.agentStatus;
@@ -671,22 +671,22 @@
       agr.status = 'FULLY_SIGNED';
     }
     logIt('agent', a.id, from, a.agentStatus,
-      'Diperbaharui sehingga ' + fmt(newEnd) + (note ? ' — ' + note : ''));
-    notify('agent', 'Pembaharuan diluluskan',
-      'Perjanjian dilanjutkan sehingga ' + fmt(newEnd) + '.', 'annual-review.html', a.id);
+      'Renewed until ' + fmt(newEnd) + (note ? ' — ' + note : ''));
+    notify('agent', 'Renewal approved',
+      'The agreement has been extended until ' + fmt(newEnd) + '.', 'annual-review.html', a.id);
     S.save();
     return a;
   }
 
   function terminate(agentId, reason) {
     guard('terminate');
-    if (!reason || !reason.trim()) throw new Error('Sebab wajib diisi untuk penamatan.');
+    if (!reason || !reason.trim()) throw new Error('A reason is required to terminate an agreement.');
     var a = S.agent(agentId);
     var from = a.agentStatus;
     a.agentStatus = 'TERMINATED';
     a.typeLabel = 'Terminated';
-    logIt('agent', a.id, from, a.agentStatus, 'Ditamatkan: ' + reason.trim());
-    notify('agent', 'Perjanjian ditamatkan', reason.trim(), 'annual-review.html', a.id);
+    logIt('agent', a.id, from, a.agentStatus, 'Terminated: ' + reason.trim());
+    notify('agent', 'Agreement terminated', reason.trim(), 'annual-review.html', a.id);
     S.save();
     return a;
   }
