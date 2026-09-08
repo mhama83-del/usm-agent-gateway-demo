@@ -17,10 +17,10 @@
   // DRAF, jadi chip membawa lencana DRAF sendiri.
   function drafHint() {
     var sla = NS.Store.config().sla;
-    return 'Chip dikira dari nilai DRAF: semakan USAINS ' + sla.usainsReviewDays
-      + ' hari, keputusan LEAP ' + sla.leapDecisionDays + ' hari, keputusan tuntutan '
-      + sla.claimDecisionDays + ' hari, ambang "Approaching Deadline" '
-      + sla.approachingWithinDays + ' hari.';
+    return 'Chip computed from DRAFT values: USAINS review ' + sla.usainsReviewDays
+      + ' days, LEAP decision ' + sla.leapDecisionDays + ' days, claim decision '
+      + sla.claimDecisionDays + ' days, "Approaching Deadline" threshold '
+      + sla.approachingWithinDays + ' days.';
   }
 
   // state: 'ok' | 'warning' | 'late'
@@ -39,14 +39,14 @@
     var state = W.slaOf(a);
     if (a.slaSource === 'seed') {
       return '<span class="sla-chip sla-' + state + '">' + TEXT[state] + '</span>'
-        + NS.C.draf('Keadaan SLA yang dikurasi untuk cerita demo (medan seed). '
-          + 'Permohonan yang dicipta semasa demo dikira dari nilai DRAF.');
+        + NS.C.draf('SLA state curated for the demo storyline (seed field). '
+          + 'Applications created during the demo are computed from DRAFT values.');
     }
     var extra = '';
     var dl = W.slaDeadline(a);
     if (dl) {
       var left = W.daysUntil(dl);
-      extra = (left < 0) ? (Math.abs(left) + ' hari lewat') : (left + ' hari lagi');
+      extra = (left < 0) ? (Math.abs(left) + ' days late') : (left + ' days left');
     }
     return slaChip(state, extra);
   }
@@ -57,7 +57,7 @@
     var extra = '';
     if (c.deadlineIso && c.claimStatus !== 'PAID' && c.claimStatus !== 'REJECTED') {
       var left = W.daysUntil(c.deadlineIso);
-      extra = (left < 0) ? (Math.abs(left) + ' hari lewat') : (left + ' hari lagi');
+      extra = (left < 0) ? (Math.abs(left) + ' days late') : (left + ' days left');
     }
     return slaChip(state, extra);
   }

@@ -14,9 +14,9 @@
       .replace(/"/g, '&quot;');
   }
 
-  // Lencana DRAF pada setiap nilai belum muktamad.
+  // Lencana DRAFT pada setiap nilai belum muktamad.
   function draf(hint) {
-    return '<span class="draf-badge" title="' + esc(hint || 'Nilai DRAF — menunggu keputusan owner') + '">DRAF</span>';
+    return '<span class="draf-badge" title="' + esc(hint || 'DRAFT value — awaiting an owner decision') + '">DRAFT</span>';
   }
 
   // Nilai + lencana DRAF
@@ -27,8 +27,8 @@
   // Penanda "demo vs produksi" untuk amaun komisen.
   // Spesifikasi §15.9 menghendaki kadar DIBEKUKAN (snapshot) pada setiap claim.
   // Demo sengaja memaparkan kadar SEMASA supaya kesan menukar kadar kelihatan.
-  var SNAPSHOT_NOTE = 'Demo memaparkan kadar semasa supaya kesan tukar kadar kelihatan. '
-    + 'Produksi membekukan kadar pada setiap claim (snapshot).';
+  var SNAPSHOT_NOTE = 'The demo shows the current rate so the effect of changing it is visible. '
+    + 'Production freezes the rate on each claim (snapshot).';
   function snapMark(extra) {
     var t = SNAPSHOT_NOTE + (extra ? ' ' + extra : '');
     return '<span class="snap-mark" tabindex="0" role="note" title="' + esc(t)
@@ -38,9 +38,9 @@
   // Amaun komisen + lencana DRAF kadar + penanda snapshot.
   function amountWithNotes(amountHtml, level, ratePercent, snapshotPercent) {
     var extra = (snapshotPercent != null && snapshotPercent !== ratePercent)
-      ? 'Kadar snapshot ketika claim dihantar: ' + snapshotPercent + '%.'
+      ? 'Snapshot rate when the claim was submitted: ' + snapshotPercent + '%.'
       : '';
-    return amountHtml + draf('Kadar komisen ' + level + ' ' + ratePercent + '% — DRAF') + snapMark(extra);
+    return amountHtml + draf(level + ' commission rate ' + ratePercent + '% — DRAFT') + snapMark(extra);
   }
 
   function kpi(label, value, sub) {
@@ -80,7 +80,7 @@
     h += '</tr></thead><tbody>';
     if (!rows.length) {
       h += '<tr><td colspan="' + headers.length + '" class="text-center text-muted py-4">'
-         + (opts.empty || 'Tiada rekod.') + '</td></tr>';
+         + (opts.empty || 'No records.') + '</td></tr>';
     }
     for (var r = 0; r < rows.length; r++) {
       h += '<tr>';

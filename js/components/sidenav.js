@@ -11,16 +11,16 @@
 
   // key ialah nama fail tanpa .html
   var LINKS = [
-    { key: 'dashboard',           label: 'Dashboard',        roles: ['agent', 'usains', 'leap', 'payment', 'admin'] },
-    { key: 'application-wizard',  label: 'Mohon / Renew',    roles: ['agent', 'admin'] },
-    { key: 'application-detail',  label: 'Fail Permohonan',  roles: ['agent', 'usains', 'leap', 'admin'] },
-    { key: 'usains-console',      label: 'Konsol USAINS',    roles: ['usains', 'admin'], count: 'usains' },
-    { key: 'leap-console',        label: 'Konsol USM LEAP',  roles: ['leap', 'admin'], count: 'leap' },
-    { key: 'agreement',           label: 'Perjanjian',       roles: ['agent', 'usains', 'leap', 'admin'], count: 'agreement' },
-    { key: 'referrals',           label: 'Rujukan Pelajar',  roles: ['agent', 'usains', 'leap', 'admin'] },
-    { key: 'claims',              label: 'Tuntutan Komisen', roles: ['agent', 'usains', 'leap', 'payment', 'admin'], count: 'claims' },
-    { key: 'annual-review',       label: 'Annual Review',    roles: ['leap', 'agent', 'admin'], count: 'review' },
-    { key: 'settings-draft',      label: 'Tetapan (DRAF)',   roles: ['agent', 'usains', 'leap', 'payment', 'admin'] }
+    { key: 'dashboard',           label: 'Dashboard',          roles: ['agent', 'usains', 'leap', 'payment', 'admin'] },
+    { key: 'application-wizard',  label: 'Apply / Renew',      roles: ['agent', 'admin'] },
+    { key: 'application-detail',  label: 'Application File',   roles: ['agent', 'usains', 'leap', 'admin'] },
+    { key: 'usains-console',      label: 'USAINS Console',     roles: ['usains', 'admin'], count: 'usains' },
+    { key: 'leap-console',        label: 'USM LEAP Console',   roles: ['leap', 'admin'], count: 'leap' },
+    { key: 'agreement',           label: 'Agreement',          roles: ['agent', 'usains', 'leap', 'admin'], count: 'agreement' },
+    { key: 'referrals',           label: 'Student Referrals',  roles: ['agent', 'usains', 'leap', 'admin'] },
+    { key: 'claims',              label: 'Commission Claims',  roles: ['agent', 'usains', 'leap', 'payment', 'admin'], count: 'claims' },
+    { key: 'annual-review',       label: 'Annual Review',      roles: ['leap', 'agent', 'admin'], count: 'review' },
+    { key: 'settings-draft',      label: 'Settings (DRAFT)',   roles: ['agent', 'usains', 'leap', 'payment', 'admin'] }
   ];
 
   // Bilangan item yang menunggu tindakan peranan semasa.
@@ -91,7 +91,7 @@
 
   function render(base, activeKey) {
     var role = NS.Store.role();
-    var h = '<nav class="usm-nav" aria-label="Navigasi utama"><div class="container-xl">'
+    var h = '<nav class="usm-nav" aria-label="Main navigation"><div class="container-xl">'
           + '<ul class="nav flex-nowrap">';
     for (var i = 0; i < LINKS.length; i++) {
       var l = LINKS[i];
@@ -101,7 +101,7 @@
          + 'href="' + base + 'pages/' + l.key + '.html"'
          + (l.key === activeKey ? ' aria-current="page"' : '') + '>'
          + C.esc(l.label)
-         + (n ? '<span class="nav-count" title="' + n + ' item menunggu tindakan anda">' + n + '</span>' : '')
+         + (n ? '<span class="nav-count" title="' + n + ' item(s) awaiting your action">' + n + '</span>' : '')
          + '</a></li>';
     }
     return h + '</ul></div></nav>';

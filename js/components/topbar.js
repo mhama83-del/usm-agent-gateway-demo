@@ -42,7 +42,7 @@
 
     var items = '';
     if (!notes.length) {
-      items = '<li><span class="dropdown-item-text text-muted small">Tiada notifikasi untuk peranan ini.</span></li>';
+      items = '<li><span class="dropdown-item-text text-muted small">No notifications for this role.</span></li>';
     }
     for (var i = 0; i < Math.min(notes.length, 8); i++) {
       var n = notes[i];
@@ -57,13 +57,13 @@
     if (notes.length) {
       items += '<li><hr class="dropdown-divider"></li>'
              + '<li><button type="button" class="dropdown-item small text-muted" id="btn-notif-read">'
-             + 'Tandakan semua sebagai dibaca</button></li>';
+             + 'Mark all as read</button></li>';
     }
 
     return ''
       + '<div class="usm-demo-strip text-center py-1 px-2">'
-      + 'DEMO SAHAJA · Semua data adalah REKAAN · Bukan sistem produksi USM · '
-      + 'Nilai bertanda DRAF belum dimuktamadkan'
+      + 'DEMO ONLY · All data is FICTITIOUS · Not a USM production system · '
+      + 'Values marked DRAFT are not yet final'
       + '</div>'
       + '<header class="usm-topbar py-2">'
       + '  <div class="container-xl d-flex align-items-center gap-2 gap-sm-3 flex-wrap">'
@@ -72,23 +72,23 @@
       + '           alt="Universiti Sains Malaysia · APEX">'
       + '      <span class="d-none d-sm-block">'
       + '        <span class="usm-brand-title d-block">USM Agent Gateway</span>'
-      + '        <span class="usm-brand-sub">USM + APEX · Pengurusan Kitar Hayat Ejen</span>'
+      + '        <span class="usm-brand-sub">USM + APEX · Agent Lifecycle Management</span>'
       + '      </span>'
       + '    </a>'
       + '    <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">'
       + '      <div class="dropdown">'
       + '        <button class="btn btn-sm btn-light position-relative dropdown-toggle" '
-      + '                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifikasi">'
-      + '          Notifikasi'
+      + '                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">'
+      + '          Notifications'
       + (unread ? '<span class="badge bg-danger ms-1">' + unread + '</span>' : '')
       + '        </button>'
       + '        <ul class="dropdown-menu dropdown-menu-end shadow">' + items + '</ul>'
       + '      </div>'
-      + '      <label class="visually-hidden" for="role-switcher">Tukar peranan</label>'
+      + '      <label class="visually-hidden" for="role-switcher">Switch role</label>'
       + '      <select id="role-switcher" class="form-select form-select-sm" style="width:auto" '
-      + '              title="Tukar peranan — navigasi dan tindakan berubah ikut peranan">' + opts + '</select>'
+      + '              title="Switch role — navigation and actions change with the role">' + opts + '</select>'
       + '      <button id="btn-reset-demo" class="btn btn-sm btn-outline-light" '
-      + '              title="Padam semua kemajuan demo dan kembali ke data asal seed">Reset Demo</button>'
+      + '              title="Clear all demo progress and return to the original seed data">Reset Demo</button>'
       + '    </div>'
       + '  </div>'
       + '  <div class="container-xl mt-2">'
@@ -110,7 +110,7 @@
     var btn = document.getElementById('btn-reset-demo');
     if (btn) {
       btn.addEventListener('click', function () {
-        if (root.confirm('Reset Demo akan memadam semua kemajuan dan kembali ke data asal seed. Teruskan?')) {
+        if (root.confirm('Reset Demo will clear all progress and return to the original seed data. Continue?')) {
           NS.Store.reset();
           root.location.href = base + 'pages/dashboard.html';
         }

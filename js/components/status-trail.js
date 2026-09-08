@@ -19,7 +19,7 @@
       var n = i + 1;
       var cls = n < current ? 'done' : (n === current ? 'current' : '');
       h += '<div class="trail-step ' + cls + '" role="listitem">'
-         + '<span class="trail-num">PERINGKAT ' + n + '</span>'
+         + '<span class="trail-num">STAGE ' + n + '</span>'
          + esc(labels[n - 1])
          + '</div>';
     }
