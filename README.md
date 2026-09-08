@@ -9,6 +9,11 @@ kepada pihak pengurusan USM.
 > + JavaScript). Tiada backend, database, atau data sebenar. Semua data adalah
 > rekaan. State demo disimpan dalam `localStorage` pelayar.
 
+> **Bahasa antara muka: English.** Seluruh UI demo dalam English, dan sistem
+> produksi akan ikut sama (keputusan owner 8 Sep 2026 — lihat `CLAUDE.md` §3.1).
+> Fail `README.md` dan `CLAUDE.md` ini kekal dalam Bahasa Melayu kerana ia
+> dokumen pembangun, bukan antara muka pengguna.
+
 **Domain demo:** https://agents.durianbytes.com
 
 ---
@@ -93,25 +98,25 @@ mungkin berbeza sedikit ikut versi):
 ## Golden path demo (jalan cerita)
 
 Mula sebagai peranan **Agent**, dan tukar peranan di bar atas mengikut arahan
-kad *"Langkah seterusnya"* pada Dashboard:
+kad *"Next step"* pada Dashboard:
 
 | # | Peranan | Tindakan |
 |---|---|---|
-| 1 | Agent | Mohon / Renew → isi wizard 4 langkah → terima deklarasi ABC → hantar |
-| 2 | USAINS | Fail permohonan → **Pulangkan** satu dokumen (sebab wajib) |
-| 3 | Agent | Fail permohonan → **Hantar semula** dokumen itu |
+| 1 | Agent | *Apply / Renew* → isi wizard 4 langkah → terima deklarasi ABC → *Submit application* |
+| 2 | USAINS | *Application File* → **Return** satu dokumen (sebab wajib) |
+| 3 | Agent | *Application File* → **Resubmit** dokumen itu |
 | 4 | USAINS | Sahkan semua 9 dokumen → **Verify & forward ke LEAP** |
-| 5 | USM LEAP | Konsol LEAP → **Luluskan** → draf perjanjian dijana automatik |
-| 6 | USAINS → LEAP → Agent | Perjanjian → tandatangan tiga pihak → ejen jadi **AKTIF** |
-| 7 | Agent | Rujukan Pelajar → hantar rujukan baharu |
-| 8 | USAINS | Rujukan Pelajar → majukan status sehingga **Yuran dibayar** |
-| 9 | Agent | **Bina tuntutan** → **Hantar tuntutan** |
-| 10 | USAINS | Tuntutan → tanda 5 syarat kelayakan → **Hantar untuk keputusan LEAP** |
-| 11 | USM LEAP | Tuntutan → **Luluskan** |
-| 12 | Payment Officer | Tuntutan → **Rekod bayaran** (amaun, tarikh, rujukan) |
-| 13 | USM LEAP | Annual Review → **Buka review** → **Renew** |
+| 5 | USM LEAP | *USM LEAP Console* → **Approve** → draf perjanjian dijana automatik |
+| 6 | USAINS → LEAP → Agent | *Agreement* → tandatangan tiga pihak → ejen jadi **ACTIVE** |
+| 7 | Agent | *Student Referrals* → **Submit referral** |
+| 8 | USAINS | *Student Referrals* → majukan status sehingga **Fees paid** |
+| 9 | Agent | **Build claim** → **Submit claim** |
+| 10 | USAINS | *Commission Claims* → tanda 5 syarat kelayakan → **Send for LEAP decision** |
+| 11 | USM LEAP | *Commission Claims* → **Approve** |
+| 12 | Payment Officer | *Commission Claims* → **Record payment** (amaun, tarikh, rujukan) |
+| 13 | USM LEAP | *Annual Review* → **Open review** → **Renew** |
 
-Penutup: buka **Tetapan (DRAF)**, tukar *Kadar komisen UG* daripada 15 kepada
+Penutup: buka **Settings (DRAFT)**, tukar *UG commission rate* daripada 15 kepada
 20, dan tunjukkan setiap amaun tuntutan berubah serta-merta.
 
 ---
@@ -130,7 +135,7 @@ js/components/topbar.js       Jenama, penukar peranan, notifikasi, Reset Demo
 js/components/sidenav.js      Navigasi ikut peranan + kiraan tugasan
 js/components/sla-chip.js     Chip SLA (Within / Approaching / Overdue)
 js/components/status-trail.js Status trail 5-peringkat
-js/components/list-card.js    Kad, jadual boleh-tindan, lencana DRAF
+js/components/list-card.js    Kad, jadual boleh-tindan, lencana DRAFT
 js/pages/<skrin>.js           Logik setiap skrin (satu fail satu skrin)
 pages/<skrin>.html            Setiap skrin = satu fail HTML (10 skrin)
 tests/                        Ujian pembangunan sahaja — tidak perlu diupload
@@ -183,5 +188,9 @@ Pemetaan yang dicadangkan ke CI4:
 | log aktiviti demo | jadual audit trail |
 
 Nilai dalam `CONFIG_DRAFT` (`data/seed.js`) ialah **titik keputusan owner** —
-dipaparkan dengan lencana **DRAF** sepanjang demo dan diringkaskan dalam skrin
-*Tetapan (DRAF)*.
+dipaparkan dengan lencana **DRAFT** sepanjang demo dan diringkaskan dalam skrin
+*Settings (DRAFT)*.
+
+Nama `CONFIG_DRAFT`, kelas CSS `draf-badge` dan fungsi `C.draf()` sengaja
+**tidak** dinamakan semula semasa penukaran bahasa — hanya teks yang dipaparkan
+berubah kepada `DRAFT`, supaya laluan konfigurasi dan gaya kekal stabil.

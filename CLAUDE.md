@@ -23,7 +23,7 @@ Ini **BUKAN** sistem produksi. Ini demo hadapan (front-end) sahaja.
 
 | Sumber | Peranan |
 |---|---|
-| `USM Agent Gateway Spesifikasi Pembangunan v1.0` (.md) | Sumber kebenaran untuk aliran, status, peraturan, label. |
+| `USM Agent Gateway Spesifikasi Pembangunan v1.0` (.md) | Sumber kebenaran untuk aliran, status, peraturan, label. **Nota:** keputusan bahasa UI dalam §3.1(5) mengatasi mana-mana label Bahasa Melayu dalam spec ini; spec itu sendiri kekal tidak diubah sebagai dokumen sumber. |
 | Prototaip ZIP (`Skop_pembinaan_dashboard_rujukan`) | Rujukan **reka bentuk, aliran skrin & data seed SAHAJA**. |
 
 **PENTING tentang ZIP:** ambil **warna, susun atur, aliran skrin, dan data seed**
@@ -57,7 +57,7 @@ dengan **Bootstrap 5 bersih**. Seed data sudah dikemas dalam `data/seed.js`.
 
 1. **Amaun komisen mesti bergerak.** Amaun tuntutan **dikira** daripada
    `CONFIG_DRAFT.commission` — `amaun = yuran tahun pertama × kadar (UG/PG)`.
-   Ia bukan angka mati. Menukar kadar dalam skrin **Tetapan (DRAF)** mesti
+   Ia bukan angka mati. Menukar kadar dalam skrin **Settings (DRAFT)** mesti
    menukar amaun serta-merta di semua skrin.
 2. **Data rekaan tambahan dibenarkan** dalam `data/seed.js` untuk menyokong
    perjanjian, notifikasi, log aktiviti dan status dokumen — dengan syarat semua
@@ -71,6 +71,27 @@ dengan **Bootstrap 5 bersih**. Seed data sudah dikemas dalam `data/seed.js`.
      `sla` menang** untuk ejen seed.
 4. **Cara jalan:** pelayan statik lokal + CDN (lihat §3). `file://` digugurkan.
 
+### Keputusan owner — 8 Sep 2026: bahasa UI ialah English
+
+5. **Bahasa antara muka ialah English — untuk demo DAN produksi.** Keperluan
+   lama "UI Bahasa Melayu" **digugurkan**. Semua teks yang dilihat pengguna —
+   label, tajuk, butang, mesej, kapsyen, nota, placeholder borang, teks kosong,
+   tab, item menu, bar amaran demo dan footer — mesti dalam English. Peraturan
+   sokongan:
+   - Kod status dalaman kekal (`SUBMITTED`, `VERIFIED`,
+     `APPROVED_AWAITING_AGREEMENT`, dll) — hanya **label paparan** diterjemah.
+   - Lencana paparan **"DRAF" menjadi "DRAFT"**. Kelas CSS `draf-badge`,
+     fungsi `C.draf()` dan nama `CONFIG_DRAFT` kekal supaya laluan konfigurasi
+     dan gaya tidak berubah.
+   - Nama syarikat dan pelajar rekaan dalam `data/seed.js` kekal — ia nama khas.
+   - Istilah yang memang English kekal: SLA, USAINS, USM LEAP, PIC, ABC,
+     Performance bond, Paid-up capital, UG, PG.
+   - Keputusan ini **mengatasi** label Bahasa Melayu dalam
+     `Spesifikasi Pembangunan v1.0`. Fail spec dalam `docs/` **tidak diubah** —
+     ia dokumen sumber; catatan ini ialah rekod perubahannya.
+   - `CLAUDE.md` dan `README.md` kekal ditulis dalam Bahasa Melayu — ia
+     dokumen pembangun, bukan antara muka pengguna.
+
 ---
 
 ## 4. Kebolehgunaan semula (matlamat penting)
@@ -82,7 +103,7 @@ bukan barang buang. Oleh itu:
   CodeIgniter 4 nanti.
 - **Chrome bersama** (top bar, navigasi, penukar peranan, footer) disuntik oleh
   satu komponen JS supaya mudah jadi *partial/layout* CI4 kemudian.
-- **Nama status, label BM, dan struktur komponen** (kad, jadual, chip SLA,
+- **Nama status, label English, dan struktur komponen** (kad, jadual, chip SLA,
   status trail) mesti konsisten dan sepadan dengan spesifikasi.
 - Elak logik dalam markup; asingkan data (`data/`), logik aliran (`js/`), dan
   paparan (`pages/`).
@@ -155,14 +176,15 @@ Awak boleh laraskan susunan jika ada sebab kukuh, tetapi kekalkan prinsip
 4. **Golden path yang benar-benar bergerak** bila butang diklik (verify,
    forward, approve, sign, submit claim, mark paid, renew) — bukan skrin statik.
    Selepas klik, state kekal (localStorage) walau tukar halaman.
-5. **Lencana "DRAF"** (badge kecil, jelas) pada SETIAP nilai belum muktamad:
+5. **Lencana "DRAFT"** (badge kecil, jelas) pada SETIAP nilai belum muktamad:
    kadar komisen, tempoh SLA, yuran pendaftaran, performance bond, threshold
    rujukan, tempoh pengajian minimum. Baca nilai dari `CONFIG_DRAFT`.
-6. **Skrin "Tetapan (DRAF)"** (`settings-draft.html`) — senaraikan SEMUA nilai
-   `CONFIG_DRAFT` di satu tempat dengan lencana DRAF. Ini penutup demo & peta
+6. **Skrin "Settings (DRAFT)"** (`settings-draft.html`) — senaraikan SEMUA nilai
+   `CONFIG_DRAFT` di satu tempat dengan lencana DRAFT. Ini penutup demo & peta
    kepada Modul Konfigurasi produksi.
 7. **Responsif** — guna pada telefon 360px ke atas (jadual → kad pada mobile).
-8. **UI Bahasa Melayu**; istilah teknikal English kekal konsisten (ikut spec).
+8. **UI English** (keputusan owner 8 Sep 2026, §3.1(5)) — demo dan produksi.
+   Kod status dalaman kekal; hanya label paparan diterjemah.
 9. **Branding USM + APEX**, tema ungu (ikut ZIP).
 10. **Notifikasi dipapar dalam UI sahaja** (lonceng/senarai) — TIADA e-mel sebenar.
 
@@ -189,15 +211,15 @@ overdue, EduBridge below-threshold) supaya dashboard hidup.
 
 Dashboard (ikut peranan), Wizard permohonan, Detail + correction, Konsol USAINS,
 Konsol LEAP, Agreement tracker, Referral, Commission claim (+ eligibility +
-payment), Annual review, dan **Tetapan (DRAF)**.
+payment), Annual review, dan **Settings (DRAFT)**.
 
 ---
 
-## 10. Nilai DRAF (titik keputusan owner)
+## 10. Nilai DRAFT (titik keputusan owner)
 
-Semua ini ada dalam `CONFIG_DRAFT` (`data/seed.js`). Paparkan dengan lencana DRAF.
+Semua ini ada dalam `CONFIG_DRAFT` (`data/seed.js`). Paparkan dengan lencana DRAFT.
 
-| Perkara | Nilai seed DRAF |
+| Perkara | Nilai seed DRAFT |
 |---|---|
 | Kadar komisen | UG 15%, PG 10% (dari yuran tahun 1) |
 | Yuran pendaftaran | NEW RM2,000, RENEWAL RM1,000 |
@@ -230,9 +252,9 @@ Semua ini ada dalam `CONFIG_DRAFT` (`data/seed.js`). Paparkan dengan lencana DRA
 - [ ] Penukar peranan berfungsi; nav/tindakan berubah ikut peranan.
 - [ ] Status trail 5-peringkat konsisten pada semua fail.
 - [ ] SLA chip tunjuk pelbagai keadaan (overdue + ok + approaching).
-- [ ] Lencana DRAF muncul pada semua nilai; skrin Tetapan (DRAF) siap.
+- [ ] Lencana DRAFT muncul pada semua nilai; skrin Settings (DRAFT) siap.
 - [ ] Butang **Reset Demo** memulihkan keadaan asal bersih.
-- [ ] Responsif diuji pada 360px & desktop; UI Bahasa Melayu.
+- [ ] Responsif diuji pada 360px & desktop; UI English.
 - [ ] Branding USM+APEX, tema ungu.
 - [ ] `README.md` dikemas kini: cara buka lokal, cara reset, cara upload ke
       Hostinger (`agents.durianbytes.com`), senarai fail.
