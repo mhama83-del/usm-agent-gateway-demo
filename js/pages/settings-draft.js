@@ -11,35 +11,35 @@
   // Metadata paparan mengikut laluan bertitik. Laluan yang tiada di sini tetap
   // dipaparkan (label dijana dari nama kunci) supaya tiada nilai tersembunyi.
   var META = {
-    'commission.ug.label': { group: 'Komisen', label: 'Label level UG', editable: false },
-    'commission.ug.ratePercent': { group: 'Komisen', label: 'Kadar komisen UG', unit: '%',
-      note: 'Amaun setiap tuntutan UG = yuran tahun pertama × kadar ini.' },
-    'commission.ug.basis': { group: 'Komisen', label: 'Asas kiraan UG', editable: false },
-    'commission.pg.label': { group: 'Komisen', label: 'Label level PG', editable: false },
-    'commission.pg.ratePercent': { group: 'Komisen', label: 'Kadar komisen PG', unit: '%',
-      note: 'Amaun setiap tuntutan PG = yuran tahun pertama × kadar ini.' },
-    'commission.pg.basis': { group: 'Komisen', label: 'Asas kiraan PG', editable: false },
-    'commission.paymentWindowDays': { group: 'Komisen', label: 'Tetingkap bayaran selepas lulus', unit: 'hari' },
+    'commission.ug.label': { group: 'Commission', label: 'UG level label', editable: false },
+    'commission.ug.ratePercent': { group: 'Commission', label: 'UG commission rate', unit: '%',
+      note: 'Each UG claim amount = first-year fee × this rate.' },
+    'commission.ug.basis': { group: 'Commission', label: 'UG calculation basis', editable: false },
+    'commission.pg.label': { group: 'Commission', label: 'PG level label', editable: false },
+    'commission.pg.ratePercent': { group: 'Commission', label: 'PG commission rate', unit: '%',
+      note: 'Each PG claim amount = first-year fee × this rate.' },
+    'commission.pg.basis': { group: 'Commission', label: 'PG calculation basis', editable: false },
+    'commission.paymentWindowDays': { group: 'Commission', label: 'Payment window after approval', unit: 'days' },
 
-    'fees.registrationNew': { group: 'Yuran & jaminan', label: 'Yuran pendaftaran — NEW', unit: 'RM' },
-    'fees.registrationRenewal': { group: 'Yuran & jaminan', label: 'Yuran pendaftaran — RENEWAL', unit: 'RM' },
-    'fees.performanceBond': { group: 'Yuran & jaminan', label: 'Performance bond', unit: 'RM' },
-    'fees.paidUpCapitalMin': { group: 'Yuran & jaminan', label: 'Paid-up capital minimum', unit: 'RM' },
+    'fees.registrationNew': { group: 'Fees & bonds', label: 'Registration fee — NEW', unit: 'RM' },
+    'fees.registrationRenewal': { group: 'Fees & bonds', label: 'Registration fee — RENEWAL', unit: 'RM' },
+    'fees.performanceBond': { group: 'Fees & bonds', label: 'Performance bond', unit: 'RM' },
+    'fees.paidUpCapitalMin': { group: 'Fees & bonds', label: 'Minimum paid-up capital', unit: 'RM' },
 
-    'sla.usainsReviewDays': { group: 'SLA', label: 'SLA semakan USAINS', unit: 'hari kalendar',
-      note: 'Menggerakkan chip SLA bagi permohonan yang dicipta semasa demo.' },
-    'sla.leapDecisionDays': { group: 'SLA', label: 'SLA keputusan USM LEAP', unit: 'hari kalendar' },
-    'sla.claimDecisionDays': { group: 'SLA', label: 'SLA keputusan tuntutan', unit: 'hari' },
-    'sla.approachingWithinDays': { group: 'SLA', label: 'Ambang "Approaching Deadline"', unit: 'hari sebelum tarikh akhir',
-      note: 'Baki hari ≤ nilai ini menukar chip SLA daripada hijau kepada kuning.' },
-    'sla.expiryAlertsDays': { group: 'SLA', label: 'Amaran tamat perjanjian', unit: 'hari' },
+    'sla.usainsReviewDays': { group: 'SLA', label: 'USAINS review SLA', unit: 'calendar days',
+      note: 'Drives the SLA chip for applications created during the demo.' },
+    'sla.leapDecisionDays': { group: 'SLA', label: 'USM LEAP decision SLA', unit: 'calendar days' },
+    'sla.claimDecisionDays': { group: 'SLA', label: 'Claim decision SLA', unit: 'days' },
+    'sla.approachingWithinDays': { group: 'SLA', label: '"Approaching Deadline" threshold', unit: 'days before the deadline',
+      note: 'Days remaining ≤ this value turns the SLA chip from green to amber.' },
+    'sla.expiryAlertsDays': { group: 'SLA', label: 'Agreement expiry alerts', unit: 'days' },
 
-    'eligibility.minStudyMonths': { group: 'Kelayakan & pembaharuan', label: 'Tempoh pengajian minimum (claim)', unit: 'bulan' },
-    'renewal.minReferralsPerYear': { group: 'Kelayakan & pembaharuan', label: 'Ambang rujukan untuk renew', unit: 'pelajar/tahun' },
-    'renewal.agreementTermYears': { group: 'Kelayakan & pembaharuan', label: 'Tempoh perjanjian', unit: 'tahun' }
+    'eligibility.minStudyMonths': { group: 'Eligibility & renewal', label: 'Minimum study period (claim)', unit: 'months' },
+    'renewal.minReferralsPerYear': { group: 'Eligibility & renewal', label: 'Referral threshold for renewal', unit: 'students/year' },
+    'renewal.agreementTermYears': { group: 'Eligibility & renewal', label: 'Agreement term', unit: 'years' }
   };
 
-  var GROUP_ORDER = ['Komisen', 'Yuran & jaminan', 'SLA', 'Kelayakan & pembaharuan', 'Lain-lain'];
+  var GROUP_ORDER = ['Commission', 'Fees & bonds', 'SLA', 'Eligibility & renewal', 'Other'];
 
   function getPath(obj, path) {
     var p = path.split('.'), o = obj;
@@ -72,7 +72,7 @@
             label: meta.label || k,
             unit: meta.unit || '',
             note: meta.note || '',
-            group: meta.group || 'Lain-lain',
+            group: meta.group || 'Other',
             editable: meta.editable !== false,
             type: Array.isArray(v) ? 'list' : (typeof v === 'number' ? 'number' : 'text')
           });
@@ -97,7 +97,7 @@
         : '<span class="small">' + C.esc(shown) + '</span>';
       return [
         '<div class="fw-semibold">' + C.esc(f.label) + ' '
-          + C.draf(f.note || 'Nilai DRAF — menunggu keputusan owner') + '</div>'
+          + C.draf(f.note || 'DRAFT value — awaiting an owner decision') + '</div>'
           + (f.note ? '<div class="small text-muted">' + C.esc(f.note) + '</div>' : '')
           + '<div class="small text-muted font-monospace" style="font-size:.68rem">CONFIG_DRAFT.' + C.esc(f.path) + '</div>',
         input,
@@ -121,10 +121,10 @@
         if (!groups[name]) continue;
         body += C.card(C.esc(name) + ' <span class="badge bg-light text-dark border ms-1">'
             + groups[name].length + '</span>',
-          C.table(['Tetapan', 'Nilai DRAF', 'Unit'], groups[name]));
+          C.table(['Setting', 'DRAFT value', 'Unit'], groups[name]));
       }
 
-      // Kesan langsung — bukti bahawa nilai DRAF menggerakkan sistem
+      // Kesan langsung — bukti bahawa nilai DRAFT menggerakkan sistem
       var claims = S.claims(), rows = [];
       for (i = 0; i < Math.min(claims.length, 6); i++) {
         var c = claims[i];
@@ -151,33 +151,33 @@
       }
 
       ctx.host.innerHTML =
-        App.pageTitle('Tetapan (DRAF)',
-          'Setiap nilai di sini ialah <strong>titik keputusan owner</strong>. '
-          + 'Semua ' + FIELDS.length + ' nilai dalam <code>CONFIG_DRAFT</code> disenaraikan — '
-          + 'senarai ini dijana terus daripada data, jadi tiada nilai boleh terlepas.',
-          '<button class="btn btn-sm btn-outline-secondary" data-action="restore">Pulih nilai seed</button>',
-          'Penutup demo')
+        App.pageTitle('Settings (DRAFT)',
+          'Every value here is an <strong>owner decision point</strong>. '
+          + 'All ' + FIELDS.length + ' values in <code>CONFIG_DRAFT</code> are listed — '
+          + 'this list is generated straight from the data, so no value can be missed.',
+          '<button class="btn btn-sm btn-outline-secondary" data-action="restore">Restore seed values</button>',
+          'Demo closing screen')
         + '<div class="alert alert-warning small">'
-        + '<strong>Ini bukan Modul Konfigurasi produksi.</strong> Dalam sistem sebenar setiap '
-        + 'perubahan mempunyai versi + audit history supaya keputusan lama terikat kepada polisi '
-        + 'ketika ia dibuat (spesifikasi §16). Di sini perubahan hanya disimpan dalam '
-        + '<code>localStorage</code> pelayar dan hilang bila Reset Demo ditekan.'
+        + '<strong>This is not the production Configuration Module.</strong> In the real system every '
+        + 'change is versioned with an audit history so past decisions stay bound to the policy '
+        + 'in force when they were made (specification §16). Here changes are only stored in '
+        + 'browser <code>localStorage</code> and are cleared when Reset Demo is pressed.'
         + '</div>'
         + '<div class="row g-3">'
         + '<div class="col-lg-7">' + body + '</div>'
         + '<div class="col-lg-5">'
-        + C.card('Kesan langsung — amaun tuntutan',
-            C.table(['Tuntutan', 'Level', 'Yuran tahun 1', 'Kadar', 'Amaun komisen'], rows,
-              { empty: 'Tiada tuntutan.' }),
-            { right: '<span class="small text-muted">Dikira semula setiap kali nilai berubah</span>',
+        + C.card('Live effect — claim amounts',
+            C.table(['Claim', 'Level', 'Year 1 fee', 'Rate', 'Commission amount'], rows,
+              { empty: 'No claims.' }),
+            { right: '<span class="small text-muted">Recomputed every time a value changes</span>',
               cls: 'card-accent' })
-        + C.card('Kesan langsung — chip SLA',
-            C.table(['Permohonan', 'Status', 'Tarikh akhir', 'SLA'], slaRows,
-              { empty: 'Cipta satu permohonan baharu melalui wizard untuk melihat chip SLA yang dikira bergerak.' }),
+        + C.card('Live effect — SLA chips',
+            C.table(['Application', 'Status', 'Deadline', 'SLA'], slaRows,
+              { empty: 'Create a new application through the wizard to see a computed SLA chip move.' }),
             { cls: 'card-accent' })
-        + C.card('Peranan &amp; akses',
-            '<p class="small mb-2">Penukar peranan di bar atas menukar navigasi dan tindakan yang '
-            + 'dibenarkan. Tiada login sebenar dalam demo.</p>'
+        + C.card('Roles &amp; access',
+            '<p class="small mb-2">The role switcher in the top bar changes the navigation and the '
+            + 'permitted actions. There is no real login in the demo.</p>'
             + '<p class="small text-muted mb-0">Agent · USAINS · USM LEAP · Payment Officer · Super Admin</p>')
         + '</div></div>';
     }
@@ -195,11 +195,11 @@
           var n = Number(String(parts[i]).trim());
           if (!isNaN(n)) out.push(n);
         }
-        if (!out.length) { App.toast('Nilai tidak sah — masukkan nombor dipisahkan koma.', 'danger'); render(); return; }
+        if (!out.length) { App.toast('Invalid value — enter numbers separated by commas.', 'danger'); render(); return; }
         setPath(cfg, f.path, out);
       } else if (f.type === 'number') {
         var v = Number(raw);
-        if (isNaN(v) || v < 0) { App.toast('Nilai tidak sah — masukkan nombor 0 atau lebih.', 'danger'); render(); return; }
+        if (isNaN(v) || v < 0) { App.toast('Invalid value — enter a number of 0 or more.', 'danger'); render(); return; }
         setPath(cfg, f.path, v);
       } else {
         setPath(cfg, f.path, raw);
@@ -214,7 +214,7 @@
       var st = S.state();
       st.config = S.clone(NS.SEED.CONFIG_DRAFT);
       S.save();
-      App.toast('Semua nilai DRAF dipulihkan kepada nilai seed.', 'success');
+      App.toast('All DRAFT values restored to the seed values.', 'success');
       render();
     });
 

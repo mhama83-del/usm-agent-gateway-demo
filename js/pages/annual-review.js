@@ -40,7 +40,7 @@
 
         var acts = '';
         if (W.can('openAnnualReview') && ['ACTIVE', 'RENEWED'].indexOf(a.agentStatus) >= 0) {
-          acts += '<button class="btn btn-sm btn-outline-usm" data-action="open" data-id="' + C.esc(a.id) + '">Buka review</button> ';
+          acts += '<button class="btn btn-sm btn-outline-usm" data-action="open" data-id="' + C.esc(a.id) + '">Open review</button> ';
         }
         if (W.can('renew') && a.agentStatus === 'REVIEW_DUE') {
           acts += '<button class="btn btn-sm btn-usm" data-action="renew" data-id="' + C.esc(a.id) + '">Renew</button> '
@@ -49,20 +49,20 @@
 
         rows.push([
           '<a href="application-detail.html?id=' + C.esc(a.id) + '" class="fw-semibold">' + C.esc(a.id) + '</a>'
-            + (focusId === a.id ? '<div><span class="badge bg-warning text-dark mt-1">FOKUS</span></div>' : ''),
+            + (focusId === a.id ? '<div><span class="badge bg-warning text-dark mt-1">FOCUS</span></div>' : ''),
           '<div class="fw-semibold">' + C.esc(a.name) + '</div>'
             + '<div class="small text-muted">' + C.esc(a.country) + '</div>',
           C.statusBadge(a.agentStatus, W.AGENT_LABEL[a.agentStatus]),
           C.esc(a.expiryLabel || '—')
-            + (band ? '<div class="small text-danger">Dalam amaran ' + band + ' hari '
-                + C.draf('Amaran tamat perjanjian — DRAF') + '</div>' : '')
+            + (band ? '<div class="small text-danger">Within the ' + band + '-day alert window '
+                + C.draf('Agreement expiry alerts — DRAFT') + '</div>' : '')
             + (days != null
-                ? '<div class="small text-muted">' + (days < 0 ? Math.abs(days) + ' hari lepas' : days + ' hari lagi') + '</div>'
+                ? '<div class="small text-muted">' + (days < 0 ? Math.abs(days) + ' days ago' : days + ' days left') + '</div>'
                 : ''),
           '<span class="' + (below ? 'text-danger fw-semibold' : 'text-success fw-semibold') + '">' + refs + '</span>'
-            + ' / ' + threshold + C.draf('Ambang rujukan untuk renew — DRAF')
-            + (below ? '<div class="small text-danger">Di bawah ambang</div>'
-                     : '<div class="small text-success">Memenuhi ambang</div>'),
+            + ' / ' + threshold + C.draf('Referral threshold for renewal — DRAFT')
+            + (below ? '<div class="small text-danger">Below threshold</div>'
+                     : '<div class="small text-success">Meets threshold</div>'),
           acts || '<span class="text-muted small">—</span>'
         ]);
       }
@@ -70,42 +70,42 @@
       var banner = '';
       if (nDue) {
         banner = '<div class="alert alert-warning small"><strong>' + nDue
-          + ' ejen menunggu keputusan annual review.</strong> '
-          + 'Penamatan memerlukan alasan bertulis (spesifikasi §15.5).</div>';
+          + ' agent(s) awaiting an annual review decision.</strong> '
+          + 'Termination requires a written reason (specification §15.5).</div>';
       } else if (nBelow) {
         banner = '<div class="alert alert-light border small">' + nBelow
-          + ' ejen berada di bawah ambang prestasi ' + threshold + ' rujukan/tahun '
-          + C.draf('Ambang rujukan untuk renew — DRAF') + '.</div>';
+          + ' agent(s) are below the performance threshold of ' + threshold + ' referrals/year '
+          + C.draf('Referral threshold for renewal — DRAFT') + '.</div>';
       }
 
       ctx.host.innerHTML =
-        App.pageTitle('Annual Review &amp; Pembaharuan',
-          'Amaran tamat pada ' + cfg.sla.expiryAlertsDays.join(' / ') + ' hari '
-          + C.draf('Amaran tamat perjanjian — DRAF')
-          + ' · Ambang prestasi ' + threshold + ' rujukan/tahun ' + C.draf('Ambang rujukan untuk renew — DRAF')
-          + ' · Tempoh perjanjian ' + cfg.renewal.agreementTermYears + ' tahun '
-          + C.draf('Tempoh perjanjian — DRAF'),
-          '', 'Peringkat 5 — Annual Review')
+        App.pageTitle('Annual Review &amp; Renewal',
+          'Expiry alerts at ' + cfg.sla.expiryAlertsDays.join(' / ') + ' days '
+          + C.draf('Agreement expiry alerts — DRAFT')
+          + ' · Performance threshold ' + threshold + ' referrals/year ' + C.draf('Referral threshold for renewal — DRAFT')
+          + ' · Agreement term ' + cfg.renewal.agreementTermYears + ' years '
+          + C.draf('Agreement term — DRAFT'),
+          '', 'Stage 5 — Annual Review')
         + banner
-        + C.card('Ejen dalam skop semakan <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
-            C.table(['ID', 'Ejen', 'Status', 'Tarikh tamat', 'Prestasi rujukan', 'Tindakan'], rows,
-              { empty: 'Tiada ejen dalam skop annual review.' }),
-            { right: '<span class="small text-muted">Snapshot prestasi ketika keputusan dibuat</span>' })
+        + C.card('Agents in review scope <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
+            C.table(['ID', 'Agent', 'Status', 'Expiry date', 'Referral performance', 'Action'], rows,
+              { empty: 'No agents in annual review scope.' }),
+            { right: '<span class="small text-muted">Performance snapshot at the time of decision</span>' })
         + '<div class="row g-3"><div class="col-lg-6">'
-        + C.card('Keputusan yang tersedia',
-            '<p class="small mb-2">Spesifikasi §8.9 menyenaraikan <strong>RENEW</strong>, '
-            + '<strong>NOT_RENEW</strong>, <strong>SUSPEND</strong> dan <strong>TERMINATE</strong>.</p>'
-            + '<p class="small mb-2">Demo ini melaksanakan <strong>RENEW</strong> dan '
-            + '<strong>TERMINATE</strong>; penamatan memerlukan alasan yang direkod dalam log aktiviti.</p>'
-            + '<p class="small text-muted mb-0">Renew melanjutkan tarikh tamat perjanjian sebanyak '
-            + cfg.renewal.agreementTermYears + ' tahun ' + C.draf('Tempoh perjanjian — DRAF')
-            + ' daripada tarikh tamat semasa.</p>')
+        + C.card('Available decisions',
+            '<p class="small mb-2">Specification §8.9 lists <strong>RENEW</strong>, '
+            + '<strong>NOT_RENEW</strong>, <strong>SUSPEND</strong> and <strong>TERMINATE</strong>.</p>'
+            + '<p class="small mb-2">This demo implements <strong>RENEW</strong> and '
+            + '<strong>TERMINATE</strong>; termination requires a reason recorded in the activity log.</p>'
+            + '<p class="small text-muted mb-0">Renew extends the agreement expiry date by '
+            + cfg.renewal.agreementTermYears + ' years ' + C.draf('Agreement term — DRAFT')
+            + ' from the current expiry date.</p>')
         + '</div><div class="col-lg-6">'
-        + C.card('Kesan penamatan',
-            '<p class="small mb-2">Terminate mengekalkan semua sejarah tetapi menghalang rujukan '
-            + 'dan tuntutan baharu — rekod tidak dipadam secara fizikal (spesifikasi §15.12).</p>'
-            + '<p class="small text-muted mb-0">Ejen yang ditamatkan kekal dalam senarai ini dengan '
-            + 'status TERMINATED supaya jejak audit lengkap.</p>')
+        + C.card('Effect of termination',
+            '<p class="small mb-2">Terminate preserves all history but blocks new referrals '
+            + 'and claims — records are not physically deleted (specification §15.12).</p>'
+            + '<p class="small text-muted mb-0">A terminated agent stays in this list with '
+            + 'status TERMINATED so the audit trail stays complete.</p>')
         + '</div></div>';
     }
 
@@ -113,15 +113,15 @@
       var id = el.getAttribute('data-id');
       var r = null;
       if (action === 'open') {
-        r = App.run(function () { return W.openAnnualReview(id); }, 'Annual review dibuka.');
+        r = App.run(function () { return W.openAnnualReview(id); }, 'Annual review opened.');
       } else if (action === 'renew') {
-        var note = root.prompt('Nota keputusan renew (pilihan):', 'Prestasi memuaskan.');
+        var note = root.prompt('Renewal decision note (optional):', 'Performance satisfactory.');
         if (note === null) return;
-        r = App.run(function () { return W.renew(id, note); }, 'Ejen diperbaharui.');
+        r = App.run(function () { return W.renew(id, note); }, 'Agent renewed.');
       } else if (action === 'terminate') {
-        var why = root.prompt('Sebab penamatan (wajib):', '');
+        var why = root.prompt('Reason for termination (required):', '');
         if (why === null) return;
-        r = App.run(function () { return W.terminate(id, why); }, 'Ejen ditamatkan.');
+        r = App.run(function () { return W.terminate(id, why); }, 'Agent terminated.');
       } else { return; }
       if (r) render();
     });

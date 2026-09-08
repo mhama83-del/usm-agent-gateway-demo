@@ -24,7 +24,7 @@
         if (W.slaOf(a) === 'late') nLate++;
         var out = W.docsOutstanding(a);
         var done = a.docs.length - out.length;
-        var btn = '<a class="btn btn-sm btn-usm" href="application-detail.html?id=' + C.esc(a.id) + '">Semak dokumen</a>';
+        var btn = '<a class="btn btn-sm btn-usm" href="application-detail.html?id=' + C.esc(a.id) + '">Review documents</a>';
         if (a.appStatus !== 'RETURNED_TO_AGENT' && out.length === 0) {
           btn += ' <button class="btn btn-sm btn-outline-usm mt-1 mt-md-0" data-action="forward" data-id="' + C.esc(a.id) + '">Verify &amp; forward</button>';
         }
@@ -34,7 +34,7 @@
             + '<div class="small text-muted">' + C.esc(a.country) + ' · ' + C.esc(a.typeLabel) + '</div>',
           C.statusBadge(a.appStatus, W.APP_LABEL[a.appStatus]),
           '<span class="' + (out.length ? '' : 'text-success fw-semibold') + '">' + done + ' / ' + a.docs.length + '</span>'
-            + (out.length ? '<div class="small text-muted">' + out.length + ' belum disahkan</div>' : ''),
+            + (out.length ? '<div class="small text-muted">' + out.length + ' unverified</div>' : ''),
           C.esc(a.submittedLabel),
           C.slaChipForAgent(a),
           btn
@@ -55,40 +55,40 @@
           C.esc(c.level) + '<div class="small text-muted">' + C.esc(c.program) + '</div>',
           C.amountWithNotes(App.money(W.commissionOf(c)), c.level, W.ratePercent(c.level), c.rateSnapshot),
           '<span class="badge bg-light text-dark border">' + nElig + ' / 5</span>'
-            + '<div class="small text-muted">syarat disahkan</div>',
+            + '<div class="small text-muted">conditions confirmed</div>',
           C.statusBadge(c.claimStatus, W.CLAIM_LABEL[c.claimStatus]),
           C.slaChipForClaim(c),
-          '<a class="btn btn-sm btn-usm" href="claims.html?id=' + C.esc(c.id) + '">Semak kelayakan</a>'
+          '<a class="btn btn-sm btn-usm" href="claims.html?id=' + C.esc(c.id) + '">Review eligibility</a>'
         ]);
       }
 
       var alertBanner = nLate
-        ? '<div class="alert alert-danger small"><strong>' + nLate + ' permohonan melebihi SLA semakan USAINS ('
-          + cfg.sla.usainsReviewDays + ' hari ' + C.draf('SLA semakan USAINS — DRAF') + ').</strong> '
-          + 'Baris gilir disusun mengikut keterdesakan SLA.</div>'
+        ? '<div class="alert alert-danger small"><strong>' + nLate + ' application(s) past the USAINS review SLA ('
+          + cfg.sla.usainsReviewDays + ' days ' + C.draf('USAINS review SLA — DRAFT') + ').</strong> '
+          + 'The queue is sorted by SLA urgency.</div>'
         : '';
 
       ctx.host.innerHTML =
-        App.pageTitle('Konsol USAINS',
-          'Semakan dokumen permohonan dan kelayakan tuntutan. '
-          + 'SLA semakan: ' + cfg.sla.usainsReviewDays + ' hari kalendar ' + C.draf('SLA semakan USAINS — DRAF')
-          + ' · SLA keputusan tuntutan: ' + cfg.sla.claimDecisionDays + ' hari ' + C.draf('SLA keputusan tuntutan — DRAF'),
+        App.pageTitle('USAINS Console',
+          'Review of application documents and claim eligibility. '
+          + 'Review SLA: ' + cfg.sla.usainsReviewDays + ' calendar days ' + C.draf('USAINS review SLA — DRAFT')
+          + ' · Claim decision SLA: ' + cfg.sla.claimDecisionDays + ' days ' + C.draf('Claim decision SLA — DRAFT'),
           '', 'USAINS Holding Sdn Bhd')
         + alertBanner
-        + C.card('Permohonan menunggu semakan <span class="badge bg-light text-dark border ms-1">' + queue.length + '</span>',
-            C.table(['ID', 'Ejen', 'Status', 'Dokumen', 'Dihantar', 'SLA', 'Tindakan'], queue,
-              { empty: 'Tiada permohonan menunggu semakan USAINS.' }),
-            { right: '<span class="small text-muted">Forward hanya bila 9/9 dokumen VERIFIED</span>' })
-        + C.card('Tuntutan menunggu semakan kelayakan <span class="badge bg-light text-dark border ms-1">' + claimRows.length + '</span>',
-            C.table(['ID', 'Pelajar', 'Program', 'Amaun', 'Kelayakan', 'Status', 'SLA', 'Tindakan'], claimRows,
-              { empty: 'Tiada tuntutan menunggu semakan.' }),
-            { right: '<span class="small text-muted">5 syarat perlu disahkan sebelum forward</span>' });
+        + C.card('Applications awaiting review <span class="badge bg-light text-dark border ms-1">' + queue.length + '</span>',
+            C.table(['ID', 'Agent', 'Status', 'Documents', 'Submitted', 'SLA', 'Action'], queue,
+              { empty: 'No applications awaiting USAINS review.' }),
+            { right: '<span class="small text-muted">Forward only when 9/9 documents are VERIFIED</span>' })
+        + C.card('Claims awaiting eligibility review <span class="badge bg-light text-dark border ms-1">' + claimRows.length + '</span>',
+            C.table(['ID', 'Student', 'Programme', 'Amount', 'Eligibility', 'Status', 'SLA', 'Action'], claimRows,
+              { empty: 'No claims awaiting review.' }),
+            { right: '<span class="small text-muted">All 5 conditions must be confirmed before forwarding</span>' });
     }
 
     App.onAction(ctx.host, function (action, el) {
       if (action !== 'forward') return;
       var r = App.run(function () { return W.verifyAndForward(el.getAttribute('data-id')); },
-        'Disahkan dan dihantar ke USM LEAP.');
+        'Verified and forwarded to USM LEAP.');
       if (r) render();
     });
 

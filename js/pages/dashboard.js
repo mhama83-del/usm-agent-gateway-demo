@@ -21,72 +21,72 @@
 
     if (role === 'agent') {
       if (!a || a.appStatus === 'REJECTED') {
-        return { t: 'Hantar permohonan ejen baharu', d: 'Wizard 4 langkah: syarikat → PIC → dokumen → deklarasi ABC.', b: link('Buka wizard permohonan', 'application-wizard') };
+        return { t: 'Submit a new agent application', d: '4-step wizard: company → PIC → documents → ABC declaration.', b: link('Open application wizard', 'application-wizard') };
       }
       if (a.appStatus === 'RETURNED_TO_AGENT') {
-        return { t: 'USAINS memulangkan dokumen — betulkan sekarang', d: 'Buka fail dan hantar semula dokumen yang ditanda.', b: link('Buka fail permohonan', 'application-detail', { id: a.id }) };
+        return { t: 'USAINS returned a document — correct it now', d: 'Open the file and resubmit the flagged document.', b: link('Open application file', 'application-detail', { id: a.id }) };
       }
       var agr = S.agreementForAgent(a.id);
       if (agr && agr.status !== 'FULLY_SIGNED' && !agr.signatures.agent.signed) {
-        return { t: 'Tandatangan perjanjian anda', d: 'Ejen menjadi AKTIF selepas ketiga-tiga pihak menandatangani.', b: link('Buka perjanjian', 'agreement', { id: agr.id }) };
+        return { t: 'Sign your agreement', d: 'The agent becomes ACTIVE once all three parties have signed.', b: link('Open agreement', 'agreement', { id: agr.id }) };
       }
       if (a.agentStatus === 'ACTIVE' || a.agentStatus === 'RENEWED') {
         for (i = 0; i < claims.length; i++) {
           if (claims[i].agentId === a.id && ['DRAFT', 'RETURNED'].indexOf(claims[i].claimStatus) >= 0) {
-            return { t: 'Hantar tuntutan ' + claims[i].id, d: 'Draf tuntutan sedia untuk dihantar kepada USAINS.', b: link('Buka tuntutan', 'claims', { id: claims[i].id }) };
+            return { t: 'Submit claim ' + claims[i].id, d: 'The claim draft is ready to send to USAINS.', b: link('Open claim', 'claims', { id: claims[i].id }) };
           }
         }
-        return { t: 'Rujuk pelajar baharu, atau bina tuntutan komisen', d: 'Tuntutan hanya boleh dibina selepas rujukan berstatus "Yuran dibayar".', b: link('Buka rujukan pelajar', 'referrals') };
+        return { t: 'Refer a new student, or build a commission claim', d: 'A claim can only be built once a referral reaches "Fees paid".', b: link('Open student referrals', 'referrals') };
       }
-      return { t: 'Menunggu tindakan pihak USM', d: 'Status semasa: ' + (ctx.W.APP_LABEL[a.appStatus] || a.appStatus) + '.', b: link('Buka fail permohonan', 'application-detail', { id: a.id }) };
+      return { t: 'Awaiting action from USM', d: 'Current status: ' + (ctx.W.APP_LABEL[a.appStatus] || a.appStatus) + '.', b: link('Open application file', 'application-detail', { id: a.id }) };
     }
 
     if (role === 'usains') {
       for (i = 0; i < agents.length; i++) {
         if (['SUBMITTED', 'UNDER_USAINS_REVIEW'].indexOf(agents[i].appStatus) >= 0) {
-          return { t: 'Semak dokumen: ' + agents[i].name, d: 'Sahkan setiap dokumen, atau pulangkan dengan sebab.', b: link('Buka konsol USAINS', 'usains-console') };
+          return { t: 'Review documents: ' + agents[i].name, d: 'Verify each document, or return one with a reason.', b: link('Open USAINS console', 'usains-console') };
         }
       }
       for (i = 0; i < claims.length; i++) {
         if (['SUBMITTED', 'UNDER_USAINS_REVIEW'].indexOf(claims[i].claimStatus) >= 0) {
-          return { t: 'Semak kelayakan tuntutan ' + claims[i].id, d: '5 syarat kelayakan perlu disahkan sebelum boleh forward.', b: link('Buka tuntutan', 'claims', { id: claims[i].id }) };
+          return { t: 'Review eligibility for claim ' + claims[i].id, d: 'All 5 eligibility conditions must be confirmed before forwarding.', b: link('Open claim', 'claims', { id: claims[i].id }) };
         }
       }
-      return { t: 'Tiada kes menunggu semakan USAINS', d: 'Baris gilir kosong buat masa ini.', b: link('Buka konsol USAINS', 'usains-console', null, 'btn-outline-usm') };
+      return { t: 'No cases awaiting USAINS review', d: 'The queue is empty for now.', b: link('Open USAINS console', 'usains-console', null, 'btn-outline-usm') };
     }
 
     if (role === 'leap') {
       for (i = 0; i < agents.length; i++) {
         if (agents[i].appStatus === 'VERIFIED') {
-          return { t: 'Keputusan kelulusan: ' + agents[i].name, d: 'Kelulusan menjana draf perjanjian secara automatik.', b: link('Buka konsol LEAP', 'leap-console') };
+          return { t: 'Approval decision: ' + agents[i].name, d: 'Approving automatically generates an agreement draft.', b: link('Open LEAP console', 'leap-console') };
         }
       }
       for (i = 0; i < claims.length; i++) {
         if (claims[i].claimStatus === 'PENDING_LEAP_DECISION') {
-          return { t: 'Keputusan tuntutan ' + claims[i].id, d: 'Lulus atau tolak; penolakan memerlukan alasan.', b: link('Buka tuntutan', 'claims', { id: claims[i].id }) };
+          return { t: 'Decision on claim ' + claims[i].id, d: 'Approve or reject; a rejection requires a written reason.', b: link('Open claim', 'claims', { id: claims[i].id }) };
         }
       }
       for (i = 0; i < agents.length; i++) {
         if (agents[i].agentStatus === 'REVIEW_DUE') {
-          return { t: 'Annual review: ' + agents[i].name, d: 'Semak prestasi rujukan, kemudian renew atau terminate.', b: link('Buka annual review', 'annual-review') };
+          return { t: 'Annual review: ' + agents[i].name, d: 'Review referral performance, then renew or terminate.', b: link('Open annual review', 'annual-review') };
         }
       }
-      return { t: 'Tiada kes menunggu keputusan LEAP', d: 'Baris gilir kosong buat masa ini.', b: link('Buka konsol LEAP', 'leap-console', null, 'btn-outline-usm') };
+      return { t: 'No cases awaiting a LEAP decision', d: 'The queue is empty for now.', b: link('Open LEAP console', 'leap-console', null, 'btn-outline-usm') };
     }
 
     if (role === 'payment') {
       for (i = 0; i < claims.length; i++) {
         if (claims[i].claimStatus === 'APPROVED_PENDING_PAYMENT') {
-          return { t: 'Rekod bayaran ' + claims[i].id + ' — ' + ctx.App.money(ctx.W.commissionOf(claims[i])),
-            d: 'Amaun, tarikh dan rujukan transaksi wajib direkod.', b: link('Buka tuntutan', 'claims', { id: claims[i].id }) };
+          return { t: 'Record payment for ' + claims[i].id + ' — ' + ctx.App.money(ctx.W.commissionOf(claims[i])),
+            d: 'The amount, date and transaction reference must be recorded.', b: link('Open claim', 'claims', { id: claims[i].id }) };
         }
       }
-      return { t: 'Tiada tuntutan menunggu bayaran', d: 'Bayaran hanya boleh direkod selepas LEAP meluluskan tuntutan.', b: link('Buka tuntutan', 'claims', null, 'btn-outline-usm') };
+      return { t: 'No claims awaiting payment', d: 'Payment can only be recorded after LEAP approves a claim.', b: link('Open claims', 'claims', null, 'btn-outline-usm') };
     }
 
-    return { t: 'Super Admin — semua skrin dan tindakan terbuka',
-      d: 'Guna peranan ini untuk melompat ke mana-mana bahagian demo.',
-      b: link('Buka Tetapan (DRAF)', 'settings-draft', null, 'btn-outline-usm') };
+    return { t: 'Super Admin — every screen and action is open',
+      d: 'Use this role to jump to any part of the demo.',
+      b: link('Open Settings (DRAFT)', 'settings-draft', null, 'btn-outline-usm') };
   }
 
   NS.App.register('dashboard', function (ctx) {
@@ -116,20 +116,20 @@
     }
 
     var kpis = '<div class="row g-3 mb-3">'
-      + C.kpi('Ejen aktif', nActive, nReview + ' dalam annual review')
-      + C.kpi('Permohonan dalam proses', nPending,
-          nOverdue ? '<span class="text-danger fw-semibold">' + nOverdue + ' melebihi SLA</span>' : 'Semua dalam SLA')
-      + C.kpi('Tuntutan terbuka', nClaimOpen,
-          App.money(claimValue) + C.draf('Amaun dikira dari kadar DRAF') + C.snapMark())
-      + C.kpi('Telah dibayar', App.money(paidValue).replace('RM ', 'RM<span class="fs-6">&nbsp;</span>'),
-          'Rekod bayaran manual sahaja')
+      + C.kpi('Active agents', nActive, nReview + ' under annual review')
+      + C.kpi('Applications in progress', nPending,
+          nOverdue ? '<span class="text-danger fw-semibold">' + nOverdue + ' past SLA</span>' : 'All within SLA')
+      + C.kpi('Open claims', nClaimOpen,
+          App.money(claimValue) + C.draf('Amount computed from the DRAFT rate') + C.snapMark())
+      + C.kpi('Paid', App.money(paidValue).replace('RM ', 'RM<span class="fs-6">&nbsp;</span>'),
+          'Manual payment records only')
       + '</div>';
 
     // --- Langkah seterusnya ---
     var next = nextStepFor(ctx);
     var nextCard = '<div class="card card-accent mb-3">'
       + '<div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">'
-      + '<div><div class="breadcrumb-mini mb-1">Langkah seterusnya untuk ' + C.esc(S.roleInfo().label) + '</div>'
+      + '<div><div class="breadcrumb-mini mb-1">Next step for ' + C.esc(S.roleInfo().label) + '</div>'
       + '<div class="fw-semibold">' + C.esc(next.t) + '</div>'
       + '<div class="small text-muted">' + C.esc(next.d) + '</div></div>'
       + '<div>' + next.b + '</div></div></div>';
@@ -141,7 +141,7 @@
       if (role === 'agent' && a.id !== (S.currentAgent() || {}).id) continue;
       rows.push([
         '<a href="application-detail.html?id=' + C.esc(a.id) + '" class="fw-semibold">' + C.esc(a.id) + '</a>'
-          + (a.isDemoCreated ? '<div><span class="badge bg-warning text-dark mt-1">BARU DALAM DEMO</span></div>' : ''),
+          + (a.isDemoCreated ? '<div><span class="badge bg-warning text-dark mt-1">NEW IN DEMO</span></div>' : ''),
         '<div class="fw-semibold">' + C.esc(a.name) + '</div>'
           + '<div class="small text-muted">' + C.esc(a.country) + ' · ' + C.esc(a.typeLabel) + '</div>',
         C.statusBadge(a.appStatus, W.APP_LABEL[a.appStatus] || a.appStatus)
@@ -152,9 +152,9 @@
         C.esc(a.expiryLabel || '—')
       ]);
     }
-    var agentTable = C.card('Ejen &amp; permohonan <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
-      C.table(['ID', 'Ejen', 'Status', 'Peringkat', 'SLA', 'Tamat'], rows,
-        { empty: 'Tiada ejen untuk peranan ini.' }));
+    var agentTable = C.card('Agents &amp; applications <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
+      C.table(['ID', 'Agent', 'Status', 'Stage', 'SLA', 'Expiry'], rows,
+        { empty: 'No agents for this role.' }));
 
     // --- Notifikasi peranan ---
     var notes = C.topbar.visibleNotifications(), notifHtml = '';
@@ -162,15 +162,15 @@
       var nt = notes[i];
       notifHtml += '<div class="usm-doc-row">'
         + '<div class="small fw-semibold">' + C.esc(nt.title)
-        + (nt.read ? '' : ' <span class="badge bg-danger">baharu</span>') + '</div>'
+        + (nt.read ? '' : ' <span class="badge bg-danger">new</span>') + '</div>'
         + '<div class="small text-muted">' + C.esc(nt.body) + '</div>'
         + '<div class="small text-muted">' + C.esc(nt.timeLabel)
-        + (nt.link ? ' · <a href="' + C.esc(nt.link) + '">Buka</a>' : '') + '</div>'
+        + (nt.link ? ' · <a href="' + C.esc(nt.link) + '">Open</a>' : '') + '</div>'
         + '</div>';
     }
-    var notifCard = C.card('Notifikasi (UI sahaja)',
-      notifHtml || C.emptyState('Tiada notifikasi untuk peranan ini.'),
-      { right: '<span class="small text-muted">Tiada e-mel/SMS sebenar</span>' });
+    var notifCard = C.card('Notifications (UI only)',
+      notifHtml || C.emptyState('No notifications for this role.'),
+      { right: '<span class="small text-muted">No real e-mail or SMS</span>' });
 
     // --- Log aktiviti ---
     var log = S.log(), logHtml = '';
@@ -183,14 +183,14 @@
         + '<small>' + C.esc(l.tsLabel) + ' · ' + C.esc(l.from) + ' → ' + C.esc(l.to) + '</small>'
         + '</div>';
     }
-    var logCard = C.card('Log aktiviti terkini', logHtml || C.emptyState('Tiada aktiviti.'));
+    var logCard = C.card('Recent activity log', logHtml || C.emptyState('No activity.'));
 
     ctx.host.innerHTML =
       App.pageTitle('Dashboard',
         C.esc(S.roleInfo().person) + ' · ' + C.esc(S.roleInfo().title)
-        + ' · Ambang prestasi ' + cfg.renewal.minReferralsPerYear + ' rujukan/tahun '
-        + C.draf('Ambang rujukan untuk renew — DRAF'),
-        '', 'Peranan aktif: ' + C.esc(S.roleInfo().label))
+        + ' · Performance threshold ' + cfg.renewal.minReferralsPerYear + ' referrals/year '
+        + C.draf('Referral threshold for renewal — DRAFT'),
+        '', 'Active role: ' + C.esc(S.roleInfo().label))
       + kpis + nextCard
       + '<div class="row g-3">'
       + '<div class="col-lg-8">' + agentTable + '</div>'

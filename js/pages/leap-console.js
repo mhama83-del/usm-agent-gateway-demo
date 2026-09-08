@@ -24,10 +24,10 @@
           '<div class="fw-semibold">' + C.esc(a.name) + '</div>'
             + '<div class="small text-muted">' + C.esc(a.country) + ' · ' + C.esc(a.typeLabel) + '</div>',
           '<div>' + C.esc(a.verifiedLabel || a.submittedLabel) + '</div>'
-            + '<div class="small text-success">9 / 9 dokumen disahkan</div>',
+            + '<div class="small text-success">9 / 9 documents verified</div>',
           C.slaChipForAgent(a),
-          '<button class="btn btn-sm btn-usm" data-action="approve" data-id="' + C.esc(a.id) + '">Luluskan</button> '
-            + '<button class="btn btn-sm btn-outline-danger mt-1 mt-md-0" data-action="reject" data-id="' + C.esc(a.id) + '">Tolak</button>'
+          '<button class="btn btn-sm btn-usm" data-action="approve" data-id="' + C.esc(a.id) + '">Approve</button> '
+            + '<button class="btn btn-sm btn-outline-danger mt-1 mt-md-0" data-action="reject" data-id="' + C.esc(a.id) + '">Reject</button>'
         ]);
       }
 
@@ -41,10 +41,10 @@
           '<div class="fw-semibold">' + C.esc(c.student) + '</div>'
             + '<div class="small text-muted">' + C.esc(ag ? ag.name : c.agentId) + ' · ' + C.esc(c.level) + '</div>',
           C.amountWithNotes(App.money(W.commissionOf(c)), c.level, W.ratePercent(c.level), c.rateSnapshot),
-          '<span class="badge bg-success">5 / 5</span><div class="small text-muted">disahkan USAINS</div>',
+          '<span class="badge bg-success">5 / 5</span><div class="small text-muted">confirmed by USAINS</div>',
           C.slaChipForClaim(c),
-          '<button class="btn btn-sm btn-usm" data-action="claim-approve" data-id="' + C.esc(c.id) + '">Luluskan</button> '
-            + '<button class="btn btn-sm btn-outline-danger mt-1 mt-md-0" data-action="claim-reject" data-id="' + C.esc(c.id) + '">Tolak</button>'
+          '<button class="btn btn-sm btn-usm" data-action="claim-approve" data-id="' + C.esc(c.id) + '">Approve</button> '
+            + '<button class="btn btn-sm btn-outline-danger mt-1 mt-md-0" data-action="claim-reject" data-id="' + C.esc(c.id) + '">Reject</button>'
         ]);
       }
 
@@ -59,54 +59,54 @@
           '<div class="fw-semibold">' + C.esc(a.name) + '</div>'
             + '<div class="small text-muted">' + C.esc(a.country) + '</div>',
           '<span class="' + (below ? 'text-danger fw-semibold' : 'text-success fw-semibold') + '">' + refs + '</span>'
-            + ' / ' + cfg.renewal.minReferralsPerYear + C.draf('Ambang rujukan untuk renew — DRAF')
-            + (below ? '<div class="small text-danger">Di bawah ambang</div>' : ''),
+            + ' / ' + cfg.renewal.minReferralsPerYear + C.draf('Referral threshold for renewal — DRAFT')
+            + (below ? '<div class="small text-danger">Below threshold</div>' : ''),
           C.esc(a.expiryLabel || '—'),
-          '<a class="btn btn-sm btn-usm" href="annual-review.html?id=' + C.esc(a.id) + '">Buka review</a>'
+          '<a class="btn btn-sm btn-usm" href="annual-review.html?id=' + C.esc(a.id) + '">Open review</a>'
         ]);
       }
 
       var total = rows.length + claimRows.length + reviewRows.length;
       var banner = total
-        ? '<div class="alert alert-light border small"><strong>' + total + ' kes menunggu keputusan anda.</strong> '
-          + 'Penolakan pada mana-mana peringkat memerlukan alasan bertulis (spesifikasi §15.5).</div>'
-        : '<div class="alert alert-success small">Tiada kes menunggu keputusan USM LEAP.</div>';
+        ? '<div class="alert alert-light border small"><strong>' + total + ' case(s) awaiting your decision.</strong> '
+          + 'A rejection at any stage requires a written reason (specification §15.5).</div>'
+        : '<div class="alert alert-success small">No cases awaiting a USM LEAP decision.</div>';
 
       ctx.host.innerHTML =
-        App.pageTitle('Konsol USM LEAP',
-          'Kelulusan permohonan, keputusan tuntutan dan annual review. '
-          + 'SLA keputusan LEAP: ' + cfg.sla.leapDecisionDays + ' hari kalendar '
-          + C.draf('SLA keputusan LEAP — DRAF'),
+        App.pageTitle('USM LEAP Console',
+          'Application approvals, claim decisions and annual reviews. '
+          + 'LEAP decision SLA: ' + cfg.sla.leapDecisionDays + ' calendar days '
+          + C.draf('LEAP decision SLA — DRAFT'),
           '', 'USM LEAP')
         + banner
-        + C.card('Permohonan menunggu keputusan <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
-            C.table(['ID', 'Ejen', 'Disahkan USAINS', 'SLA', 'Tindakan'], rows,
-              { empty: 'Tiada permohonan menunggu keputusan LEAP.' }),
-            { right: '<span class="small text-muted">Kelulusan menjana draf perjanjian</span>' })
-        + C.card('Tuntutan menunggu keputusan <span class="badge bg-light text-dark border ms-1">' + claimRows.length + '</span>',
-            C.table(['ID', 'Pelajar', 'Amaun', 'Kelayakan', 'SLA', 'Tindakan'], claimRows,
-              { empty: 'Tiada tuntutan menunggu keputusan.' }))
-        + C.card('Annual review terbuka <span class="badge bg-light text-dark border ms-1">' + reviewRows.length + '</span>',
-            C.table(['ID', 'Ejen', 'Rujukan tahun ini', 'Tamat', 'Tindakan'], reviewRows,
-              { empty: 'Tiada annual review terbuka.' }));
+        + C.card('Applications awaiting a decision <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
+            C.table(['ID', 'Agent', 'Verified by USAINS', 'SLA', 'Action'], rows,
+              { empty: 'No applications awaiting a LEAP decision.' }),
+            { right: '<span class="small text-muted">Approving generates an agreement draft</span>' })
+        + C.card('Claims awaiting a decision <span class="badge bg-light text-dark border ms-1">' + claimRows.length + '</span>',
+            C.table(['ID', 'Student', 'Amount', 'Eligibility', 'SLA', 'Action'], claimRows,
+              { empty: 'No claims awaiting a decision.' }))
+        + C.card('Open annual reviews <span class="badge bg-light text-dark border ms-1">' + reviewRows.length + '</span>',
+            C.table(['ID', 'Agent', 'Referrals this year', 'Expiry', 'Action'], reviewRows,
+              { empty: 'No open annual reviews.' }));
     }
 
     App.onAction(ctx.host, function (action, el) {
       var id = el.getAttribute('data-id');
       var r = null, why;
       if (action === 'approve') {
-        r = App.run(function () { return W.approve(id); }, 'Diluluskan — draf perjanjian dijana.');
+        r = App.run(function () { return W.approve(id); }, 'Approved — agreement draft generated.');
       } else if (action === 'reject') {
-        why = root.prompt('Sebab penolakan permohonan (wajib):', '');
+        why = root.prompt('Reason for rejecting this application (required):', '');
         if (why === null) return;
-        r = App.run(function () { return W.rejectApplication(id, why); }, 'Permohonan ditolak.');
+        r = App.run(function () { return W.rejectApplication(id, why); }, 'Application rejected.');
       } else if (action === 'claim-approve') {
         r = App.run(function () { return W.decideClaim(id, 'approve'); },
-          'Tuntutan diluluskan — menunggu rekod bayaran.');
+          'Claim approved — awaiting a payment record.');
       } else if (action === 'claim-reject') {
-        why = root.prompt('Sebab penolakan tuntutan (wajib):', '');
+        why = root.prompt('Reason for rejecting this claim (required):', '');
         if (why === null) return;
-        r = App.run(function () { return W.decideClaim(id, 'reject', why); }, 'Tuntutan ditolak.');
+        r = App.run(function () { return W.decideClaim(id, 'reject', why); }, 'Claim rejected.');
       } else { return; }
       if (r) render();
     });
