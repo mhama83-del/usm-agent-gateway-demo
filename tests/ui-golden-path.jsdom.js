@@ -99,14 +99,14 @@ console.log('\n== 2. Wizard permohonan (Agent) ==');
 setRole('agent');
 openPage('application-wizard');
 check('langkah 1 aktif', !!win.document.querySelector('.wizard-step.active[data-step="1"]'));
-click('button', 'Seterusnya');
-click('button', 'Seterusnya');
-click('button', 'Seterusnya');
+click('button', 'Next');
+click('button', 'Next');
+click('button', 'Next');
 check('langkah 4 (ABC) aktif', !!win.document.querySelector('.wizard-step.active[data-step="4"]'));
-click('button', 'Hantar permohonan');
+click('button', 'Submit application');
 check('disekat tanpa deklarasi ABC', S().agents().length === 6);
 win.document.getElementById('abc').checked = true;
-click('button', 'Hantar permohonan');
+click('button', 'Submit application');
 var newAgentId = S().agents()[0].id;
 check('permohonan baharu dicipta', S().agents().length === 7
   && S().agents()[0].appStatus === 'SUBMITTED', newAgentId);
@@ -119,15 +119,15 @@ check('fail permohonan baharu dibuka', body().indexOf(newAgentId) >= 0);
 setPrompt('');
 click('[data-action="doc-return"]');
 check('sebab kosong ditolak', S().agent(newAgentId).appStatus !== 'RETURNED_TO_AGENT');
-setPrompt('Penyata kewangan hanya 1 tahun; perlu 2 tahun terkini.');
+setPrompt('Financial statements cover 1 year only; the latest 2 years are required.');
 click('[data-action="doc-return"]');
 check('status RETURNED_TO_AGENT', S().agent(newAgentId).appStatus === 'RETURNED_TO_AGENT');
-check('sebab dipaparkan pada dokumen', body().indexOf('perlu 2 tahun terkini') >= 0);
+check('sebab dipaparkan pada dokumen', body().indexOf('the latest 2 years are required') >= 0);
 
 console.log('\n== 4. Agent betulkan dokumen ==');
 setRole('agent');
 openPage('application-detail', '?id=' + newAgentId);
-setPrompt('Penyata beraudit 2024 & 2025 dimuat naik.');
+setPrompt('Audited statements for 2024 & 2025 uploaded.');
 click('[data-action="doc-resubmit"]');
 check('dokumen RESUBMITTED', S().agent(newAgentId).docs[0].status === 'RESUBMITTED');
 check('kembali UNDER_USAINS_REVIEW', S().agent(newAgentId).appStatus === 'UNDER_USAINS_REVIEW');
@@ -233,7 +233,7 @@ openPage('annual-review');
 click('[data-action="open"][data-id="' + newAgentId + '"]');
 check('REVIEW_DUE', S().agent(newAgentId).agentStatus === 'REVIEW_DUE');
 check('peringkat 5/5', W().stageOf(S().agent(newAgentId)) === 5);
-setPrompt('Prestasi memuaskan.');
+setPrompt('Performance satisfactory.');
 click('[data-action="renew"][data-id="' + newAgentId + '"]');
 check('RENEWED', S().agent(newAgentId).agentStatus === 'RENEWED');
 
@@ -288,7 +288,7 @@ check('ambang pulih ke 2', S().config().sla.approachingWithinDays === 2);
 openPage('claims');
 check('penanda snapshot pada amaun tuntutan', body().indexOf('snap-mark') >= 0);
 check('teks demo-vs-produksi ada pada tooltip',
-  body().indexOf('Produksi membekukan kadar pada setiap claim') >= 0);
+  body().indexOf('Production freezes the rate on each claim') >= 0);
 check('chip SLA membawa lencana DRAF', body().indexOf('sla-chip') >= 0
   && body().indexOf('draf-badge') >= 0);
 
@@ -319,17 +319,17 @@ check('setiap nilai membawa lencana DRAF (' + drafCount + ' >= ' + leaves.length
 console.log('\n== 17. Penukar peranan menukar navigasi ==');
 setRole('agent');
 openPage('dashboard');
-check('Agent nampak "Mohon / Renew"', chrome().indexOf('Mohon / Renew') >= 0);
-check('Agent tidak nampak "Konsol USAINS"', chrome().indexOf('Konsol USAINS') < 0);
+check('Agent nampak "Apply / Renew"', chrome().indexOf('Apply / Renew') >= 0);
+check('Agent tidak nampak "USAINS Console"', chrome().indexOf('USAINS Console') < 0);
 setRole('usains');
 openPage('dashboard');
-check('USAINS nampak "Konsol USAINS"', chrome().indexOf('Konsol USAINS') >= 0);
-check('USAINS tidak nampak "Mohon / Renew"', chrome().indexOf('Mohon / Renew') < 0);
+check('USAINS nampak "USAINS Console"', chrome().indexOf('USAINS Console') >= 0);
+check('USAINS tidak nampak "Apply / Renew"', chrome().indexOf('Apply / Renew') < 0);
 setRole('payment');
 openPage('dashboard');
-check('Payment Officer nampak Tuntutan Komisen', chrome().indexOf('Tuntutan Komisen') >= 0);
+check('Payment Officer nampak Commission Claims', chrome().indexOf('Commission Claims') >= 0);
 openPage('usains-console');
-check('Payment Officer disekat dari Konsol USAINS', body().indexOf('tiada akses') >= 0);
+check('Payment Officer disekat dari USAINS Console', body().indexOf('has no access to this screen') >= 0);
 
 console.log('\n== 18. Reset Demo ==');
 setRole('agent');
@@ -348,7 +348,7 @@ for (var p = 0; p < PAGES.length; p++) {
   openPage(PAGES[p]);
   var html = body();
   check(PAGES[p] + '.html dirender',
-    html.length > 200 && html.indexOf('Ralat skrin') < 0 && html.indexOf('belum dibina') < 0,
+    html.length > 200 && html.indexOf('Screen error') < 0 && html.indexOf('Screen not built') < 0,
     html.slice(0, 120));
 }
 
@@ -380,6 +380,31 @@ for (var rr = 0; rr < ROLES.length; rr++) {
 }
 check(checked + ' pautan disemak merentas 10 skrin × 5 peranan — tiada yang mati',
   dead.length === 0, dead.slice(0, 6).join(' | '));
+
+console.log('\n== 21. UI English (tiada teks BM tertinggal) ==');
+// Perkataan BM yang PASTI tidak sepatutnya muncul dalam UI English.
+var BM_WORDS = ['Tiada ', 'Semua data', 'Peringkat ', 'Sebab:', 'Menunggu',
+  'Dihantar', 'Disahkan', 'Diluluskan', 'Ditolak', 'Dipulangkan', 'Perjanjian',
+  'Tuntutan', 'Rujukan', 'Permohonan', 'Dokumen', 'Konsol', 'Tetapan',
+  'Mohon / Renew', 'wajib', 'hari kalendar', 'yuran', 'Kadar komisen', 'DRAF<'];
+var bmHits = [];
+for (var bp = 0; bp < PAGES.length; bp++) {
+  for (var br = 0; br < ROLES.length; br++) {
+    openPage(PAGES[bp]);
+    S().setRole(ROLES[br]);
+    openPage(PAGES[bp]);
+    var full = chrome() + body();
+    for (var bw = 0; bw < BM_WORDS.length; bw++) {
+      if (full.indexOf(BM_WORDS[bw]) >= 0) {
+        var hit = PAGES[bp] + ' [' + ROLES[br] + '] → "' + BM_WORDS[bw] + '"';
+        if (bmHits.indexOf(hit) < 0) bmHits.push(hit);
+      }
+    }
+  }
+}
+check('tiada perkataan BM pada 10 skrin x 5 peranan', bmHits.length === 0,
+  bmHits.slice(0, 8).join(' | '));
+check('lencana memaparkan DRAFT, bukan DRAF', body().indexOf('>DRAFT<') >= 0);
 
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);
