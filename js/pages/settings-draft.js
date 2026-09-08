@@ -2,7 +2,7 @@
  *
  * Senarai medan DIJANA dengan merentasi CONFIG_DRAFT secara rekursif, bukan
  * ditaip tangan — jadi menambah nilai baharu dalam data/seed.js secara automatik
- * muncul di sini dengan lencana DRAF. Tiada nilai boleh terlepas.
+ * muncul di sini dengan lencana DRAFT. Tiada nilai boleh terlepas.
  */
 (function (root) {
   'use strict';

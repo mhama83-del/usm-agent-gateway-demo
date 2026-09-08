@@ -1,4 +1,4 @@
-/* referrals.js — Rujukan pelajar: ejen AKTIF merujuk, pegawai berautoriti
+/* referrals.js — Rujukan pelajar: ejen ACTIVE merujuk, pegawai berautoriti
    mengesahkan status secara manual, dan tuntutan dibina selepas yuran dibayar. */
 (function (root) {
   'use strict';

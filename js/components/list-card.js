@@ -1,6 +1,6 @@
 /*
  * list-card.js — Blok paparan berulang: kad KPI, jadual boleh-stack (mobile),
- * lencana DRAF, lencana status, baris dokumen.
+ * lencana DRAFT, lencana status, baris dokumen.
  * Setiap fungsi memulangkan HTML — mudah jadi partial CI4 kemudian.
  */
 (function (root) {
@@ -19,7 +19,7 @@
     return '<span class="draf-badge" title="' + esc(hint || 'DRAFT value — awaiting an owner decision') + '">DRAFT</span>';
   }
 
-  // Nilai + lencana DRAF
+  // Nilai + lencana DRAFT
   function drafValue(value, hint) {
     return esc(value) + draf(hint);
   }
@@ -35,7 +35,7 @@
       + '" aria-label="' + esc(t) + '">i</span>';
   }
 
-  // Amaun komisen + lencana DRAF kadar + penanda snapshot.
+  // Amaun komisen + lencana DRAFT kadar + penanda snapshot.
   function amountWithNotes(amountHtml, level, ratePercent, snapshotPercent) {
     var extra = (snapshotPercent != null && snapshotPercent !== ratePercent)
       ? 'Snapshot rate when the claim was submitted: ' + snapshotPercent + '%.'

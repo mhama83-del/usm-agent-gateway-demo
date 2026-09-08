@@ -8,7 +8,7 @@
  * window.USMDEMO.SEED.
  *
  * CONFIG_DRAFT = semua nilai boleh-konfigurasi yang BELUM dimuktamadkan owner.
- * Paparkan dengan lencana "DRAF" sepanjang demo; ringkaskan dalam skrin
+ * Paparkan dengan lencana "DRAFT" sepanjang demo; ringkaskan dalam skrin
  * pages/settings-draft.html.
  */
 (function (root) {
@@ -16,7 +16,7 @@
 
   var NOW_ISO = '2026-08-31';
 
-  // --- Nilai keputusan owner (DRAF) --------------------------------------
+  // --- Nilai keputusan owner (DRAFT) ------------------------------------
   var CONFIG_DRAFT = {
     commission: {
       ug: { label: 'Undergraduate (UG)', ratePercent: 15, basis: 'First-year fee' },
@@ -57,7 +57,7 @@
     'No full refund issued'
   ];
 
-  // Checklist dokumen (label DRAF di mana relevan)
+  // Checklist dokumen (label DRAFT di mana relevan)
   var DOC_CHECKLIST = [
     'Company Registration Certificate (SSM / foreign equivalent)',
     'Proof of Paid-Up Capital (min. RM' + CONFIG_DRAFT.fees.paidUpCapitalMin + ')',
@@ -319,7 +319,7 @@
   }
 
   // Amaun komisen = yuran tahun pertama x kadar (UG/PG).
-  // DIKIRA, bukan angka mati — menukar kadar dalam Tetapan (DRAF) menggerakkan
+  // DIKIRA, bukan angka mati — menukar kadar dalam Settings (DRAFT) menggerakkan
   // semua amaun serta-merta.
   function commissionAmount(level, firstYearFee, cfg) {
     if (!firstYearFee) return 0;

@@ -14,7 +14,7 @@
   };
 
   // Semua input chip SLA (tempoh semakan + ambang "approaching") ialah nilai
-  // DRAF, jadi chip membawa lencana DRAF sendiri.
+  // DRAFT, jadi chip membawa lencana DRAFT sendiri.
   function drafHint() {
     var sla = NS.Store.config().sla;
     return 'Chip computed from DRAFT values: USAINS review ' + sla.usainsReviewDays
