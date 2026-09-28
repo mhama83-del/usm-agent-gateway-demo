@@ -112,18 +112,31 @@
         ]);
       }
 
-      // --- tindakan ikut peranan ---
-      var acts = [];
+      // --- Tindakan ALIRAN KERJA: bergantung peranan dan vendorStatus ---
+      var workflowActs = [];
       if (canEdit) {
-        acts.push('<button class="btn btn-sm btn-usm" data-action="submit-vendor">Submit registration form</button>');
+        workflowActs.push('<button class="btn btn-sm btn-usm" data-action="submit-vendor">Submit registration form</button>');
       }
       if (W.can('verifyVendorPTJ') && status === 'Pending Bendahari' && !v.ptjVerified) {
-        acts.push('<button class="btn btn-sm btn-usm" data-action="verify-ptj">Verify Section 2 (PTJ)</button>');
+        workflowActs.push('<button class="btn btn-sm btn-usm" data-action="verify-ptj">Verify Section 2 (PTJ)</button>');
       }
       if (W.can('issueSupplierCode') && status === 'Pending Bendahari') {
-        acts.push('<button class="btn btn-sm btn-usm" data-action="issue-code">Issue Supplier Code</button>');
+        workflowActs.push('<button class="btn btn-sm btn-usm" data-action="issue-code">Issue Supplier Code</button>');
       }
-      acts.push('<button class="btn btn-sm btn-outline-secondary" data-action="print">Print / Save as PDF</button>');
+
+      // --- Tindakan DOKUMEN: TIDAK BERPAGAR ---
+      // Keputusan owner 28 Sep 2026: borang boleh dicetak/disimpan dalam
+      // MANA-MANA keadaan vendorStatus (Registered, Pending Bendahari, Not
+      // Registered) oleh SETIAP peranan yang boleh membuka skrin ini.
+      //
+      // Ia sengaja dibina di luar setiap blok `if` di atas dan digabungkan
+      // secara berasingan, supaya suntingan akan datang tidak boleh
+      // memagarnya tanpa disedari. Ujian responsive-360.chrome.js menyemak
+      // butang ini merentas ketiga-tiga vendorStatus x peranan berkaitan.
+      var docActs = ['<button class="btn btn-sm btn-outline-secondary" data-action="print">'
+        + 'Print / Save as PDF</button>'];
+
+      var acts = workflowActs.concat(docActs);
 
       // --- banner keadaan ---
       var banner;

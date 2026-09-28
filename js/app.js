@@ -10,6 +10,15 @@
   var PAGES = {};          // key -> render(ctx)
   var BASE = '../';        // pages/ berada satu tahap di bawah akar
 
+  // Penanda build yang dipaparkan dalam footer. Demo ini statik dan tiada
+  // langkah build, jadi nilai ini dinaikkan secara manual setiap kali kod
+  // dikeluarkan — sama disiplin dengan VERSION dalam js/store.js.
+  //
+  // Tujuannya: bila sesuatu "tidak muncul" selepas deploy, footer terus
+  // memberitahu build mana yang sedang dijalankan oleh pelayar, jadi soalan
+  // "adakah fail lama masih dicache?" dijawab dalam satu pandangan.
+  var BUILD = '2026-09-28d';
+
   function register(key, fn) { PAGES[key] = fn; }
 
   function qs(name) {
@@ -91,7 +100,9 @@
         + 'no backend, no e-mail, no legally valid e-signature. '
         + 'Values marked <span class="draf-badge">DRAFT</span> await an owner decision.</div>'
         + '<div class="col-md-4 text-md-end">Demo date: <strong>' + C.esc(NS.WF.fmt(S.now())) + '</strong>'
-        + '<br>agents.durianbytes.com</div>'
+        + '<br>agents.durianbytes.com'
+        + '<br><span class="small">Build <span class="font-monospace" id="app-build">'
+        + C.esc(BUILD) + '</span> · state v' + C.esc(String(S.state().version)) + '</span></div>'
         + '</div></div></footer>';
     }
 
@@ -128,6 +139,7 @@
 
   NS.App = {
     register: register, boot: boot, qs: qs, el: el, toast: toast, run: run,
-    money: money, go: go, pageTitle: pageTitle, onAction: onAction, BASE: BASE
+    money: money, go: go, pageTitle: pageTitle, onAction: onAction, BASE: BASE,
+    BUILD: BUILD
   };
 })(window);

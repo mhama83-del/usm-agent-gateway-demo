@@ -845,6 +845,22 @@ check('kod dokumen USM.FIS.AP.B.2023.01 kekal pada pengepala cetak',
   win.document.querySelector('.print-sheet-head').textContent.indexOf('USM.FIS.AP.B.2023.01') >= 0);
 check('label USM Office Use Only kekal', body().indexOf('USM Office Use Only') >= 0);
 
+console.log('\n== 25a. Penanda build dalam footer ==');
+// Penanda ini wujud supaya soalan "adakah pelayar saya menjalankan kod baharu?"
+// dijawab dalam satu pandangan, tanpa perlu membuka DevTools.
+setRole('agent');
+openPage('vendor-registration', '?id=AG-2041');
+var footText = win.document.getElementById('chrome-bottom').textContent;
+check('footer memaparkan penanda build', footText.indexOf('Build') >= 0);
+check('footer memaparkan versi state', /state v\d+/.test(footText), footText.slice(-60));
+var buildEl = win.document.getElementById('app-build');
+check('penanda build boleh dicapai melalui #app-build', !!buildEl);
+check('penanda footer sepadan App.BUILD',
+  buildEl && buildEl.textContent === win.USMDEMO.App.BUILD,
+  buildEl && (buildEl.textContent + ' vs ' + win.USMDEMO.App.BUILD));
+check('versi state dalam footer ialah VERSION semasa',
+  footText.indexOf('state v' + S().state().version) >= 0, String(S().state().version));
+
 console.log('\n== 25b. Stylesheet cetak ==');
 var cssText = fs.readFileSync(path.join(REPO, 'assets/css/app.css'), 'utf8');
 check('hanya SATU blok @media print',

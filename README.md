@@ -115,6 +115,20 @@ mungkin berbeza sedikit ikut versi):
 > diupload ke Hostinger — ia untuk repo sahaja. Yang perlu naik hanyalah
 > `index.html`, `.htaccess`, `assets/`, `js/`, `data/` dan `pages/`.
 
+### Semak build yang sedang dijalankan pelayar
+
+Footer setiap skrin memaparkan penanda build dan versi state, contohnya:
+
+```
+Build 2026-09-28d · state v3
+```
+
+Selepas `git pull` di pelayan, buka demo dan lihat footer. Jika penanda itu
+bukan build terbaharu, pelayar atau CDN masih menghidangkan fail lama —
+bukan ciri yang hilang. Nilainya ialah pemalar `BUILD` dalam `js/app.js`;
+naikkan setiap kali kod dikeluarkan, sama disiplin dengan `VERSION` dalam
+`js/store.js`.
+
 ### Kenapa ciri baharu kadang "hilang" selepas deploy
 
 Hostinger melayan fail statik dengan `Cache-Control: public, max-age=604800`
