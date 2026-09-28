@@ -343,3 +343,28 @@ h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
 @media print {
   .usm-topbar, .usm-nav, .toast-host, .usm-demo-strip { display: none !important; }
 }
+
+/* --- Borang batch Bendahari ------------------------------------------- */
+/* Jadual 19 lajur: biarkan ia menatal secara mendatar DI DALAM bekasnya
+   supaya halaman itu sendiri tidak melimpah pada 360px. */
+.bendahari-table { font-size: .74rem; white-space: nowrap; }
+.bendahari-table th {
+  background: var(--usm-purple-50, #f3eefb);
+  font-weight: 600;
+  vertical-align: middle;
+}
+.bendahari-head { border-left: 3px solid var(--usm-purple); padding-left: .6rem; }
+.signoff-block dt { font-weight: 400; }
+
+/* --- Print: borang sahaja --------------------------------------------- */
+@media print {
+  .usm-demo-strip,
+  .usm-topbar,
+  .usm-nav,
+  .usm-footer,
+  .no-print { display: none !important; }
+  .table-responsive { overflow: visible !important; }
+  .bendahari-table { font-size: .62rem; }
+  .card { border: 0 !important; }
+  body { background: #fff; }
+}

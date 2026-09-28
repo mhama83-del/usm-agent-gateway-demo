@@ -22,7 +22,8 @@ var { spawn } = require('child_process');
 var ROOT = path.join(__dirname, '..');
 var PORT = 8731;
 var PAGES = ['dashboard', 'application-wizard', 'application-detail', 'usains-console',
-  'leap-console', 'agreement', 'referrals', 'claims', 'annual-review', 'settings-draft'];
+  'leap-console', 'agreement', 'referrals', 'claims', 'annual-review', 'settings-draft',
+  'vendor-registration', 'claim-batch'];
 
 var CHROME_CANDIDATES = [
   process.env.CHROME_PATH,

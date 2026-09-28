@@ -362,7 +362,8 @@ check('CL-0102 kembali DRAFT', S().claim('CL-0102').claimStatus === 'DRAFT');
 
 console.log('\n== 19. Semua 10 skrin dirender tanpa ralat ==');
 var PAGES = ['dashboard', 'application-wizard', 'application-detail', 'usains-console',
-  'leap-console', 'agreement', 'referrals', 'claims', 'annual-review', 'settings-draft'];
+  'leap-console', 'agreement', 'referrals', 'claims', 'annual-review', 'settings-draft',
+  'vendor-registration', 'claim-batch'];
 setRole('admin');
 for (var p = 0; p < PAGES.length; p++) {
   openPage(PAGES[p]);

@@ -20,6 +20,7 @@
     { key: 'referrals',           label: 'Student Referrals',  roles: ['agent', 'usains', 'leap', 'admin'] },
     { key: 'claims',              label: 'Commission Claims',  roles: ['agent', 'usains', 'leap', 'payment', 'admin'], count: 'claims' },
     { key: 'vendor-registration', label: 'Vendor Registration', roles: ['agent', 'usains', 'payment', 'admin'], count: 'vendor' },
+    { key: 'claim-batch',         label: 'Claim Batch',        roles: ['usains', 'leap', 'payment', 'admin'], count: 'batch' },
     { key: 'annual-review',       label: 'Annual Review',      roles: ['leap', 'agent', 'admin'], count: 'review' },
     { key: 'settings-draft',      label: 'Settings (DRAFT)',   roles: ['agent', 'usains', 'leap', 'payment', 'admin'] }
   ];
@@ -75,6 +76,17 @@
         } else if (role === 'payment') {
           if (c.claimStatus === 'APPROVED_PENDING_PAYMENT') n++;
         }
+      }
+      return n;
+    }
+    if (kind === 'batch') {
+      var bl = NS.Store.batches();
+      for (i = 0; i < bl.length; i++) {
+        var bs = bl[i].batchStatus;
+        if (role === 'usains' && (bs === 'DRAFT' || bs === 'APPROVED')) n++;
+        else if (role === 'leap' && bs === 'CHECKED') n++;
+        else if (role === 'payment' && bs === 'SUBMITTED_TO_BENDAHARI') n++;
+        else if (role === 'admin' && bs !== 'SUBMITTED_TO_BENDAHARI') n++;
       }
       return n;
     }
