@@ -19,6 +19,7 @@
     { key: 'agreement',           label: 'Agreement',          roles: ['agent', 'usains', 'leap', 'admin'], count: 'agreement' },
     { key: 'referrals',           label: 'Student Referrals',  roles: ['agent', 'usains', 'leap', 'admin'] },
     { key: 'claims',              label: 'Commission Claims',  roles: ['agent', 'usains', 'leap', 'payment', 'admin'], count: 'claims' },
+    { key: 'vendor-registration', label: 'Vendor Registration', roles: ['agent', 'usains', 'payment', 'admin'], count: 'vendor' },
     { key: 'annual-review',       label: 'Annual Review',      roles: ['leap', 'agent', 'admin'], count: 'review' },
     { key: 'settings-draft',      label: 'Settings (DRAFT)',   roles: ['agent', 'usains', 'leap', 'payment', 'admin'] }
   ];
@@ -73,6 +74,25 @@
           if (c.claimStatus === 'PENDING_LEAP_DECISION') n++;
         } else if (role === 'payment') {
           if (c.claimStatus === 'APPROVED_PENDING_PAYMENT') n++;
+        }
+      }
+      return n;
+    }
+    if (kind === 'vendor') {
+      for (i = 0; i < agents.length; i++) {
+        var av = agents[i].vendor;
+        if (!av) continue;
+        if (role === 'agent') {
+          // Ejen hanya nampak kesnya sendiri, dan hanya bila ia boleh bertindak.
+          if (agents[i].id !== (S.currentAgent() || {}).id) continue;
+          if (av.vendorStatus === 'Not Registered'
+              && ['ACTIVE', 'RENEWED'].indexOf(agents[i].agentStatus) >= 0) n++;
+        } else if (role === 'usains') {
+          if (av.vendorStatus === 'Pending' && !av.ptjVerified) n++;
+        } else if (role === 'payment') {
+          if (av.vendorStatus === 'Pending' && av.ptjVerified) n++;
+        } else if (role === 'admin') {
+          if (av.vendorStatus !== 'Registered') n++;
         }
       }
       return n;
