@@ -421,6 +421,11 @@ check(checked + ' pautan disemak merentas 10 skrin × 5 peranan — tiada yang m
   dead.length === 0, dead.slice(0, 6).join(' | '));
 console.log('\n== 21. UI English (tiada teks BM tertinggal) ==');
 
+// PENGECUALIAN yang disengajakan: label sign-off borang Bendahari
+// (Disemak Oleh, Diluluskan Oleh, Tandatangan, Tarikh, Cap Nama & Jawatan)
+// KEKAL Bahasa Melayu — ia petikan verbatim borang rasmi, bukan teks UI yang
+// dikarang (keputusan D-023). Senarai di bawah huruf kecil dan padanan
+// case-sensitive, jadi label bermula huruf besar itu tidak tertangkap.
 // Penanda BM. Nama bulan yang SAMA dalam English (April, Jun, September,
 // November) sengaja tidak disenaraikan; hanya yang benar-benar BM.
 var BM_WORDS = [
