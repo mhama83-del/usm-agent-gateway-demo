@@ -23,7 +23,10 @@
   //   1 — keluaran asal (UI Bahasa Melayu)
   //   2 — UI English (keputusan owner 8 Sep 2026); state versi 1 dibuang
   //       kerana ia mengandungi teks BM yang tersimpan.
-  var VERSION = 2;
+  //   3 — Integrasi Bendahari & vendor (28 Sep 2026): medan baharu pada
+  //       STUDENTS/CLAIMS/AGENTS, entiti CLAIM_BATCHES, dan 3 nilai DRAFT
+  //       baharu. State versi 2 tiada medan ini, jadi ia dibuang.
+  var VERSION = 3;
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
@@ -37,11 +40,12 @@
       referrals: clone(SEED.STUDENTS),
       claims: clone(SEED.CLAIMS),
       agreements: clone(SEED.AGREEMENTS),
+      batches: clone(SEED.CLAIM_BATCHES),
       notifications: clone(SEED.NOTIFICATIONS),
       log: clone(SEED.ACTIVITY_LOG),
       // ejen/rujukan/tuntutan yang dicipta semasa demo
       demoAgentId: null,
-      seq: { agent: 2100, ref: 300, claim: 200, agreement: 900, log: 100, notif: 100 }
+      seq: { agent: 2100, ref: 300, claim: 200, agreement: 900, log: 100, notif: 100, batch: 1 }
     };
   }
 
@@ -93,6 +97,13 @@
   function referral(id) { return find(referrals(), 'refId', id); }
   function claims() { return load().claims; }
   function claim(id) { return find(claims(), 'id', id); }
+  function batches() { return load().batches; }
+  function batch(id) { return find(batches(), 'id', id); }
+  function batchesForAgent(agentId) {
+    var all = batches(), out = [];
+    for (var i = 0; i < all.length; i++) { if (all[i].agentId === agentId) out.push(all[i]); }
+    return out;
+  }
   function agreements() { return load().agreements; }
   function agreement(id) { return find(agreements(), 'id', id); }
   function agreementForAgent(agentId) { return find(agreements(), 'agentId', agentId); }
@@ -138,6 +149,9 @@
     referral: referral,
     claims: claims,
     claim: claim,
+    batches: batches,
+    batch: batch,
+    batchesForAgent: batchesForAgent,
     agreements: agreements,
     agreement: agreement,
     agreementForAgent: agreementForAgent,
