@@ -87,6 +87,8 @@ akan terus memaparkan teks lama itu walaupun kodnya sudah dikemas kini.
 >
 > - `1` — keluaran asal (UI Bahasa Melayu)
 > - `2` — UI English (keputusan owner 8 Sep 2026)
+> - `3` — integrasi Bendahari & vendor (28 Sep 2026): medan baharu pada
+>   pelajar/tuntutan/ejen, entiti `CLAIM_BATCHES`, 3 nilai DRAFT baharu
 
 ---
 
@@ -127,16 +129,20 @@ kad *"Next step"* pada Dashboard:
 | 4 | USAINS | Sahkan semua 9 dokumen → **Verify & forward ke LEAP** |
 | 5 | USM LEAP | *USM LEAP Console* → **Approve** → draf perjanjian dijana automatik |
 | 6 | USAINS → LEAP → Agent | *Agreement* → tandatangan tiga pihak → ejen jadi **ACTIVE** |
+| 6b | Agent → USAINS → Payment Officer | *Vendor Registration* → isi Part A/B/C → **Verify Section 2 (PTJ)** → **Issue Supplier Code** |
 | 7 | Agent | *Student Referrals* → **Submit referral** |
 | 8 | USAINS | *Student Referrals* → majukan status sehingga **Fees paid** |
 | 9 | Agent | **Build claim** → **Submit claim** |
 | 10 | USAINS | *Commission Claims* → tanda 5 syarat kelayakan → **Send for LEAP decision** |
 | 11 | USM LEAP | *Commission Claims* → **Approve** |
+| 11b | USAINS → LEAP → USAINS | *Claim Batch* → **Create batch** → **Check** (Disemak Oleh) → **Approve** (Diluluskan Oleh) → **Submit to Bursary** → **Export to Bendahari (CSV)** |
 | 12 | Payment Officer | *Commission Claims* → **Record payment** (amaun, tarikh, rujukan) |
 | 13 | USM LEAP | *Annual Review* → **Open review** → **Renew** |
 
 Penutup: buka **Settings (DRAFT)**, tukar *UG commission rate* daripada 15 kepada
-20, dan tunjukkan setiap amaun tuntutan berubah serta-merta.
+20, dan tunjukkan setiap amaun tuntutan berubah serta-merta. Kemudian tukar
+*USD → RM exchange rate* dan tunjukkan lajur **Total Fee (USD)** pada batch
+Bendahari bergerak sama — nilai USD dikira, tidak pernah disimpan.
 
 ---
 
@@ -156,7 +162,9 @@ js/components/sla-chip.js     Chip SLA (Within / Approaching / Overdue)
 js/components/status-trail.js Status trail 5-peringkat
 js/components/list-card.js    Kad, jadual boleh-tindan, lencana DRAFT
 js/pages/<skrin>.js           Logik setiap skrin (satu fail satu skrin)
-pages/<skrin>.html            Setiap skrin = satu fail HTML (10 skrin)
+pages/<skrin>.html            Setiap skrin = satu fail HTML (12 skrin)
+pages/claim-batch.html        Batch tuntutan dalam format lajur Bendahari
+pages/vendor-registration.html Borang vendor USM.FIS.AP.B.2023.01
 tests/                        Ujian pembangunan sahaja — tidak perlu diupload
 ```
 
@@ -205,6 +213,9 @@ Pemetaan yang dicadangkan ke CI4:
 | `js/store.js` | Model + Repository di atas MySQL |
 | `data/seed.js` `CONFIG_DRAFT` | jadual konfigurasi berversi (Modul Konfigurasi) |
 | log aktiviti demo | jadual audit trail |
+| `CLAIM_BATCHES` | jadual `claim_batches` + pivot `claim_batch_items` |
+| `AGENTS.vendor{}` | jadual `vendor_profiles` (1:1 dengan ejen) |
+| Eksport CSV | penjana eksport sisi pelayan (CSV **dan** XLSX) |
 
 Nilai dalam `CONFIG_DRAFT` (`data/seed.js`) ialah **titik keputusan owner** —
 dipaparkan dengan lencana **DRAFT** sepanjang demo dan diringkaskan dalam skrin

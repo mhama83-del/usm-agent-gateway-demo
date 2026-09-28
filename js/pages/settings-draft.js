@@ -36,10 +36,18 @@
 
     'eligibility.minStudyMonths': { group: 'Eligibility & renewal', label: 'Minimum study period (claim)', unit: 'months' },
     'renewal.minReferralsPerYear': { group: 'Eligibility & renewal', label: 'Referral threshold for renewal', unit: 'students/year' },
-    'renewal.agreementTermYears': { group: 'Eligibility & renewal', label: 'Agreement term', unit: 'years' }
+    'renewal.agreementTermYears': { group: 'Eligibility & renewal', label: 'Agreement term', unit: 'years' },
+
+    'currency.usdToRm': { group: 'Currency & Bursary', label: 'USD → RM exchange rate', unit: 'RM per USD',
+      note: 'Drives the "Total Fee (USD)" column on every Bursary claim batch. The USD figure is computed, never stored.' },
+    'bendahari.batchPeriodMonths': { group: 'Currency & Bursary', label: 'Claim batch period', unit: 'months',
+      note: 'Length of the period covered by one batch submitted to the Bursary.' },
+    'vendor.supplierCodeSlaDays': { group: 'Currency & Bursary', label: 'Bursary SLA to issue a Supplier Code', unit: 'days',
+      note: 'Time allowed for the Bursary to issue a Supplier Code once the vendor form is complete.' }
   };
 
-  var GROUP_ORDER = ['Commission', 'Fees & bonds', 'SLA', 'Eligibility & renewal', 'Other'];
+  var GROUP_ORDER = ['Commission', 'Fees & bonds', 'SLA', 'Eligibility & renewal',
+    'Currency & Bursary', 'Other'];
 
   function getPath(obj, path) {
     var p = path.split('.'), o = obj;
@@ -137,6 +145,21 @@
         ]);
       }
 
+      // Kesan langsung pada amaun USD setiap batch Bendahari
+      var batchRows = [];
+      var bl = S.batches();
+      for (i = 0; i < bl.length; i++) {
+        var bt = W.batchTotals(bl[i]);
+        var bag = S.agent(bl[i].agentId);
+        batchRows.push([
+          C.esc(bl[i].batchNo),
+          C.esc(bag ? bag.name : bl[i].agentId),
+          App.money(bt.feeRm),
+          S.config().currency.usdToRm,
+          '<strong>' + C.esc(W.usdMoney(bt.feeRm)) + '</strong>'
+        ]);
+      }
+
       // Kesan langsung pada chip SLA
       var agents = S.agents(), slaRows = [];
       for (i = 0; i < agents.length; i++) {
@@ -170,6 +193,11 @@
             C.table(['Claim', 'Level', 'Year 1 fee', 'Rate', 'Commission amount'], rows,
               { empty: 'No claims.' }),
             { right: '<span class="small text-muted">Recomputed every time a value changes</span>',
+              cls: 'card-accent' })
+        + C.card('Live effect — Bursary batch (USD)',
+            C.table(['Batch', 'Agent', 'Total (RM)', 'Rate', 'Total (USD)'], batchRows,
+              { empty: 'No batches yet.' }),
+            { right: '<span class="small text-muted">USD is computed, never stored</span>',
               cls: 'card-accent' })
         + C.card('Live effect — SLA chips',
             C.table(['Application', 'Status', 'Deadline', 'SLA'], slaRows,

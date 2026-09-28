@@ -24,6 +24,7 @@ Ini **BUKAN** sistem produksi. Ini demo hadapan (front-end) sahaja.
 | Sumber | Peranan |
 |---|---|
 | `USM Agent Gateway Spesifikasi Pembangunan v1.0` (.md) | Sumber kebenaran untuk aliran, status, peraturan, label. **Nota:** keputusan bahasa UI dalam §3.1(5) mengatasi mana-mana label Bahasa Melayu dalam spec ini; spec itu sendiri kekal tidak diubah sebagai dokumen sumber. |
+| `USM-Agent-Gateway-Integrasi-Bendahari-Vendor.md` (docs/) | Nota rujukan integrasi dokumen Bendahari & pendaftaran vendor. Merekod keputusan D-020 hingga D-024, format 19 lajur borang tuntutan, struktur borang `USM.FIS.AP.B.2023.01`, dan 7 peraturan perniagaan baharu. |
 | Prototaip ZIP (`Skop_pembinaan_dashboard_rujukan`) | Rujukan **reka bentuk, aliran skrin & data seed SAHAJA**. |
 
 **PENTING tentang ZIP:** ambil **warna, susun atur, aliran skrin, dan data seed**
@@ -92,6 +93,30 @@ dengan **Bootstrap 5 bersih**. Seed data sudah dikemas dalam `data/seed.js`.
    - `CLAUDE.md` dan `README.md` kekal ditulis dalam Bahasa Melayu — ia
      dokumen pembangun, bukan antara muka pengguna.
 
+### Keputusan owner — 28 Sep 2026: integrasi Bendahari & vendor
+
+6. **Tiga dokumen rasmi dimasukkan ke dalam demo** supaya ia kelihatan seolah-olah
+   sudah sebahagian sistem. Butiran penuh dalam
+   `docs/USM-Agent-Gateway-Integrasi-Bendahari-Vendor.md`; ringkasannya:
+   - **D-020** Jadual batch guna struktur **TEMPLATE 19 lajur** borang Bendahari
+     (termasuk `Total Fee (RM)` dan `Total Fee (USD)`), dicampur blok sign-off
+     daripada CONTOH. Susunan lajur mesti **padan tepat** header Excel —
+     ejaan, ruang berganda dan garis miring dikekalkan persis. Jangan "kemas".
+   - **D-021** `firstYearFee` kekal **sumber tunggal** nilai RM. `feeUSD`
+     **DIKIRA** daripada `CONFIG_DRAFT.currency.usdToRm`, tidak pernah disimpan.
+     Ini menyokong hujah utama demo: tukar kadar → semua amaun bergerak.
+   - **D-022** Golden path dipanjangkan dengan langkah pendaftaran vendor:
+     perjanjian ditandatangani → ACTIVE → **pendaftaran vendor** → **Kod
+     Pembekal** → rujukan → tuntutan → **batch** → bayaran.
+   - **D-023** Seksyen 2 & 3 borang vendor (asal BM) diterjemah ke English.
+     Kod dokumen `USM.FIS.AP.B.2023.01` dan label `USM Office Use Only` kekal.
+     Label sign-off borang Bendahari (`Disemak Oleh :`, `Diluluskan Oleh :`,
+     `Tandatangan :`, `Tarikh :`, `Cap Nama & Jawatan :`) **kekal Bahasa
+     Melayu** kerana ia petikan verbatim borang rasmi, bukan teks UI dikarang.
+   - **D-024** Nota rujukan ditulis ke dalam repo untuk fasa produksi.
+7. **Bayaran disekat tanpa Kod Pembekal.** `recordPayment()` gagal jika ejen
+   tiada `vendor.supplierCode` dan `vendorStatus === 'Registered'`.
+
 ---
 
 ## 4. Kebolehgunaan semula (matlamat penting)
@@ -139,6 +164,8 @@ usm-agent-gateway-demo/
     ├── referrals.html
     ├── claims.html
     ├── annual-review.html
+    ├── claim-batch.html          # batch tuntutan format Bendahari
+    ├── vendor-registration.html  # borang USM.FIS.AP.B.2023.01
     └── settings-draft.html
 ```
 
@@ -187,6 +214,13 @@ Awak boleh laraskan susunan jika ada sebab kukuh, tetapi kekalkan prinsip
    Kod status dalaman kekal; hanya label paparan diterjemah.
 9. **Branding USM + APEX**, tema ungu (ikut ZIP).
 10. **Notifikasi dipapar dalam UI sahaja** (lonceng/senarai) — TIADA e-mel sebenar.
+11. **Batch tuntutan format Bendahari** (`claim-batch.html`) — jadual 19 lajur
+    padan tepat borang Excel, blok sign-off, **Export to Bendahari (CSV)** dan
+    **Print view**. CSV sahaja; penjanaan `.xlsx` memerlukan pustaka dan
+    melanggar syarat statik/vanilla.
+12. **Pendaftaran vendor** (`vendor-registration.html`) — Part A/B/C +
+    Seksyen 2/3 borang `USM.FIS.AP.B.2023.01`, dengan `supplierCode` dan
+    `vendorStatus`. Tanpa Kod Pembekal, rekod bayaran **disekat**.
 
 ---
 
@@ -211,7 +245,8 @@ overdue, EduBridge below-threshold) supaya dashboard hidup.
 
 Dashboard (ikut peranan), Wizard permohonan, Detail + correction, Konsol USAINS,
 Konsol LEAP, Agreement tracker, Referral, Commission claim (+ eligibility +
-payment), Annual review, dan **Settings (DRAFT)**.
+payment), Annual review, **Claim Batch (Bendahari)**, **Vendor Registration**,
+dan **Settings (DRAFT)**. Dua belas skrin kesemuanya.
 
 ---
 
@@ -231,6 +266,9 @@ Semua ini ada dalam `CONFIG_DRAFT` (`data/seed.js`). Paparkan dengan lencana DRA
 | Amaran tamat | 90 / 60 / 30 hari |
 | Threshold rujukan (renew) | 15 pelajar/tahun |
 | Tempoh pengajian minimum (claim) | 2 bulan |
+| Kadar tukaran USD → RM | 4.70 |
+| Tempoh satu batch Bendahari | 6 bulan |
+| SLA Bendahari keluarkan Kod Pembekal | 14 hari |
 
 ---
 
@@ -258,6 +296,8 @@ Semua ini ada dalam `CONFIG_DRAFT` (`data/seed.js`). Paparkan dengan lencana DRA
 - [ ] Branding USM+APEX, tema ungu.
 - [ ] `README.md` dikemas kini: cara buka lokal, cara reset, cara upload ke
       Hostinger (`agents.durianbytes.com`), senarai fail.
+- [ ] Jadual batch padan **tepat** 19 lajur borang Bendahari; CSV & print siap.
+- [ ] Pendaftaran vendor lengkap; bayaran disekat tanpa Kod Pembekal.
 - [ ] Struktur UI disahkan boleh diguna semula sebagai views CodeIgniter 4.
 
 ---
