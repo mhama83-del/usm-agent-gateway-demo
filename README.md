@@ -129,13 +129,13 @@ kad *"Next step"* pada Dashboard:
 | 4 | USAINS | Sahkan semua 9 dokumen → **Verify & forward ke LEAP** |
 | 5 | USM LEAP | *USM LEAP Console* → **Approve** → draf perjanjian dijana automatik |
 | 6 | USAINS → LEAP → Agent | *Agreement* → tandatangan tiga pihak → ejen jadi **ACTIVE** |
-| 6b | Agent → USAINS → Payment Officer | *Vendor Registration* → isi Part A/B/C → **Verify Section 2 (PTJ)** → **Issue Supplier Code** |
+| 6b | Agent → USAINS → Payment Officer | *Vendor Registration* → isi Part A/B/C → **Verify Section 2 (PTJ)** → **Issue Supplier Code** → **Print / Save as PDF** |
 | 7 | Agent | *Student Referrals* → **Submit referral** |
 | 8 | USAINS | *Student Referrals* → majukan status sehingga **Fees paid** |
 | 9 | Agent | **Build claim** → **Submit claim** |
 | 10 | USAINS | *Commission Claims* → tanda 5 syarat kelayakan → **Send for LEAP decision** |
 | 11 | USM LEAP | *Commission Claims* → **Approve** |
-| 11b | USAINS → LEAP → USAINS | *Claim Batch* → **Create batch** → **Check** (Reviewed By) → **Approve** (Approved By) → **Submit to Bursary** → **Export to Bendahari (CSV)** |
+| 11b | USAINS → LEAP → USAINS | *Claim Batch* → **Create batch** → **Check** (Reviewed By) → **Approve** (Approved By) → **Submit to Bursary** → **Export to Bendahari (CSV)** → **Print / Save as PDF** |
 | 12 | Payment Officer | *Commission Claims* → **Record payment** (amaun, tarikh, rujukan) |
 | 13 | USM LEAP | *Annual Review* → **Open review** → **Renew** |
 

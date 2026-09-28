@@ -340,10 +340,6 @@ h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
   .container-xl { padding-left: .7rem; padding-right: .7rem; }
 }
 
-@media print {
-  .usm-topbar, .usm-nav, .toast-host, .usm-demo-strip { display: none !important; }
-}
-
 /* --- Borang batch Bendahari ------------------------------------------- */
 /* Jadual 19 lajur: biarkan ia menatal secara mendatar DI DALAM bekasnya
    supaya halaman itu sendiri tidak melimpah pada 360px. */
@@ -356,15 +352,111 @@ h1, h2, h3, h4, h5, h6 { color: var(--usm-purple-dark); }
 .bendahari-head { border-left: 3px solid var(--usm-purple); padding-left: .6rem; }
 .signoff-block dt { font-weight: 400; }
 
-/* --- Print: borang sahaja --------------------------------------------- */
+/* --- Print / Save as PDF ---------------------------------------------- */
+/* Blok pengepala borang: tersembunyi pada skrin, muncul hanya semasa cetak. */
+.print-only { display: none; }
+
+/* A4 portrait ialah lalai — borang vendor direka untuk muat elok padanya. */
+@page { size: A4 portrait; margin: 12mm; }
+
+/* Helaian batch 19 lajur terlalu lebar untuk portrait. Named page ini
+   memutarnya kepada landscape pada pelayar yang menyokong; yang tidak
+   menyokong hanya kekal portrait, jadi ia peningkatan progresif sahaja. */
+@page sheet-landscape { size: A4 landscape; margin: 10mm; }
+body.print-landscape { page: sheet-landscape; }
+
 @media print {
+  /* Sembunyikan chrome dan setiap kawalan skrin. */
   .usm-demo-strip,
   .usm-topbar,
   .usm-nav,
   .usm-footer,
-  .no-print { display: none !important; }
+  .toast-host,
+  .no-print,
+  /* Setiap kawalan: butang tindakan, butang cetak, pautan bergaya butang.
+     Borang bercetak tidak boleh membawa butang. */
+  .btn,
+  button { display: none !important; }
+
+  .print-only { display: block !important; }
+
+  body { background: #fff; color: #000; }
+  .container-xl { max-width: none !important; padding: 0 !important; }
+
+  /* Susun atur dua lajur menjadi satu lajur supaya seksyen borang mengalir
+     ikut turutan: Part A -> B -> C -> Section 2 -> Section 3.
+     HANYA lajur susun atur (col-lg-*) — lajur medan borang (col-sm-*) mesti
+     kekal dua-per-baris, jika tidak borang jadi panjang berjela. */
+  .row > [class*='col-lg-'] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  /* Kad jadi blok borang yang kemas, tidak terbelah antara halaman. */
+  .card {
+    border: 1px solid #333 !important;
+    box-shadow: none !important;
+    margin-bottom: 8px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .card-header {
+    background: #eee !important;
+    color: #000 !important;
+    font-weight: 600;
+    border-bottom: 1px solid #333 !important;
+    padding: 4px 8px !important;
+  }
+  .card-body { padding: 8px !important; }
+  .row.g-2 > *, .row.g-3 > * { padding-top: 2px !important; padding-bottom: 2px !important; }
+  dl.row { margin-bottom: 0 !important; }
+  dl.row dt, dl.row dd { margin-bottom: 1px !important; }
+  p { margin-bottom: 4px !important; }
+  hr { margin: 6px 0 !important; }
+
+  /* Medan borang: papar sebagai garisan isi, bukan kotak input skrin. */
+  .form-control,
+  .form-select {
+    border: 0 !important;
+    border-bottom: 1px solid #555 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 1px 2px !important;
+    min-height: 0 !important;
+    color: #000 !important;
+  }
+  .form-label { margin-bottom: 0 !important; font-size: .68rem; color: #333; }
+
+  .page-head { display: none !important; }
+  .breadcrumb-mini, .alert { font-size: .7rem; }
+  .alert { border: 1px solid #999 !important; }
+
+  /* Pengepala borang bercetak. */
+  .print-sheet-head {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  .print-logo { height: 42px; width: auto; }
+  .print-sheet-org { font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+  .print-sheet-title { font-size: .95rem; font-weight: 700; }
+  .print-sheet-code { font-size: .64rem; color: #333; }
+  .print-demo-note {
+    font-size: .62rem;
+    border: 1px solid #000;
+    padding: 2px 6px;
+    margin-bottom: 8px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  /* Helaian batch Bendahari. */
   .table-responsive { overflow: visible !important; }
-  .bendahari-table { font-size: .62rem; }
-  .card { border: 0 !important; }
-  body { background: #fff; }
+  .bendahari-table { font-size: .52rem; white-space: normal !important; }
+  .bendahari-table th, .bendahari-table td { padding: 2px 3px !important; }
+  .signoff-block { break-inside: avoid; page-break-inside: avoid; }
 }

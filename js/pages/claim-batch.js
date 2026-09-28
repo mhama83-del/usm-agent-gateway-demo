@@ -301,7 +301,7 @@
           acts.push('<button class="btn btn-sm btn-usm" data-action="submit-bendahari">Submit to Bursary</button>');
         }
         acts.push('<button class="btn btn-sm btn-outline-usm" data-action="export-csv">Export to Bendahari (CSV)</button>');
-        acts.push('<button class="btn btn-sm btn-outline-secondary" data-action="print">Print view</button>');
+        acts.push('<button class="btn btn-sm btn-outline-secondary" data-action="print">Print / Save as PDF</button>');
 
         detail = C.card(
           'Batch ' + C.esc(current.batchNo)
@@ -310,6 +310,18 @@
           + '<div>' + C.statusBadge(current.batchStatus, W.BATCH_LABEL[current.batchStatus])
           + ' <span class="small text-muted ms-1">Prepared by ' + C.esc(current.preparedBy) + '</span></div>'
           + '<div class="d-flex gap-2 flex-wrap">' + acts.join('') + '</div>'
+          + '</div>'
+          + '<div class="print-only print-sheet-head">'
+          + '<img src="' + App.BASE + 'assets/img/usm-apex-logo.svg" class="print-logo" '
+          + 'alt="Universiti Sains Malaysia · APEX">'
+          + '<div>'
+          + '<div class="print-sheet-org">OFFICE OF THE BURSAR</div>'
+          + '<div class="print-sheet-title">COMMISSION CLAIM BATCH — BURSARY SUBMISSION</div>'
+          + '<div class="print-sheet-code">' + C.esc(current.batchNo) + ' · '
+          + C.esc(a ? a.name : current.agentId) + '</div>'
+          + '</div></div>'
+          + '<div class="print-only print-demo-note">'
+          + 'DEMO ONLY · All data is fictitious · Not a USM production document'
           + '</div>'
           + '<div class="bendahari-head mb-2">'
           + '<div class="fw-semibold">' + C.esc(SHEET_TITLE) + '</div>'
@@ -403,6 +415,10 @@
         App.toast('CSV export is not available in this browser.', 'danger');
       }
     }
+
+    // Helaian 19 lajur terlalu lebar untuk A4 portrait. Kelas ini memilih
+    // named page landscape; pelayar yang tidak menyokongnya kekal portrait.
+    try { document.body.classList.add('print-landscape'); } catch (e) { /* demo */ }
 
     render();
   });

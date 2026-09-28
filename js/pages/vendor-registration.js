@@ -123,6 +123,7 @@
       if (W.can('issueSupplierCode') && status === 'Pending Bendahari') {
         acts.push('<button class="btn btn-sm btn-usm" data-action="issue-code">Issue Supplier Code</button>');
       }
+      acts.push('<button class="btn btn-sm btn-outline-secondary" data-action="print">Print / Save as PDF</button>');
 
       // --- banner keadaan ---
       var banner;
@@ -150,8 +151,24 @@
 
       var sla = S.config().vendor.supplierCodeSlaDays;
 
+      // Pengepala ini tersembunyi pada skrin (.print-only) dan muncul hanya
+      // pada cetakan, meniru kepala borang rasmi.
+      var printHead = '<div class="print-only print-sheet-head">'
+        + '<img src="' + App.BASE + 'assets/img/usm-apex-logo.svg" class="print-logo" '
+        + 'alt="Universiti Sains Malaysia · APEX">'
+        + '<div>'
+        + '<div class="print-sheet-org">OFFICE OF THE BURSAR</div>'
+        + '<div class="print-sheet-title">NON-TRADE VENDOR REGISTRATION FORM</div>'
+        + '<div class="print-sheet-code">Document Code: ' + FORM_CODE
+        + ' · Amendment: 00 · Date: 01.08.2023</div>'
+        + '</div></div>'
+        + '<div class="print-only print-demo-note">'
+        + 'DEMO ONLY · All data is fictitious · Not a USM production document'
+        + '</div>';
+
       ctx.host.innerHTML =
-        App.pageTitle('Vendor Registration',
+        printHead
+        + App.pageTitle('Vendor Registration',
           'Non-trade vendor registration with the Office of the Bursar — form '
           + '<span class="font-monospace">' + FORM_CODE + '</span>. '
           + 'A Supplier Code is required before any commission payment can be recorded. '
@@ -235,10 +252,12 @@
               ['Status', C.statusBadge(status, W.VENDOR_LABEL[status] || status)]
             ]),
             { cls: 'card-accent' })
+        + '<div class="no-print">'
         + C.card('Vendor status — all agents <span class="badge bg-light text-dark border ms-1">'
             + rows.length + '</span>',
             C.table(['ID', 'Agent', 'Status', 'Supplier Code'], rows,
               { empty: 'No agents for this role.' }))
+        + '</div>'
         + C.card('Required attachments',
             '<ol class="small ps-3 mb-2">'
             + '<li>A copy of the Agency Registration Certificate / Identity Card / Passport</li>'
@@ -276,6 +295,9 @@
       } else if (action === 'issue-code') {
         r = App.run(function () { return W.issueSupplierCode(currentId); },
           'Supplier Code issued. Payments to this agent are now unblocked.');
+      } else if (action === 'print') {
+        if (root.print) root.print();
+        return;
       } else { return; }
       if (r) render();
     });

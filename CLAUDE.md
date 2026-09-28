@@ -220,7 +220,13 @@ Awak boleh laraskan susunan jika ada sebab kukuh, tetapi kekalkan prinsip
     padan tepat borang Excel, blok sign-off, **Export to Bendahari (CSV)** dan
     **Print view**. CSV sahaja; penjanaan `.xlsx` memerlukan pustaka dan
     melanggar syarat statik/vanilla.
-12. **Pendaftaran vendor** (`vendor-registration.html`) — Part A/B/C +
+12. **Cetakan borang** — kedua-dua `claim-batch.html` dan
+    `vendor-registration.html` mempunyai butang **Print / Save as PDF**
+    (`window.print()` + `@media print`, tiada pustaka). Chrome, navigasi,
+    footer dan SETIAP butang disembunyikan; logo USM+APEX, kod dokumen dan
+    nota DEMO ONLY dicetak di atas. Borang vendor muat A4 portrait; helaian
+    batch 19 lajur guna named page landscape.
+13. **Pendaftaran vendor** (`vendor-registration.html`) — Part A/B/C +
     Seksyen 2/3 borang `USM.FIS.AP.B.2023.01`, dengan `supplierCode` dan
     `vendorStatus`. Tanpa Kod Pembekal, rekod bayaran **disekat**.
 

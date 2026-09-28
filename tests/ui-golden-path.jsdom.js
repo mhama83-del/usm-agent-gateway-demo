@@ -805,6 +805,74 @@ click('[data-action="pay"]');
 check('bayaran berjaya selepas Kod Pembekal dikeluarkan',
   S().claim('CL-0088').claimStatus === 'PAID', S().claim('CL-0088').claimStatus);
 
+console.log('\n== 25. Print / Save as PDF pada kedua-dua skrin borang ==');
+var PRINT_LABEL = 'Print / Save as PDF';
+
+[['vendor-registration', 'agent', '?id=AG-2041', 'NON-TRADE VENDOR REGISTRATION FORM'],
+ ['claim-batch', 'usains', '?id=BAT-0001', 'COMMISSION CLAIM BATCH']].forEach(function (pc) {
+  setRole(pc[1]);
+  openPage(pc[0], pc[2]);
+  var host = win.document.getElementById('page');
+
+  var btn = host.querySelector('[data-action="print"]');
+  check(pc[0] + ': butang cetak wujud', !!btn);
+  check(pc[0] + ': label cetak konsisten',
+    btn && btn.textContent.trim() === PRINT_LABEL, btn && btn.textContent.trim());
+
+  // Klik mesti memanggil window.print(). jsdom tidak melaksanakannya, jadi
+  // ia digantikan dengan pengesan.
+  var called = false;
+  win.print = function () { called = true; };
+  btn.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  check(pc[0] + ': klik memanggil window.print()', called === true);
+
+  var head = host.querySelector('.print-sheet-head');
+  check(pc[0] + ': pengepala cetak wujud', !!head);
+  check(pc[0] + ': pengepala cetak ada logo USM+APEX',
+    !!(head && head.querySelector('img.print-logo')));
+  check(pc[0] + ': pengepala cetak namakan Office of the Bursar',
+    !!head && head.textContent.indexOf('OFFICE OF THE BURSAR') >= 0);
+  check(pc[0] + ': pengepala cetak namakan dokumen',
+    !!head && head.textContent.indexOf(pc[3]) >= 0, head && head.textContent.slice(0, 80));
+  check(pc[0] + ': nota DEMO ONLY dicetak',
+    !!host.querySelector('.print-demo-note'));
+});
+
+// Kod dokumen rasmi mesti kekal verbatim pada borang vendor.
+setRole('agent');
+openPage('vendor-registration', '?id=AG-2041');
+check('kod dokumen USM.FIS.AP.B.2023.01 kekal pada pengepala cetak',
+  win.document.querySelector('.print-sheet-head').textContent.indexOf('USM.FIS.AP.B.2023.01') >= 0);
+check('label USM Office Use Only kekal', body().indexOf('USM Office Use Only') >= 0);
+
+console.log('\n== 25b. Stylesheet cetak ==');
+var cssText = fs.readFileSync(path.join(REPO, 'assets/css/app.css'), 'utf8');
+check('hanya SATU blok @media print',
+  cssText.split('@media print {').length - 1 === 1,
+  String(cssText.split('@media print {').length - 1));
+check('@page A4 portrait ditetapkan',
+  /@page\s*\{[^}]*size:\s*A4 portrait/.test(cssText));
+check('helaian batch dapat named page landscape',
+  /@page sheet-landscape\s*\{[^}]*size:\s*A4 landscape/.test(cssText)
+  && /body\.print-landscape\s*\{[^}]*page:\s*sheet-landscape/.test(cssText));
+var printBlock = cssText.slice(cssText.indexOf('@media print {'));
+['.usm-demo-strip', '.usm-topbar', '.usm-nav', '.usm-footer', '.no-print', '.btn']
+  .forEach(function (sel) {
+    check('cetak menyembunyikan ' + sel, printBlock.indexOf(sel) >= 0);
+  });
+check('.print-only tersembunyi pada skrin',
+  /\.print-only\s*\{\s*display:\s*none;\s*\}/.test(cssText));
+check('.print-only muncul semasa cetak',
+  /\.print-only\s*\{\s*display:\s*block\s*!important/.test(printBlock));
+check('lajur medan borang TIDAK ditindankan (hanya col-lg-*)',
+  printBlock.indexOf("[class*='col-lg-']") >= 0
+  && printBlock.indexOf("[class*='col-']\n") < 0);
+
+setRole('usains');
+openPage('claim-batch', '?id=BAT-0001');
+check('claim-batch menandakan body untuk cetakan landscape',
+  win.document.body.classList.contains('print-landscape'));
+
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);
 process.exit(fail ? 1 : 0);
