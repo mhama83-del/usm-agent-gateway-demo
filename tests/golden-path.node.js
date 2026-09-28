@@ -175,7 +175,8 @@ W.submitVendorForm(a.id, {
   swiftCode: 'DEMOIDJA', bankBranch: 'Thamrin',
   declarationIdNo: 'Passport C7781900', declarationAccepted: true
 });
-check('borang dihantar -> Pending', S.agent(a.id).vendor.vendorStatus === 'Pending');
+check('borang dihantar -> Pending Bendahari',
+  S.agent(a.id).vendor.vendorStatus === 'Pending Bendahari');
 
 S.setRole('payment');
 threw = false;
@@ -190,7 +191,9 @@ S.setRole('payment');
 W.issueSupplierCode(a.id);
 check('Kod Pembekal dikeluarkan', W.isVendorRegistered(S.agent(a.id)),
   S.agent(a.id).vendor.supplierCode);
-check('kategori NONTRADE', S.agent(a.id).vendor.supplierCategory === 'NONTRADE');
+check('kategori ikut CONFIG_DRAFT vendor.supplierCodeType',
+  S.agent(a.id).vendor.supplierCategory === S.config().vendor.supplierCodeType
+  && S.agent(a.id).vendor.supplierCategory === 'NONTRADE');
 
 S.setRole('agent'); // kembali ke peranan Agent untuk langkah seterusnya
 
@@ -326,6 +329,8 @@ check('kembali 1 batch seed', S2.batches().length === 1, String(S2.batches().len
 check('AG-2041 kekal Registered selepas reset',
   S2.agent('AG-2041').vendor.supplierCode === 'NT-2026-0041');
 check('kadar USD kembali 4.70', S2.config().currency.usdToRm === 4.70);
+check('tempoh batch ikut claimBatch.periodMonths', S2.config().claimBatch.periodMonths === 6);
+check('kategori kod pembekal lalai NONTRADE', S2.config().vendor.supplierCodeType === 'NONTRADE');
 
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);

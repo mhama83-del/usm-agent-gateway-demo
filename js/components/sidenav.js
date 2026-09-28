@@ -100,9 +100,9 @@
           if (av.vendorStatus === 'Not Registered'
               && ['ACTIVE', 'RENEWED'].indexOf(agents[i].agentStatus) >= 0) n++;
         } else if (role === 'usains') {
-          if (av.vendorStatus === 'Pending' && !av.ptjVerified) n++;
+          if (av.vendorStatus === 'Pending Bendahari' && !av.ptjVerified) n++;
         } else if (role === 'payment') {
-          if (av.vendorStatus === 'Pending' && av.ptjVerified) n++;
+          if (av.vendorStatus === 'Pending Bendahari' && av.ptjVerified) n++;
         } else if (role === 'admin') {
           if (av.vendorStatus !== 'Registered') n++;
         }

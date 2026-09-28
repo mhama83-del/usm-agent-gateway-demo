@@ -49,11 +49,12 @@
     currency: {
       usdToRm: 4.70
     },
-    bendahari: {
-      batchPeriodMonths: 6 // panjang tempoh satu batch tuntutan
+    claimBatch: {
+      periodMonths: 6 // kekerapan batch tuntutan ke Bendahari
     },
     vendor: {
-      supplierCodeSlaDays: 14 // SLA Bendahari keluarkan Kod Pembekal
+      supplierCodeType: 'NONTRADE', // kategori kod pembekal bagi ejen
+      supplierCodeSlaDays: 14       // SLA Bendahari keluarkan Kod Pembekal
     }
   };
 
@@ -101,7 +102,7 @@
 
   // --- Profil vendor (borang USM.FIS.AP.B.2023.01) -----------------------
   // Semua REKAAN — lihat docs/USM-Agent-Gateway-Integrasi-Bendahari-Vendor.md §10.
-  // vendorStatus: 'Not Registered' | 'Pending' | 'Registered'
+  // vendorStatus: 'Not Registered' | 'Pending Bendahari' | 'Registered'
   // supplierCode hanya wujud apabila Bendahari sudah mengeluarkannya.
   function vendorProfile(o) {
     var v = {
@@ -122,7 +123,7 @@
       // Seksyen 3 — diisi Jabatan Bendahari
       supplierCode: null, supplierCategory: 'NONTRADE',
       processedBy: '—', verifiedBy: '—', issuedDateLabel: '—',
-      // status keseluruhan
+      // status keseluruhan: 'Not Registered' | 'Pending Bendahari' | 'Registered'
       vendorStatus: 'Not Registered'
     };
     for (var k in (o || {})) {
@@ -290,7 +291,7 @@
         ptjVerified: true, ptjPurpose: 'Recruitment agent commission payment',
         ptjApplicantName: 'Aiman Rashid', ptjGrade: 'Verification Officer, N41',
         ptjEmail: 'aiman.rashid@usains.demo', ptjDateLabel: '26 Aug 2026',
-        vendorStatus: 'Pending'
+        vendorStatus: 'Pending Bendahari'
       }),
       activities: [
         { actor: 'Dr. Farah Idris (USM LEAP)', action: 'Approved application — agreement draft generated', time: '22 Aug 2026' },

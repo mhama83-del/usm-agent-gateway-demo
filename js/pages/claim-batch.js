@@ -328,10 +328,10 @@
       }
 
       ctx.host.innerHTML =
-        App.pageTitle('Claim Batch (Bendahari)',
+        App.pageTitle('Commission Claim Batch (Bendahari Submission)',
           'Approved commission claims are grouped into a batch and submitted to the Office of '
           + 'the Bursar in the prescribed column format. Batch period: '
-          + S.config().bendahari.batchPeriodMonths + ' months '
+          + S.config().claimBatch.periodMonths + ' months '
           + C.draf('Batch period length — DRAFT'),
           '', 'Office of the Bursar')
         + '<div class="row g-3"><div class="col-lg-8">' + detail + '</div>'
@@ -385,7 +385,8 @@
       var b = S.batch(currentId);
       if (!b) return;
       var csv = toCsv(S, W, b);
-      var name = b.batchNo.replace(/[^A-Za-z0-9]+/g, '-') + '.csv';
+      // Nama fail ditetapkan oleh nota rujukan §2.3.
+      var name = 'Bendahari-Claim-Batch-' + b.id + '.csv';
       try {
         var blob = new root.Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
         var url = root.URL.createObjectURL(blob);

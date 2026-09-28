@@ -50,7 +50,7 @@
       // Peranan dalaman: utamakan kes yang menunggu tindakan mereka.
       var list = S.agents(), i;
       for (i = 0; i < list.length; i++) {
-        if (list[i].vendor && list[i].vendor.vendorStatus === 'Pending') return list[i];
+        if (list[i].vendor && list[i].vendor.vendorStatus === 'Pending Bendahari') return list[i];
       }
       for (i = 0; i < list.length; i++) {
         if (list[i].vendor && list[i].vendor.vendorStatus === 'Not Registered') return list[i];
@@ -117,10 +117,10 @@
       if (canEdit) {
         acts.push('<button class="btn btn-sm btn-usm" data-action="submit-vendor">Submit registration form</button>');
       }
-      if (W.can('verifyVendorPTJ') && status === 'Pending' && !v.ptjVerified) {
+      if (W.can('verifyVendorPTJ') && status === 'Pending Bendahari' && !v.ptjVerified) {
         acts.push('<button class="btn btn-sm btn-usm" data-action="verify-ptj">Verify Section 2 (PTJ)</button>');
       }
-      if (W.can('issueSupplierCode') && status === 'Pending') {
+      if (W.can('issueSupplierCode') && status === 'Pending Bendahari') {
         acts.push('<button class="btn btn-sm btn-usm" data-action="issue-code">Issue Supplier Code</button>');
       }
 
@@ -130,7 +130,7 @@
         banner = '<div class="alert alert-success small"><strong>Registered non-trade vendor.</strong> '
           + 'Supplier Code <strong class="font-monospace">' + C.esc(v.supplierCode) + '</strong> — '
           + 'commission payments to this agent can be recorded.</div>';
-      } else if (status === 'Pending') {
+      } else if (status === 'Pending Bendahari') {
         banner = '<div class="alert alert-warning small"><strong>Awaiting Supplier Code.</strong> '
           + (v.ptjVerified
               ? 'Section 2 is verified; the Bursary has yet to issue a code. '
@@ -226,7 +226,8 @@
               ['Non-Trade Supplier Code', v.supplierCode
                 ? '<strong class="font-monospace">' + C.esc(v.supplierCode) + '</strong>'
                 : '<span class="text-muted">Not yet issued</span>'],
-              ['Category', C.esc(v.supplierCategory || 'NONTRADE')
+              ['Category', C.esc(v.supplierCategory || S.config().vendor.supplierCodeType)
+                + C.draf('Supplier code category for agents — DRAFT')
                 + '<div class="small text-muted">TRADE · NONTRADE · GAJI · INVESTMENT · INTERCO · RLKA · LAIN</div>'],
               ['Processed By', C.esc(v.processedBy || '—')],
               ['Checked &amp; Verified By', C.esc(v.verifiedBy || '—')],
@@ -243,8 +244,10 @@
             + '<li>A copy of the Agency Registration Certificate / Identity Card / Passport</li>'
             + '<li>A copy of the front page of the bank statement</li>'
             + '</ol>'
-            + '<p class="small text-muted mb-0">File upload is disabled in the demo; both documents '
-            + 'are treated as attached.</p>')
+            + '<p class="small mb-1">Completed forms are submitted to '
+            + '<span class="font-monospace">evendor@usm.my</span>.</p>'
+            + '<p class="small text-muted mb-0">File upload and e-mail are disabled in the demo; '
+            + 'both documents are treated as attached.</p>')
         + '</div></div>';
     }
 

@@ -187,8 +187,8 @@ check('disekat tanpa menerima akuan Part C',
   S().agent(newAgentId).vendor.vendorStatus === 'Not Registered');
 win.document.getElementById('vf-accept').checked = true;
 click('[data-action="submit-vendor"]');
-check('borang dihantar -> Pending',
-  S().agent(newAgentId).vendor.vendorStatus === 'Pending');
+check('borang dihantar -> Pending Bendahari',
+  S().agent(newAgentId).vendor.vendorStatus === 'Pending Bendahari');
 check('medan Part B disimpan',
   S().agent(newAgentId).vendor.bankAccountNo === '9999-2100-4455');
 
@@ -204,6 +204,7 @@ check('Kod Pembekal dikeluarkan', W().isVendorRegistered(S().agent(newAgentId)),
   S().agent(newAgentId).vendor.supplierCode);
 check('kategori NONTRADE direkod',
   S().agent(newAgentId).vendor.supplierCategory === 'NONTRADE');
+check('emel rujukan Bendahari dipaparkan', body().indexOf('evendor@usm.my') >= 0);
 
 console.log('\n== 8. Agent rujuk pelajar ==');
 setRole('agent');

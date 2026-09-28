@@ -24,7 +24,8 @@ Ini **BUKAN** sistem produksi. Ini demo hadapan (front-end) sahaja.
 | Sumber | Peranan |
 |---|---|
 | `USM Agent Gateway Spesifikasi Pembangunan v1.0` (.md) | Sumber kebenaran untuk aliran, status, peraturan, label. **Nota:** keputusan bahasa UI dalam §3.1(5) mengatasi mana-mana label Bahasa Melayu dalam spec ini; spec itu sendiri kekal tidak diubah sebagai dokumen sumber. |
-| `USM-Agent-Gateway-Integrasi-Bendahari-Vendor.md` (docs/) | Nota rujukan integrasi dokumen Bendahari & pendaftaran vendor. Merekod keputusan D-020 hingga D-024, format 19 lajur borang tuntutan, struktur borang `USM.FIS.AP.B.2023.01`, dan 7 peraturan perniagaan baharu. |
+| `USM-Agent-Gateway-Integrasi-Bendahari-Vendor.md` (docs/) | **Nota rujukan owner** untuk integrasi dokumen Bendahari & pendaftaran vendor. Berkuasa ke atas rekod pelaksanaan di bawah. |
+| `USM-Agent-Gateway-Bendahari-Vendor-Rekod-Pelaksanaan.md` (docs/) | Dokumen sokongan: rentetan header Excel yang tepat (untuk ujian), rekod keputusan D-020 hingga D-025, dan perbezaan yang disengajakan daripada nota owner. |
 | Prototaip ZIP (`Skop_pembinaan_dashboard_rujukan`) | Rujukan **reka bentuk, aliran skrin & data seed SAHAJA**. |
 
 **PENTING tentang ZIP:** ambil **warna, susun atur, aliran skrin, dan data seed**

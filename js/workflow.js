@@ -113,7 +113,8 @@
     SUBMITTED_TO_BENDAHARI: 'Submitted to Bursary'
   };
   var VENDOR_LABEL = {
-    'Not Registered': 'Not Registered', 'Pending': 'Pending Supplier Code',
+    'Not Registered': 'Not Registered',
+    'Pending Bendahari': 'Pending Bursary',
     'Registered': 'Registered'
   };
 
@@ -788,7 +789,7 @@
     }
     v.declarationSigned = true;
     v.declarationDateLabel = fmt(st.nowIso);
-    v.vendorStatus = 'Pending';
+    v.vendorStatus = 'Pending Bendahari';
     logIt('vendor', a.id, from, v.vendorStatus,
       'Vendor registration form submitted (USM.FIS.AP.B.2023.01)');
     notify('usains', 'Vendor registration submitted',
@@ -804,7 +805,7 @@
     var a = S.agent(agentId);
     var v = vendorOf(a);
     if (!v) throw new Error('Agent not found.');
-    if (v.vendorStatus !== 'Pending') {
+    if (v.vendorStatus !== 'Pending Bendahari') {
       throw new Error('Section 2 can only be completed once the agent has submitted Section 1.');
     }
     if (v.ptjVerified) throw new Error('Section 2 has already been completed.');
@@ -816,7 +817,7 @@
     v.ptjGrade = info.title;
     v.ptjEmail = info.person.toLowerCase().replace(/[^a-z]+/g, '.') + '@usains.demo';
     v.ptjDateLabel = fmt(st.nowIso);
-    logIt('vendor', a.id, 'Pending', 'Pending',
+    logIt('vendor', a.id, 'Pending Bendahari', 'Pending Bendahari',
       'Section 2 verified by PTJ — forwarded to the Bursary');
     notify('payment', 'Vendor form ready for Supplier Code',
       a.name + ' passed PTJ verification and is awaiting a Supplier Code.',
@@ -832,7 +833,7 @@
     var v = vendorOf(a);
     if (!v) throw new Error('Agent not found.');
     if (v.vendorStatus === 'Registered') throw new Error('A Supplier Code has already been issued.');
-    if (v.vendorStatus !== 'Pending') {
+    if (v.vendorStatus !== 'Pending Bendahari') {
       throw new Error('The agent must submit the vendor registration form first.');
     }
     // R-2
@@ -844,12 +845,12 @@
     code = String(code || '').trim();
     if (!code) code = S.nextId('vendor', 'NT-' + toDate(st.nowIso).getFullYear() + '-');
     v.supplierCode = code;
-    v.supplierCategory = 'NONTRADE';
+    v.supplierCategory = st.config.vendor.supplierCodeType;
     v.processedBy = info.person;
     v.verifiedBy = 'Haslina Mohd Yusof';
     v.issuedDateLabel = fmt(st.nowIso);
     v.vendorStatus = 'Registered';
-    logIt('vendor', a.id, 'Pending', 'Registered',
+    logIt('vendor', a.id, 'Pending Bendahari', 'Registered',
       'Supplier Code ' + code + ' issued by the Bursary');
     notify('all', 'Supplier Code issued',
       a.name + ' is now a registered non-trade vendor (' + code + ').',
@@ -918,7 +919,7 @@
     var seq = st.batches.length + 1;
     var num = String(seq);
     while (num.length < 3) num = '0' + num;
-    var months = st.config.bendahari.batchPeriodMonths;
+    var months = st.config.claimBatch.periodMonths;
     var b = {
       id: S.nextId('batch', 'BAT-'),
       batchNo: 'BND/' + toDate(st.nowIso).getFullYear() + '/' + num,

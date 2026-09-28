@@ -40,8 +40,10 @@
 
     'currency.usdToRm': { group: 'Currency & Bursary', label: 'USD → RM exchange rate', unit: 'RM per USD',
       note: 'Drives the "Total Fee (USD)" column on every Bursary claim batch. The USD figure is computed, never stored.' },
-    'bendahari.batchPeriodMonths': { group: 'Currency & Bursary', label: 'Claim batch period', unit: 'months',
+    'claimBatch.periodMonths': { group: 'Currency & Bursary', label: 'Claim batch period', unit: 'months',
       note: 'Length of the period covered by one batch submitted to the Bursary.' },
+    'vendor.supplierCodeType': { group: 'Currency & Bursary', label: 'Supplier code category for agents', unit: 'category',
+      note: 'Category recorded in Section 3 of USM.FIS.AP.B.2023.01. Agents are non-trade vendors.' },
     'vendor.supplierCodeSlaDays': { group: 'Currency & Bursary', label: 'Bursary SLA to issue a Supplier Code', unit: 'days',
       note: 'Time allowed for the Bursary to issue a Supplier Code once the vendor form is complete.' }
   };

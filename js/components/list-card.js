@@ -64,7 +64,8 @@
     APPROVED_AWAITING_AGREEMENT: 'info text-dark', AGREEMENT_SIGNED: 'success',
     FULLY_SIGNED: 'success', RESUBMITTED: 'info text-dark',
     // Status vendor (borang USM.FIS.AP.B.2023.01)
-    'Registered': 'success', 'Pending': 'warning text-dark', 'Not Registered': 'secondary',
+    'Registered': 'success', 'Pending Bendahari': 'warning text-dark',
+    'Not Registered': 'secondary',
     // Status batch tuntutan Bendahari
     CHECKED: 'info text-dark', APPROVED: 'primary',
     SUBMITTED_TO_BENDAHARI: 'success'

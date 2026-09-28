@@ -1,281 +1,192 @@
-# USM Agent Gateway — Integrasi Dokumen Bendahari & Pendaftaran Vendor
+# Integrasi Dokumen Rasmi Bendahari & Pendaftaran Vendor — Rujukan Pembangunan Demo
 
-## Nota rujukan pembangunan
+> Nota rujukan untuk Claude Code. Letak dalam `docs/`. Ia **melengkapkan**
+> Spesifikasi Pembangunan v1.0 dan `CLAUDE.md`, bukan menggantikannya. Urutan
+> kuasa kekal: (1) `CLAUDE.md`, (2) Spesifikasi v1.0, (3) nota ini, (4) prototaip.
+>
+> Tujuan: demo mesti **kelihatan seolah-olah dokumen rasmi ini sudah sebahagian
+> sistem** — borang & medan sedia terisi dalam data seed, boleh dilihat semasa
+> demo kepada pengurusan USM. Kekal **statik sahaja** (tiada backend/DB/API).
+> UI dalam **English** (ikut keputusan bahasa terkini).
 
-| Perkara | Butiran |
+---
+
+## 1. Sumber
+
+Tiga artifak sebenar daripada proses kewangan USM (bukan rekaan):
+
+| Fail | Maksud |
 |---|---|
-| Versi | 1.0 |
-| Tarikh | 28 September 2026 |
-| Status | Disahkan owner — asas pembangunan `feature/bendahari-vendor` |
-| Kedudukan | Melengkapkan `CLAUDE.md` dan `USM-Agent-Gateway-Spesifikasi-Pembangunan-v1.0.md` |
-| Bahasa | Nota ini Bahasa Melayu (dokumen pembangun). UI yang dibina ialah English. |
+| `CONTOH_EXCEL_SUBMIT_BENDAHARI.xlsx` | Borang **sebenar** senarai pelajar untuk tuntutan komisen yang dihantar ke Bendahari (contoh terisi). |
+| `AGENT_COMMISSION_CLAIM_TEMPLATE.xlsx` | Versi templat kosong borang yang sama. |
+| `USM.FIS.AP.B.2023.01` (PDF) | Borang rasmi Bendahari untuk mendaftar ejen sebagai **pembekal bukan perdagangan (non-trade vendor)** supaya boleh dibayar. |
 
-> **Asal usul nota ini.** Nota ini ditulis daripada **tiga dokumen sumber rasmi**
-> yang dibekalkan owner pada 28 Sep 2026. Struktur, nama lajur dan nama medan di
-> bawah diekstrak terus daripada fail-fail itu, bukan diringkaskan daripada
-> ingatan. Sila rujuk §1 untuk lokasi fail asal.
+Kedua-dua Excel = **format output** modul tuntutan. PDF = **langkah pendaftaran
+vendor** yang kini hilang daripada demo.
 
 ---
 
-## 1. Dokumen sumber
+## 2. PENAMBAHAN #1 — Batch Tuntutan & Eksport Bendahari
 
-| # | Fail | Peranan dalam demo |
-|---|---|---|
-| 1 | `AGENT COMMISSION CLAIM TEMPLATE.xlsx` | Borang **kosong rasmi** tuntutan komisen — **19 lajur (A–S)**. Sumber kebenaran untuk susunan lajur. |
-| 2 | `CONTOH EXCEL SUBMIT BENDAHARI.xlsx` | Contoh **terisi** — 18 lajur (tiada `Total Fee (RM)`), tetapi **ada blok sign-off** yang tiada dalam template. |
-| 3 | `USM.FIS.AP.B.2023.01- Borang Kod Pembekal Bukan Perdagangan EN.pdf` | Borang pendaftaran vendor bukan perdagangan, 4 muka surat, Jabatan Bendahari. |
+### 2.1 Konsep baharu: BATCH
+Tuntutan komisen dihantar ke Bendahari **berkelompok mengikut tempoh**
+("Batch Date From ___ to ___"), bukan satu-satu. Tambah entiti `CLAIM_BATCHES`
+yang mengumpulkan beberapa tuntutan yang diluluskan ke dalam satu penghantaran.
 
-Fail asal berada di luar repo (folder kerja owner) dan **tidak** dimasukkan ke
-dalam repo kerana mengandungi format dokumen rasmi USM. Nota ini ialah
-rakaman strukturnya.
+### 2.2 Lajur tepat borang Bendahari (WAJIB padan)
+Skrin/eksport batch mesti guna lajur ini, susunan sama:
 
----
+1. No. of Student
+2. Agent Name
+3. Student Name
+4. Passport No.
+5. Student Matric No. *(mandatory)*
+6. Student USM ID No. *(mandatory)*
+7. Postgraduate (PG) or Undergraduate (UG)
+8. Reference Number
+9. Name of School / Faculty
+10. Name of Programme
+11. Total Fee (RM)
+12. Total Fee (USD)
+13. Date Paid to USM
+14. Receipt No.
+15. **Feedback From USM** — sub-lajur: `Date` · `Receipt No` · `Amaun (USD)` · `Amaun (RM)`
+16. Status Reply From IPS/BPA
 
-## 2. Masalah yang diselesaikan
+Pengepala batch: **"Batch Date From \<start\> to \<end\>"**.
+Blok tandatangan bawah: **Disemak Oleh** / **Diluluskan Oleh** — Tandatangan,
+Tarikh, Cap Nama & Jawatan. (Ini secara langsung mencerminkan kawalan
+**pemisahan kuasa** dalam spesifikasi: penyemak ≠ pelulus.)
 
-Sebelum ini demo berhenti pada "tuntutan diluluskan → rekod bayaran". Dalam
-proses sebenar, antara kelulusan dan bayaran terdapat **dua halangan pentadbiran
-Bendahari** yang tidak wujud dalam demo:
+### 2.3 Skrin baharu
+- `pages/claim-batch.html` — "Commission Claim Batch (Bendahari Submission)".
+  Papar satu batch dalam **format jadual Bendahari tepat** di atas, dengan
+  header batch + blok sign-off. Sekurang-kurangnya satu batch **sedia dalam
+  seed** supaya kelihatan lengkap semasa demo.
+- Butang **"Export to Bendahari (CSV)"** — jana fail CSV di pelayar guna
+  vanilla JS (dibenarkan; tiada backend). Nama fail: `Bendahari-Claim-Batch-<id>.csv`.
+- Butang **"Print / PDF view"** — susun atur mesra cetak (guna `window.print()`).
 
-1. Tuntutan mesti dihantar kepada Bendahari dalam **format Excel yang ditetapkan**
-   — satu batch pelajar, bukan satu tuntutan satu masa.
-2. Ejen mesti **berdaftar sebagai pembekal bukan perdagangan** dan mempunyai
-   **Kod Pembekal (supplier code)** sebelum apa-apa bayaran boleh dikreditkan.
-
-Demo perlu kelihatan seolah-olah kedua-dua dokumen ini **sudah** sebahagian
-sistem, dengan data seed sedia terisi.
-
----
-
-## 3. Keputusan owner — 28 September 2026
-
-| ID | Keputusan | Status |
-|---|---|---|
-| **D-020** | Jadual batch guna **struktur TEMPLATE 19 lajur** (termasuk `Total Fee (RM)` **dan** `Total Fee (USD)`), **dicampur** blok sign-off daripada CONTOH. Tajuk ikut template: *"Foreign Student Recruitment Agent Student List for Commission Claim"*. Susunan lajur mesti **padan tepat** header Excel. | Disahkan |
-| **D-021** | **`feeRM` TIDAK ditambah.** `firstYearFee` kekal **sumber tunggal** nilai RM; `feeUSD` **DIKIRA** daripada `CONFIG_DRAFT.currency.usdToRm`. Elak dua sumber kebenaran, dan menyokong hujah utama demo: tukar kadar → semua amaun bergerak (selaras `CLAUDE.md` §3.1(1)). | Disahkan |
-| **D-022** | Golden path dipanjangkan: perjanjian ditandatangani → **ACTIVE** → **pendaftaran vendor** → **Bendahari keluarkan supplierCode** → rujukan → tuntutan → **batch** → bayaran. `submitApplication()` mencipta `vendorStatus = 'Not Registered'`. | Disahkan |
-| **D-023** | Seksyen 2 & 3 borang vendor (asal Bahasa Melayu) **diterjemah ke English** — satu bahasa satu skrin, selaras keputusan bahasa 8 Sep 2026. Kod dokumen `USM.FIS.AP.B.2023.01` dan label `USM Office Use Only` **kekal seperti asal**. | Disahkan |
-| **D-025** | **Label sign-off borang Bendahari turut diterjemah ke English** (28 Sep 2026): `Reviewed By :`, `Approved By :`, `Signature :`, `Date :`, `Name & Position Stamp :`. Ia label borang, bukan kod. **Tiada pengecualian bahasa pada UI** — hanya kod dokumen dan `USM Office Use Only` kekal verbatim. | Disahkan |
-| **D-024** | Nota rujukan ini ditulis sebagai sebahagian repo, menjadi rujukan fasa produksi. | Disahkan |
-
----
-
-## 4. Format borang tuntutan Bendahari
-
-### 4.1 Susunan lajur (TEMPLATE — ikut ini)
-
-Header **dua baris**: baris 3 ialah tajuk lajur, baris 4 ialah sub-tajuk bagi
-blok `FEEDBACK FROM USM` (dalam Excel, `O3:R3` bercantum).
-
-| Lajur | Header baris 3 | Header baris 4 | Sumber data demo |
-|---|---|---|---|
-| A | `No. of Student` | — | nombor berjujukan dalam batch |
-| B | `Agent Name` | — | `agent.name` |
-| C | `Student Name` | — | `claim.student` |
-| D | `Passport No.` | — | `claim.passport` |
-| E | `Student Matric No. (mandatory)` | — | `STUDENTS.matricNo` |
-| F | `Student USM ID No.       (mandatory)` | — | `STUDENTS.usmIdNo` |
-| G | `Postgraduate (PG) or Undergraduate (UG)` | — | `claim.level` |
-| H | `REFERENCE NUMBER` | — | `CLAIMS.referenceNumber` |
-| I | `Name of School/ Faculty` | — | `STUDENTS.faculty` |
-| J | `Name of Programme` | — | `claim.program` |
-| K | `Total Fee (RM)` | — | `claim.firstYearFee` |
-| L | `Total Fee (USD)` | — | **dikira**: `firstYearFee ÷ currency.usdToRm` |
-| M | `Date Paid to USM` | — | `CLAIMS.datePaidToUSMLabel` |
-| N | `RECEIPT NO.` | — | `CLAIMS.receiptNo` |
-| O | `FEEDBACK FROM USM` | `DATE` | `feedbackFromUSM.dateLabel` |
-| P | ″ | `RECEIPT NO` | `feedbackFromUSM.receiptNo` |
-| Q | ″ | `AMAUN (USD)` | `feedbackFromUSM.amountUSD` |
-| R | ″ | `AMAUN (RM)` | `feedbackFromUSM.amountRM` |
-| S | `Status Reply From IPS/BPA` | — | `CLAIMS.ipsBpaStatus` |
-
-> Ejaan dan jarak header **dikekalkan persis** seperti dalam Excel, termasuk
-> ruang berganda dalam `Student USM ID No.       (mandatory)` dan garis miring
-> tanpa ruang dalam `Name of School/ Faculty`. Ujian memadankan rentetan ini
-> secara tepat — jangan "kemas" ejaannya.
-
-### 4.2 Header batch
-
-- Tajuk: `Foreign Student Recruitment Agent Student List for Commission Claim`
-- Tempoh: `Batch Date From : <dari> to <hingga>`
-
-### 4.3 Blok sign-off (daripada CONTOH)
-
-| Label asal (Excel) | Label demo (English) | Pihak |
-|---|---|---|
-| `Disemak Oleh :` | `Reviewed By :` | USAINS |
-| `Diluluskan Oleh :` | `Approved By :` | USM LEAP |
-| `Tandatangan :` | `Signature :` | kedua-dua pihak |
-| `Tarikh :` | `Date :` | kedua-dua pihak |
-| `Cap Nama & Jawatan :` | `Name & Position Stamp :` | kedua-dua pihak |
-
-Label sign-off **diterjemah ke English** (keputusan D-025, 28 Sep 2026) kerana
-ia label borang, bukan kod. **Tiada pengecualian bahasa pada UI.** Yang kekal
-verbatim hanyalah kod dokumen `USM.FIS.AP.B.2023.01` dan label
-`USM Office Use Only` — kedua-duanya pengenal dokumen.
-
-### 4.4 Eksport
-
-- **CSV sahaja** (vanilla JS, `Blob` + `URL.createObjectURL`). Tiada penjanaan
-  `.xlsx` — itu memerlukan pustaka dan melanggar syarat "statik, vanilla".
-- CSV tidak menyokong sel bercantum, jadi eksport mengeluarkan **dua baris
-  header** yang meniru baris 3 dan baris 4.
-- **Print view** melalui `@media print`.
+### 2.4 Dwi-matawang USD/RM
+Pelajar antarabangsa bayar dalam **USD**; borang bawa kedua-dua USD dan RM.
+Tambah `feeUSD` dan `feeRM` pada setiap tuntutan, dan kadar tukaran rujukan
+`CONFIG_DRAFT.currency.usdToRm` (lencana DRAFT).
 
 ---
 
-## 5. Format borang pendaftaran vendor
+## 3. PENAMBAHAN #2 — Pendaftaran Vendor (Borang USM.FIS.AP.B.2023.01)
 
-`USM.FIS.AP.B.2023.01` — *Non-Trade Vendor Registration Form*, Office of the
-Bursar, Amendment 00, 01.08.2023.
+Sebelum ejen boleh **dibayar**, mereka mesti didaftar sebagai vendor dengan
+**kod pembekal** daripada Bendahari. Tambah skrin `pages/vendor-registration.html`
+yang memaparkan borang ini, **sedia terisi** untuk ejen aktif dalam seed.
 
-### Seksyen 1 — diisi ejen
+### 3.1 Medan borang (padan borang rasmi)
+**Part A — Agency / Individual Information**
+Full Name · Registration/Passport/National ID No · Address · Telephone No. (Malaysia)
+· Telephone No. (origin country) · Email Address · Nationality · Contact Person.
 
-| Bahagian | Medan |
-|---|---|
-| **Part A** — Agency / Individual Information | Full Name · Registration/ Passport/ National Identification Card No · Address · Telephone No. (Malaysia if any) · Telephone No. (Origin country) · Email Address · Nationality · Contact Person (if applicable) |
-| **Part B** — Banking Information | Bank Account Holder Name · Bank Full Name · Bank Account No. · Bank Address · Swift Code · Bank Branch<br>*Foreign bank account:* Routing Number · IBAN Number · BSB Code · IFSC Code |
-| **Part C** — Declaration | Nama pengaku · Registration/ Passport/ NRIC No · Designation · teks akuan · Signature · Agency Stamp (if applicable) · Date |
+**Part B — Banking Information**
+Bank Account Holder Name · Bank Full Name · Bank Account No. · Bank Address ·
+Swift Code · Bank Branch · *(bank asing:)* Routing Number · IBAN · BSB Code · IFSC Code.
 
-### Seksyen 2 — diisi PTJ (`USM Office Use Only`)
+**Part C — Declaration**
+Nama penandatangan · Reg/Passport/IC No · Designation · teks akuan · Tandatangan ·
+Agency Stamp · Tarikh.
 
-Purpose of Application · Applicant Name · Name & Grade of Position ·
-Email Address · Date.
+**Section 2 — diisi oleh PTJ (dalam sistem: USAINS)**
+Tujuan Permohonan · Nama Pemohon · Nama & Gred Jawatan · Email · Tarikh.
 
-### Seksyen 3 — diisi Jabatan Bendahari (`USM Office Use Only`)
+**Section 3 — diisi oleh Bendahari**
+Kod pembekal: `TRADE / NONTRADE / GAJI / INVESTMENT / INTERCO / RLKA / LAIN`
+(untuk ejen = **NONTRADE**) · Diproses Oleh · Disemak & Disahkan Oleh.
+Emel penghantaran rujukan: `evendor@usm.my`.
 
-- **Non-Trade Supplier Code** (nilai `supplierCode`)
-- Kategori: `TRADE` · **`NONTRADE`** · `GAJI` · `INVESTMENT` · `INTERCO` ·
-  `RLKA` · `LAIN`
-- `Processed By` dan `Checked & Verified By` — Nama, Nama & Gred Jawatan, Tarikh
+### 3.2 Status pendaftaran vendor (rantai bayaran)
+Tambah pada setiap ejen: `vendorStatus` = `Not Registered` / `Pending Bendahari`
+/ `Registered`, plus `supplierCode` (cth `NT-2026-00417`) apabila Registered.
 
----
-
-## 6. Model data
-
-### 6.1 Medan baharu
-
-| Entiti | Medan |
-|---|---|
-| `STUDENTS` | `matricNo`, `usmIdNo`, `faculty` |
-| `CLAIMS` | `referenceNumber`, `datePaidToUSMIso` + `datePaidToUSMLabel`, `receiptNo`, `feedbackFromUSM{ dateLabel, receiptNo, amountUSD, amountRM }`, `ipsBpaStatus`, `batchId` |
-| `AGENTS` | `vendor{ … }` — lihat §6.2 |
-
-`feeUSD` **tidak disimpan** pada mana-mana entiti (D-021). Ia dikira pada masa
-paparan melalui `WF.usdOf(rm)`.
-
-### 6.2 Blok `vendor` pada AGENTS
-
-```
-vendor: {
-  // Part A
-  fullName, registrationNo, address, phoneMalaysia, phoneOrigin,
-  email, nationality, contactPerson,
-  // Part B
-  bankAccountHolder, bankName, bankAccountNo, bankAddress,
-  swiftCode, bankBranch, routingNumber, ibanNumber, bsbCode, ifscCode,
-  // Part C
-  declarationName, declarationIdNo, designation,
-  declarationSigned, declarationDateLabel,
-  // Seksyen 2 (PTJ)
-  ptjVerified, ptjPurpose, ptjApplicantName, ptjGrade, ptjEmail, ptjDateLabel,
-  // Seksyen 3 (Bendahari)
-  supplierCode, supplierCategory, processedBy, verifiedBy, issuedDateLabel,
-  // status keseluruhan
-  vendorStatus    // 'Not Registered' | 'Pending' | 'Registered'
-}
-```
-
-### 6.3 Entiti baharu `CLAIM_BATCHES`
-
-```
-{ id, batchNo, agentId, periodFromLabel, periodToLabel,
-  claimIds[], batchStatus, preparedBy,
-  checkedBy{ name, designation, dateLabel },
-  approvedBy{ name, designation, dateLabel },
-  createdIso, submittedIso }
-```
-
-`batchStatus`: `DRAFT` → `CHECKED` → `APPROVED` → `SUBMITTED_TO_BENDAHARI`.
-Jumlah RM dan USD **dikira**, tidak disimpan.
+**Peraturan:** rekod bayaran tuntutan **tidak boleh** dibuat kecuali ejen
+`vendorStatus = Registered` (ada kod pembekal). Ini menutup gelung antara
+"perjanjian ditandatangani" dan "boleh terima komisen". Papar amaran pada skrin
+bayaran jika ejen belum berdaftar sebagai vendor.
 
 ---
 
-## 7. Peraturan perniagaan baharu
+## 4. Perubahan model data (`data/seed.js`)
 
-| # | Peraturan |
-|---|---|
-| **R-1** | **Bayaran disekat tanpa Kod Pembekal.** `recordPayment()` gagal jika `agent.vendor.vendorStatus !== 'Registered'` atau `supplierCode` kosong. UI memaparkan amaran dan memautkan ke skrin pendaftaran vendor. |
-| **R-2** | Kod Pembekal hanya boleh dikeluarkan (`issueSupplierCode`, peranan Payment Officer/Bendahari) selepas ejen menghantar Seksyen 1 **dan** PTJ mengesahkan Seksyen 2. |
-| **R-3** | Hanya ejen **ACTIVE** atau **RENEWED** boleh menghantar borang vendor. |
-| **R-4** | Batch hanya boleh mengandungi tuntutan milik **satu ejen** yang sudah melepasi keputusan LEAP (`APPROVED_PENDING_PAYMENT` atau `PAID`). |
-| **R-5** | Satu tuntutan hanya boleh berada dalam **satu batch**. |
-| **R-6** | Sign-off berjujukan: `checkBatch` (USAINS) mesti mendahului `approveBatch` (USM LEAP); `submitBatchToBendahari` hanya selepas diluluskan. |
-| **R-7** | "Tandatangan" pada batch ialah **status demo**, bukan e-signature sah — sama seperti perjanjian. |
+> Semua rekaan, dilabel demo. Tambah medan sahaja; jangan ubah kunci sedia ada
+> tanpa beritahu. Isi nilai supaya demo kelihatan **lengkap**.
 
----
+**STUDENTS** — tambah: `matricNo` *(mandatory)*, `usmIdNo` *(mandatory)*,
+`faculty` (Name of School/Faculty), `feeUSD`, `feeRM`.
 
-## 8. Nilai DRAFT baharu
+**CLAIMS** — tambah: `referenceNumber`, `feeUSD`, `feeRM`, `datePaidToUSM`,
+`receiptNo`, dan blok `feedbackFromUSM { date, receiptNo, amountUSD, amountRM }`,
+`ipsBpaStatus`, `batchId`.
 
-Ditambah ke `CONFIG_DRAFT` dalam `data/seed.js`; muncul automatik dalam skrin
-`Settings (DRAFT)` dengan lencana DRAFT.
+**AGENTS** — tambah blok `vendor { status, supplierCode, bank: { holderName,
+bankName, accountNo, bankAddress, swiftCode, branch, routingNumber, iban, bsb,
+ifsc }, ptj: {...}, declaration: {...} }`. Isi penuh untuk ejen **aktif**
+(Global Bridge, dll), kosong/`Pending` untuk permohonan baharu.
 
-| Laluan | Nilai seed | Kenapa ia titik keputusan owner |
-|---|---|---|
-| `currency.usdToRm` | `4.70` | Kadar tukaran USD→RM untuk lajur `Total Fee (USD)`. Belum dimuktamadkan; menggerakkan setiap nilai USD dalam batch. |
-| `bendahari.batchPeriodMonths` | `6` | Panjang tempoh batch (CONTOH menggunakan April→Oktober). |
-| `vendor.supplierCodeSlaDays` | `14` | SLA Bendahari mengeluarkan Kod Pembekal selepas borang lengkap. |
+**Entiti baharu `CLAIM_BATCHES`** — `{ id, dateFrom, dateTo, claimIds[],
+preparedBy, checkedBy, approvedBy, status }`. Sekurang-kurangnya **satu batch
+lengkap** dalam seed untuk demo.
 
 ---
 
-## 9. Skrin baharu
+## 5. Nilai DRAF baharu (lencana DRAFT + skrin Settings)
 
-| Skrin | Fail | Peranan yang nampak |
-|---|---|---|
-| **Claim Batch (Bendahari)** | `pages/claim-batch.html` | USAINS, USM LEAP, Payment Officer, Super Admin |
-| **Vendor Registration** | `pages/vendor-registration.html` | Agent, USAINS, Payment Officer, Super Admin |
-
-Kedua-duanya mengekalkan chrome bersama, status trail, chip SLA dan lencana
-DRAFT yang konsisten dengan sepuluh skrin sedia ada.
+Tambah ke `CONFIG_DRAFT` dan skrin Settings (DRAFT):
+- `currency.usdToRm` — kadar tukaran rujukan USD→RM
+- `vendor.supplierCodeType` — lalai `NONTRADE`
+- `claimBatch.periodMonths` — kekerapan batch (cth 6 bulan)
 
 ---
 
-## 10. Data seed rekaan
+## 6. Skrin & navigasi
 
-Semua data **rekaan**, selaras `CLAUDE.md` §11 (larangan data USM sebenar).
-Nilai sengaja dibuat jelas palsu:
+Skrin baharu: `claim-batch.html`, `vendor-registration.html`.
+Cadangan navigasi ikut peranan:
+- **Agent** — nampak borang vendornya sendiri (read-only, Registered) + tuntutannya dalam batch.
+- **USAINS / Payment Officer** — konsol batch + eksport Bendahari + Section 2 borang vendor.
+- **Super Admin** — semua.
 
-- Kod Pembekal: `NT-2026-0041`
-- SWIFT: `DEMOMYKL`
-- Nombor akaun bank: bermula `9999-`
-- Batch seed: **`BAT-0001`** untuk Global Bridge Education Sdn Bhd (`AG-2041`)
-- Tempoh batch ikut garis masa demo (`NOW_ISO` = 2026-08-31), **bukan**
-  "April 2025 to Ooctober 2025" daripada CONTOH (tarikh sebenar, dan ada typo)
+Kekalkan status trail 5-peringkat, chip SLA, lencana DRAFT seperti sedia ada.
 
 ---
 
-## 11. Kesan pada versi state
+## 7. Andaian & keputusan owner (sahkan)
 
-`js/store.js` menaikkan `VERSION` daripada `2` kepada `3`. Skema seed berubah
-(medan baharu + entiti `CLAIM_BATCHES`), jadi state tersimpan versi 2 mesti
-dibuang, bukan digunakan semula. Lihat bahagian *"Naik taraf automatik"* dalam
-`README.md`.
+1. **Peranan Bendahari** — demo tiada peranan "Bendahari" berasingan; kod
+   pembekal (Section 3) dipaparkan sebagai *sudah diberikan* dalam seed. Untuk
+   produksi, mungkin perlu peranan/entiti Bendahari. → keputusan owner.
+2. **PTJ = USAINS** — Section 2 borang vendor diandaikan diisi oleh USAINS
+   sebagai perantara operasi. Sahkan sama ada betul, atau fakulti berasingan.
+3. **Kadar tukaran USD→RM** — nilai DRAF; owner tetapkan sumber rasmi.
+4. **Matric No / USM ID wajib** — borang Bendahari tanda ia *mandatory*. Dalam
+   produksi, tuntutan tak boleh dihantar tanpa kedua-duanya; dalam demo ia
+   sedia terisi.
 
 ---
 
-## 12. Pemetaan ke produksi (CodeIgniter 4)
+## 8. Skop demo vs produksi
 
-| Demo | CodeIgniter 4 |
-|---|---|
-| `pages/claim-batch.html` | satu view + controller batch tuntutan |
-| `pages/vendor-registration.html` | satu view + controller profil vendor |
-| `CLAIM_BATCHES` | jadual `claim_batches` + jadual pivot `claim_batch_items` |
-| `AGENTS.vendor{}` | jadual `vendor_profiles` (1:1 dengan ejen) |
-| Eksport CSV | penjana eksport sebenar (CSV **dan** XLSX) di sisi pelayan |
-| `CONFIG_DRAFT.currency.usdToRm` | jadual kadar tukaran berversi + audit |
-| Gate `supplierCode` | peraturan pengesahan dalam Payment Service |
+**Utama untuk demo (nilai tinggi, buat dahulu):**
+- Skrin `claim-batch.html` dalam format Bendahari tepat + eksport CSV.
+- Skrin `vendor-registration.html` sedia terisi + status vendor pada ejen.
+- Peraturan "tiada kod pembekal = tiada bayaran" (amaran UI).
 
-**Nota penting untuk produksi:** dalam sistem sebenar, kadar tukaran mesti
-**dibekukan (snapshot)** pada setiap batch ketika ia dihantar kepada Bendahari,
-sama seperti kadar komisen dibekukan pada setiap tuntutan (spesifikasi §15.9).
-Demo sengaja memaparkan kadar semasa supaya kesan menukar kadar kelihatan.
+**Skop produksi (catat dalam spec, tak perlu penuh dalam demo):**
+- Aliran kerja pendaftaran vendor tiga peringkat sebenar (Ejen→PTJ→Bendahari).
+- Dwi-matawang penuh dengan kadar hidup.
+- Penjanaan Excel sebenar (.xlsx) berbanding CSV/paparan.
+
+---
+
+## 9. Larangan (kekal seperti CLAUDE.md §11)
+
+Statik sahaja: tiada backend/DB/API/SSO/gerbang bayaran/e-signature sebenar.
+Eksport CSV & `window.print()` dibenarkan (pelayar sahaja). Tiada e-mel sebenar.
+Semua data rekaan & dilabel demo. Vanilla JS, namespace `window.USMDEMO`.
+Kekal pada branch kerja; jangan sentuh `main` tanpa arahan.
