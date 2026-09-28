@@ -167,25 +167,43 @@ check('FULLY_SIGNED', S().agreement(agrId).status === 'FULLY_SIGNED');
 check('ejen kini ACTIVE', S().agent(newAgentId).agentStatus === 'ACTIVE');
 check('peringkat 4/5', W().stageOf(S().agent(newAgentId)) === 4);
 
-console.log('\n== 7b. Pendaftaran vendor Bendahari ==');
-// Skrin vendor-registration.html dibina dalam commit berikutnya; di sini
-// transisi dipandu terus melalui WF supaya golden path UI kekal boleh jalan.
+console.log('\n== 7b. Pendaftaran vendor Bendahari (klik sebenar) ==');
 setRole('payment');
 var payBlocked = false;
 try { W().recordPayment('CL-0102', { amount: 10, reference: 'X' }); } catch (e) { payBlocked = true; }
 check('R-1 bayaran disekat tanpa Kod Pembekal', payBlocked);
+
 setRole('agent');
-W().submitVendorForm(newAgentId, {
-  bankAccountHolder: 'Nusantara Edu Partners Sdn Bhd',
-  bankName: 'Demo Nusantara Bank', bankAccountNo: '9999-2100-4455',
-  swiftCode: 'DEMOIDJA', declarationIdNo: 'Passport C7781900', declarationAccepted: true
-});
-check('borang vendor dihantar -> Pending',
+openPage('vendor-registration', '?id=' + newAgentId);
+check('borang vendor dipaparkan', !!win.document.getElementById('vendor-form'));
+check('Part A sedia terisi daripada permohonan',
+  win.document.getElementById('vf-fullName').value === 'Nusantara Edu Partners Sdn Bhd',
+  win.document.getElementById('vf-fullName').value);
+win.document.getElementById('vf-bankName').value = 'Demo Nusantara Bank';
+win.document.getElementById('vf-bankAccountNo').value = '9999-2100-4455';
+win.document.getElementById('vf-swiftCode').value = 'DEMOIDJA';
+click('[data-action="submit-vendor"]');
+check('disekat tanpa menerima akuan Part C',
+  S().agent(newAgentId).vendor.vendorStatus === 'Not Registered');
+win.document.getElementById('vf-accept').checked = true;
+click('[data-action="submit-vendor"]');
+check('borang dihantar -> Pending',
   S().agent(newAgentId).vendor.vendorStatus === 'Pending');
-setRole('usains'); W().verifyVendorPTJ(newAgentId);
-setRole('payment'); W().issueSupplierCode(newAgentId);
+check('medan Part B disimpan',
+  S().agent(newAgentId).vendor.bankAccountNo === '9999-2100-4455');
+
+setRole('usains');
+openPage('vendor-registration', '?id=' + newAgentId);
+click('[data-action="verify-ptj"]');
+check('Seksyen 2 disahkan PTJ', S().agent(newAgentId).vendor.ptjVerified === true);
+
+setRole('payment');
+openPage('vendor-registration', '?id=' + newAgentId);
+click('[data-action="issue-code"]');
 check('Kod Pembekal dikeluarkan', W().isVendorRegistered(S().agent(newAgentId)),
   S().agent(newAgentId).vendor.supplierCode);
+check('kategori NONTRADE direkod',
+  S().agent(newAgentId).vendor.supplierCategory === 'NONTRADE');
 
 console.log('\n== 8. Agent rujuk pelajar ==');
 setRole('agent');
@@ -611,6 +629,145 @@ check('label CONFIG_DRAFT BM lama hilang',
   S().config().commission.ug.label === 'Undergraduate (UG)', S().config().commission.ug.label);
 check('tiada teks BM pada dashboard selepas naik taraf',
   bmWordIn(chrome() + body()) === null, String(bmWordIn(chrome() + body())));
+
+console.log('\n== 23. Skrin Claim Batch — format lajur Bendahari ==');
+setRole('usains');
+openPage('claim-batch', '?id=BAT-0001');
+var B = win.USMDEMO.App.bendahari;
+check('batch seed BAT-0001 dipaparkan', body().indexOf('BND/2026/001') >= 0);
+
+// Susunan lajur mesti padan TEPAT header Excel (keputusan D-020).
+var EXPECTED_COLS = [
+  'No. of Student', 'Agent Name', 'Student Name', 'Passport No.',
+  'Student Matric No. (mandatory)', 'Student USM ID No.       (mandatory)',
+  'Postgraduate (PG) or Undergraduate (UG)', 'REFERENCE NUMBER',
+  'Name of School/ Faculty', 'Name of Programme', 'Total Fee (RM)',
+  'Total Fee (USD)', 'Date Paid to USM', 'RECEIPT NO.',
+  'FEEDBACK FROM USM', 'Status Reply From IPS/BPA'
+];
+var EXPECTED_SUB = ['DATE', 'RECEIPT NO', 'AMAUN (USD)', 'AMAUN (RM)'];
+check('senarai lajur modul padan header Excel',
+  B.COLUMNS.join('|') === EXPECTED_COLS.join('|'), B.COLUMNS.join('|'));
+check('sub-lajur FEEDBACK FROM USM padan',
+  B.SUBCOLUMNS.join('|') === EXPECTED_SUB.join('|'), B.SUBCOLUMNS.join('|'));
+
+var ths = win.document.querySelectorAll('.bendahari-table thead th');
+check('20 sel header dirender (16 + 4 sub)', ths.length === 20, String(ths.length));
+var headMismatch = [];
+for (var hc = 0; hc < 16; hc++) {
+  if (ths[hc].textContent !== EXPECTED_COLS[hc]) {
+    headMismatch.push(hc + ': ' + JSON.stringify(ths[hc].textContent));
+  }
+}
+for (var hs = 0; hs < 4; hs++) {
+  if (ths[16 + hs].textContent !== EXPECTED_SUB[hs]) {
+    headMismatch.push('sub' + hs + ': ' + JSON.stringify(ths[16 + hs].textContent));
+  }
+}
+check('setiap header dirender persis sama dengan Excel',
+  headMismatch.length === 0, headMismatch.join(' | '));
+check('FEEDBACK FROM USM merentangi 4 lajur',
+  ths[14].getAttribute('colspan') === '4', ths[14].getAttribute('colspan'));
+check('ruang berganda dalam header USM ID dikekalkan',
+  ths[5].textContent.indexOf('No.       (mandatory)') >= 0);
+
+var dataRows = win.document.querySelectorAll('.bendahari-table tbody tr');
+check('2 baris data dalam BAT-0001', dataRows.length === 2, String(dataRows.length));
+check('setiap baris ada 19 sel',
+  dataRows[0].querySelectorAll('td').length === 19,
+  String(dataRows[0].querySelectorAll('td').length));
+
+// Blok sign-off — label verbatim borang Bendahari.
+check('blok sign-off Disemak Oleh ada', body().indexOf('Disemak Oleh :') >= 0);
+check('blok sign-off Diluluskan Oleh ada', body().indexOf('Diluluskan Oleh :') >= 0);
+check('medan Cap Nama & Jawatan ada', body().indexOf('Cap Nama') >= 0);
+check('tajuk helaian ikut template',
+  body().indexOf('Foreign Student Recruitment Agent Student List for Commission Claim') >= 0);
+check('tempoh batch dipaparkan', body().indexOf('Batch Date From :') >= 0);
+
+console.log('\n== 23b. Eksport CSV ==');
+var csv = B.toCsv(S(), W(), S().batch('BAT-0001'));
+var csvLines = csv.split('\r\n');
+check('CSV ada dua baris header',
+  csvLines[4].indexOf('No. of Student') >= 0 && csvLines[5].indexOf('AMAUN (USD)') >= 0);
+check('header CSV kekalkan ruang berganda',
+  csvLines[4].indexOf('Student USM ID No.       (mandatory)') >= 0);
+check('CSV guna nombor mentah, bukan berformat',
+  csvLines[6].indexOf('"31000"') >= 0 && csvLines[6].indexOf('"31,000"') < 0, csvLines[6]);
+check('sel kosong CSV betul-betul kosong (bukan em-dash)',
+  csvLines[7].indexOf('"—"') < 0, csvLines[7]);
+check('CSV ditutup dengan blok sign-off',
+  csv.indexOf('Disemak Oleh :') >= 0 && csv.indexOf('Diluluskan Oleh :') >= 0);
+check('nama penyemak & pelulus ada dalam CSV',
+  csv.indexOf('Aiman Rashid') >= 0 && csv.indexOf('Dr. Farah Idris') >= 0);
+check('USD dalam CSV dikira dari kadar DRAFT',
+  csvLines[6].indexOf('"' + (Math.round(31000 / 4.70 * 100) / 100).toFixed(2) + '"') >= 0, csvLines[6]);
+
+console.log('\n== 23c. Kitaran hayat batch melalui UI ==');
+// AG-1988 ada DUA tuntutan yang sudah melepasi keputusan LEAP dan belum
+// dibatch: CL-0088 (APPROVED_PENDING_PAYMENT) dan CL-0079 (PAID).
+setRole('usains');
+openPage('claim-batch', '?id=BAT-0001&agent=AG-1988');
+var boxes = win.document.querySelectorAll('[data-claim]');
+check('kedua-dua tuntutan boleh-batch disenaraikan', boxes.length === 2, String(boxes.length));
+click('[data-action="create-batch"]');
+var newBatch = S().batches()[0];
+check('batch baharu dicipta DRAFT',
+  newBatch.batchStatus === 'DRAFT' && newBatch.agentId === 'AG-1988',
+  newBatch.id + ' ' + newBatch.batchNo);
+check('tuntutan ditanda dengan batchId', S().claim('CL-0088').batchId === newBatch.id);
+
+setRole('leap');
+openPage('claim-batch', '?id=' + newBatch.id);
+check('LEAP tiada butang Approve sebelum USAINS semak',
+  !win.document.querySelector('[data-action="approve"]'));
+setRole('usains');
+openPage('claim-batch', '?id=' + newBatch.id);
+click('[data-action="check"]');
+check('CHECKED — Disemak Oleh direkod',
+  S().batch(newBatch.id).batchStatus === 'CHECKED'
+  && S().batch(newBatch.id).checkedBy.name === 'Aiman Rashid');
+setRole('leap');
+openPage('claim-batch', '?id=' + newBatch.id);
+click('[data-action="approve"]');
+check('APPROVED — Diluluskan Oleh direkod',
+  S().batch(newBatch.id).batchStatus === 'APPROVED'
+  && S().batch(newBatch.id).approvedBy.name === 'Dr. Farah Idris');
+setRole('usains');
+openPage('claim-batch', '?id=' + newBatch.id);
+click('[data-action="submit-bendahari"]');
+check('SUBMITTED_TO_BENDAHARI',
+  S().batch(newBatch.id).batchStatus === 'SUBMITTED_TO_BENDAHARI');
+check('butang Export CSV dan Print ada',
+  !!win.document.querySelector('[data-action="export-csv"]')
+  && !!win.document.querySelector('[data-action="print"]'));
+check('elemen .no-print wujud untuk paparan cetak',
+  win.document.querySelectorAll('.no-print').length > 0);
+
+console.log('\n== 24. Gate Kod Pembekal pada skrin Tuntutan ==');
+// AG-1988 belum berdaftar vendor, jadi bayaran mesti kekal disekat.
+setRole('payment');
+openPage('claims', '?id=CL-0088');
+check('borang bayaran dipaparkan untuk tuntutan diluluskan',
+  !!win.document.getElementById('pay-form'));
+click('[data-action="pay"]');
+check('R-1 bayaran disekat — tuntutan kekal belum dibayar',
+  S().claim('CL-0088').claimStatus === 'APPROVED_PENDING_PAYMENT',
+  S().claim('CL-0088').claimStatus);
+
+// Daftar vendor, kemudian bayaran sepatutnya berjaya.
+S().agent('AG-1988').agentStatus = 'ACTIVE';
+setRole('agent');
+W().submitVendorForm('AG-1988', {
+  bankName: 'Demo Archipelago Bank', bankAccountNo: '9999-1988-0077',
+  declarationAccepted: true
+});
+setRole('usains'); W().verifyVendorPTJ('AG-1988');
+setRole('payment'); W().issueSupplierCode('AG-1988');
+openPage('claims', '?id=CL-0088');
+click('[data-action="pay"]');
+check('bayaran berjaya selepas Kod Pembekal dikeluarkan',
+  S().claim('CL-0088').claimStatus === 'PAID', S().claim('CL-0088').claimStatus);
 
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);
