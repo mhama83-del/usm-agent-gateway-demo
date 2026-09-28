@@ -104,15 +104,38 @@ mungkin berbeza sedikit ikut versi):
 3. **Aktifkan SSL:** cari *SSL* → pasang sijil percuma (Let's Encrypt) untuk
    `agents.durianbytes.com` supaya `https://` berfungsi.
 4. **Upload fail:** guna *File Manager* atau FTP. Muat naik **kandungan** repo
-   (fail & folder: `index.html`, `assets/`, `js/`, `data/`, `pages/`) ke **akar
-   folder subdomain**. Pastikan `index.html` berada terus di akar folder itu
-   (bukan dalam subfolder tambahan).
+   (fail & folder: `index.html`, `.htaccess`, `assets/`, `js/`, `data/`,
+   `pages/`) ke **akar folder subdomain**. Pastikan `index.html` berada terus
+   di akar folder itu (bukan dalam subfolder tambahan). `.htaccess` ialah fail
+   tersembunyi — hidupkan *Show hidden files* dalam File Manager.
 5. **Uji:** buka `https://agents.durianbytes.com` dan larikan seluruh golden path
    serta butang **Reset Demo**.
 
 > Nota: `README.md`, `CLAUDE.md`, `.gitignore`, `docs/` dan `tests/` tidak perlu
 > diupload ke Hostinger — ia untuk repo sahaja. Yang perlu naik hanyalah
-> `index.html`, `assets/`, `js/`, `data/` dan `pages/`.
+> `index.html`, `.htaccess`, `assets/`, `js/`, `data/` dan `pages/`.
+
+### Kenapa ciri baharu kadang "hilang" selepas deploy
+
+Hostinger melayan fail statik dengan `Cache-Control: public, max-age=604800`
+— **tujuh hari**. Selepas `git pull` di pelayan, pelayar dan cache tepi CDN
+boleh terus menghidangkan JS/CSS lama sepanjang tempoh itu. Gejalanya
+mengelirukan: halaman nampak berfungsi seperti biasa, tetapi ciri yang baru
+ditambah tidak kelihatan, kerana modul skrin yang dimuatkan masih versi lama.
+**Incognito tidak membantu** — ia hanya mengosongkan cache pelayar, bukan
+cache CDN.
+
+`.htaccess` dalam repo membetulkan ini: HTML, JS, CSS dan JSON mesti disahkan
+semula setiap kali dimuatkan, manakala imej dan fon kekal dicache sehari.
+Pelayan sudah menghantar ETag, jadi fail yang tidak berubah hanya menghasilkan
+respons `304` yang murah.
+
+Untuk mengesahkan apa yang server benar-benar hantar:
+
+```bash
+curl -sSI https://agents.durianbytes.com/js/pages/claim-batch.js | grep -i cache-control
+curl -sS  https://agents.durianbytes.com/js/pages/claim-batch.js | grep -c "Save as PDF"
+```
 
 ---
 

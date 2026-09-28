@@ -1,0 +1,30 @@
+# USM Agent Gateway — demo statik. Kawalan cache untuk hos Hostinger.
+#
+# KENAPA FAIL INI WUJUD
+# Hostinger melayan fail statik dengan "Cache-Control: public, max-age=604800"
+# (7 hari) secara lalai. Selepas `git pull` di pelayan, pelayar DAN cache CDN
+# boleh terus menghidangkan JS/CSS lama sehingga seminggu. Kesannya mengelirukan:
+# halaman nampak berfungsi, tetapi ciri yang baru ditambah "hilang" kerana
+# modul skrinnya masih versi lama. Incognito tidak membantu, kerana ia hanya
+# mengosongkan cache pelayar, bukan cache tepi CDN.
+#
+# HTML, JS dan CSS kini mesti disahkan semula setiap kali dimuatkan. ETag sudah
+# dihantar oleh pelayan, jadi fail yang tidak berubah hanya menghasilkan
+# respons 304 yang murah.
+
+<IfModule mod_headers.c>
+  # Kod dan penanda: sentiasa sahkan semula.
+  <FilesMatch "\.(html|js|css|json)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # Aset yang jarang berubah: cache sehari memadai.
+  <FilesMatch "\.(svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
+
+# Demo ini bukan laman awam yang hendak diindeks.
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>

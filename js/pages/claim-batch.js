@@ -284,6 +284,16 @@
         ]);
       }
 
+      // Tindakan peringkat dokumen — dipaparkan di kawasan tajuk, sama
+      // seperti skrin Vendor Registration.
+      var docActs = '';
+      if (current) {
+        docActs = '<button class="btn btn-sm btn-outline-usm" data-action="export-csv">'
+          + 'Export to Bendahari (CSV)</button> '
+          + '<button class="btn btn-sm btn-outline-secondary" data-action="print">'
+          + 'Print / Save as PDF</button>';
+      }
+
       var detail;
       if (!current) {
         detail = C.card('Claim batch',
@@ -300,8 +310,6 @@
         if (W.can('submitBatchToBendahari') && current.batchStatus === 'APPROVED') {
           acts.push('<button class="btn btn-sm btn-usm" data-action="submit-bendahari">Submit to Bursary</button>');
         }
-        acts.push('<button class="btn btn-sm btn-outline-usm" data-action="export-csv">Export to Bendahari (CSV)</button>');
-        acts.push('<button class="btn btn-sm btn-outline-secondary" data-action="print">Print / Save as PDF</button>');
 
         detail = C.card(
           'Batch ' + C.esc(current.batchNo)
@@ -345,7 +353,7 @@
           + 'the Bursar in the prescribed column format. Batch period: '
           + S.config().claimBatch.periodMonths + ' months '
           + C.draf('Batch period length — DRAFT'),
-          '', 'Office of the Bursar')
+          docActs, 'Office of the Bursar')
         + '<div class="row g-3"><div class="col-lg-8">' + detail + '</div>'
         + '<div class="col-lg-4 no-print">'
         + C.card('Batches <span class="badge bg-light text-dark border ms-1">' + rows.length + '</span>',
