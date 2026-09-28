@@ -167,6 +167,26 @@ check('FULLY_SIGNED', S().agreement(agrId).status === 'FULLY_SIGNED');
 check('ejen kini ACTIVE', S().agent(newAgentId).agentStatus === 'ACTIVE');
 check('peringkat 4/5', W().stageOf(S().agent(newAgentId)) === 4);
 
+console.log('\n== 7b. Pendaftaran vendor Bendahari ==');
+// Skrin vendor-registration.html dibina dalam commit berikutnya; di sini
+// transisi dipandu terus melalui WF supaya golden path UI kekal boleh jalan.
+setRole('payment');
+var payBlocked = false;
+try { W().recordPayment('CL-0102', { amount: 10, reference: 'X' }); } catch (e) { payBlocked = true; }
+check('R-1 bayaran disekat tanpa Kod Pembekal', payBlocked);
+setRole('agent');
+W().submitVendorForm(newAgentId, {
+  bankAccountHolder: 'Nusantara Edu Partners Sdn Bhd',
+  bankName: 'Demo Nusantara Bank', bankAccountNo: '9999-2100-4455',
+  swiftCode: 'DEMOIDJA', declarationIdNo: 'Passport C7781900', declarationAccepted: true
+});
+check('borang vendor dihantar -> Pending',
+  S().agent(newAgentId).vendor.vendorStatus === 'Pending');
+setRole('usains'); W().verifyVendorPTJ(newAgentId);
+setRole('payment'); W().issueSupplierCode(newAgentId);
+check('Kod Pembekal dikeluarkan', W().isVendorRegistered(S().agent(newAgentId)),
+  S().agent(newAgentId).vendor.supplierCode);
+
 console.log('\n== 8. Agent rujuk pelajar ==');
 setRole('agent');
 openPage('referrals');
@@ -468,6 +488,14 @@ var gAgr = (S().agreementForAgent(gAgent) || {}).id;
 setRole('usains'); openPage('agreement', '?id=' + gAgr); click('[data-action="sign"]');
 setRole('leap');   openPage('agreement', '?id=' + gAgr); click('[data-action="sign"]');
 setRole('agent');  openPage('agreement', '?id=' + gAgr); click('[data-action="sign"]');
+// Pendaftaran vendor — tanpa Kod Pembekal, rekod bayaran di bawah akan disekat.
+W().submitVendorForm(gAgent, {
+  bankName: 'Demo Nusantara Bank', bankAccountNo: '9999-2100-4455',
+  declarationAccepted: true
+});
+setRole('usains'); W().verifyVendorPTJ(gAgent);
+setRole('payment'); W().issueSupplierCode(gAgent);
+setRole('agent');
 openPage('referrals');
 click('[data-action="add"]');
 var gRef = S().referrals()[0].refId;
@@ -574,7 +602,7 @@ var staleState = {
 };
 store['usm_demo_state'] = JSON.stringify(staleState);
 openPage('dashboard');
-check('state versi 1 dibuang dan diganti seed', S().state().version === 2, String(S().state().version));
+check('state versi 1 dibuang dan diganti seed', S().state().version === 3, String(S().state().version));
 check('6 ejen seed dimuatkan semula', S().agents().length === 6, String(S().agents().length));
 check('notifikasi BM lama hilang', bmWordIn(JSON.stringify(S().notifications())) === null);
 check('log BM lama hilang', bmWordIn(JSON.stringify(S().log())) === null);

@@ -45,7 +45,8 @@
       log: clone(SEED.ACTIVITY_LOG),
       // ejen/rujukan/tuntutan yang dicipta semasa demo
       demoAgentId: null,
-      seq: { agent: 2100, ref: 300, claim: 200, agreement: 900, log: 100, notif: 100, batch: 1 }
+      seq: { agent: 2100, ref: 300, claim: 200, agreement: 900, log: 100, notif: 100,
+             batch: 1, vendor: 50 }
     };
   }
 

@@ -29,6 +29,14 @@
     var d = toDate(iso);
     return d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear();
   }
+  // Label bulan sahaja, untuk tempoh batch: "Mar 2026".
+  function monthLabel(iso) {
+    if (!iso) return '—';
+    var d = toDate(iso);
+    return BULAN[d.getMonth()] + ' ' + d.getFullYear();
+  }
+  function addMonths(iso, n) { var d = toDate(iso); d.setMonth(d.getMonth() + n); return toIso(d); }
+
   function daysBetween(fromIso, toIsoStr) {
     return Math.round((toDate(toIsoStr) - toDate(fromIso)) / 86400000);
   }
@@ -99,6 +107,16 @@
     RETURNED: 'Returned', RESUBMITTED: 'Resubmitted'
   };
 
+  var BATCH_LABEL = {
+    DRAFT: 'Draft', CHECKED: 'Checked by USAINS',
+    APPROVED: 'Approved by USM LEAP',
+    SUBMITTED_TO_BENDAHARI: 'Submitted to Bursary'
+  };
+  var VENDOR_LABEL = {
+    'Not Registered': 'Not Registered', 'Pending': 'Pending Supplier Code',
+    'Registered': 'Registered'
+  };
+
   // --- SLA ---------------------------------------------------------------
   // Keputusan owner (1 Sep 2026): ejen SEED guna medan `sla` (keadaan yang
   // dikurasi untuk cerita demo). Permohonan yang DICIPTA semasa demo dikira
@@ -143,6 +161,18 @@
     return Math.round(fee * ratePercent(rec.level) / 100);
   }
 
+  // Lajur "Total Fee (USD)" borang Bendahari. DIKIRA daripada kadar DRAFT —
+  // feeUSD tidak disimpan, supaya RM kekal satu-satunya sumber kebenaran.
+  function usdOf(rm) {
+    var rate = S.config().currency.usdToRm;
+    if (!rm || !rate) return 0;
+    return Math.round(rm / rate * 100) / 100;
+  }
+  function usdMoney(rm) {
+    var v = usdOf(rm);
+    return v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   // --- Log + notifikasi --------------------------------------------------
   function logIt(entity, entityId, from, to, note) {
     var st = S.state();
@@ -154,7 +184,7 @@
       entity: entity, entityId: entityId,
       from: from, to: to, note: note || ''
     });
-    if (entity === 'agent') {
+    if (entity === 'agent' || entity === 'vendor') {
       var a = S.agent(entityId);
       if (a) {
         a.activities = a.activities || [];
@@ -179,12 +209,14 @@
 
   // --- Kebenaran mengikut peranan ----------------------------------------
   var PERMS = {
-    agent: ['submitApplication', 'resubmitDocument', 'signAgent', 'addReferral', 'createClaim', 'submitClaim'],
+    agent: ['submitApplication', 'resubmitDocument', 'signAgent', 'addReferral', 'createClaim', 'submitClaim',
+            'submitVendorForm'],
     usains: ['startReview', 'verifyDocument', 'returnDocument', 'verifyAndForward', 'signUsains',
-             'startClaimReview', 'setEligibility', 'forwardClaim', 'returnClaim', 'advanceReferral'],
+             'startClaimReview', 'setEligibility', 'forwardClaim', 'returnClaim', 'advanceReferral',
+             'verifyVendorPTJ', 'createBatch', 'checkBatch', 'submitBatchToBendahari'],
     leap: ['approve', 'rejectApplication', 'signLeap', 'decideClaim', 'openAnnualReview',
-           'renew', 'terminate', 'advanceReferral'],
-    payment: ['recordPayment'],
+           'renew', 'terminate', 'advanceReferral', 'approveBatch'],
+    payment: ['recordPayment', 'issueSupplierCode'],
     admin: ['*']
   };
   function can(action, roleKey) {
@@ -220,6 +252,20 @@
       pic: data.pic || '—', director: data.director || '—', conduct: '—',
       abc: { accepted: !!data.abcAccepted, byName: data.pic || '—', dateLabel: fmt(st.nowIso) },
       isDemoCreated: true,
+      // Ejen baharu BELUM berdaftar sebagai pembekal Bendahari. Part A diisi
+      // awal daripada borang permohonan supaya skrin vendor sedia terisi.
+      vendor: SEED.vendorProfile({
+        fullName: data.name,
+        registrationNo: data.ssm || '—',
+        address: data.registeredAddress || '—',
+        email: data.officialEmail || '—',
+        nationality: data.country || '—',
+        contactPerson: data.pic || '—',
+        bankAccountHolder: data.name,
+        declarationName: data.pic || '—',
+        designation: 'Person in Charge (PIC)',
+        vendorStatus: 'Not Registered'
+      }),
       activities: []
     };
     st.agents.unshift(a);
@@ -597,6 +643,14 @@
     if (c.claimStatus !== 'APPROVED_PENDING_PAYMENT') {
       throw new Error('Payment can only be recorded after the claim is APPROVED.');
     }
+    // R-1: tiada Kod Pembekal Bendahari = tiada bayaran.
+    var payee = S.agent(c.agentId);
+    var pv = payee && payee.vendor;
+    if (!pv || pv.vendorStatus !== 'Registered' || !pv.supplierCode) {
+      throw new Error('Payment is blocked: ' + (payee ? payee.name : c.agentId)
+        + ' has no Bursary Supplier Code. Complete the vendor registration form '
+        + '(USM.FIS.AP.B.2023.01) first.');
+    }
     if (!data || !data.reference || !String(data.reference).trim()) {
       throw new Error('A payment reference is required.');
     }
@@ -691,6 +745,264 @@
     return a;
   }
 
+  // --- Transisi: pendaftaran vendor (USM.FIS.AP.B.2023.01) ---------------
+  function vendorOf(a) { return (a && a.vendor) || null; }
+
+  function isVendorRegistered(a) {
+    var v = vendorOf(a);
+    return !!(v && v.vendorStatus === 'Registered' && v.supplierCode);
+  }
+
+  // Seksyen 1 (Part A/B/C) dihantar oleh ejen.
+  function submitVendorForm(agentId, data) {
+    guard('submitVendorForm');
+    var a = S.agent(agentId);
+    if (!a) throw new Error('Agent not found.');
+    // R-3
+    if (a.agentStatus !== 'ACTIVE' && a.agentStatus !== 'RENEWED') {
+      throw new Error('Only ACTIVE agents can submit the vendor registration form.');
+    }
+    if (a.vendor && a.vendor.vendorStatus === 'Registered') {
+      throw new Error('This agent already holds a Bursary Supplier Code.');
+    }
+    data = data || {};
+    if (!String(data.bankAccountNo || '').trim()) {
+      throw new Error('Bank Account No. is required in Part B.');
+    }
+    if (!String(data.bankName || '').trim()) {
+      throw new Error('Bank Full Name is required in Part B.');
+    }
+    if (!data.declarationAccepted) {
+      throw new Error('The Part C declaration must be accepted before submitting.');
+    }
+    var st = S.state();
+    var v = a.vendor || (a.vendor = SEED.vendorProfile());
+    var from = v.vendorStatus;
+    var keys = ['fullName', 'registrationNo', 'address', 'phoneMalaysia', 'phoneOrigin',
+      'email', 'nationality', 'contactPerson', 'bankAccountHolder', 'bankName',
+      'bankAccountNo', 'bankAddress', 'swiftCode', 'bankBranch', 'routingNumber',
+      'ibanNumber', 'bsbCode', 'ifscCode', 'declarationName', 'declarationIdNo',
+      'designation'];
+    for (var i = 0; i < keys.length; i++) {
+      if (data[keys[i]] != null && String(data[keys[i]]).trim() !== '') v[keys[i]] = data[keys[i]];
+    }
+    v.declarationSigned = true;
+    v.declarationDateLabel = fmt(st.nowIso);
+    v.vendorStatus = 'Pending';
+    logIt('vendor', a.id, from, v.vendorStatus,
+      'Vendor registration form submitted (USM.FIS.AP.B.2023.01)');
+    notify('usains', 'Vendor registration submitted',
+      a.name + ' submitted the non-trade vendor form for PTJ verification.',
+      'vendor-registration.html?id=' + a.id, a.id);
+    S.save();
+    return a;
+  }
+
+  // Seksyen 2 disahkan oleh PTJ (USAINS).
+  function verifyVendorPTJ(agentId) {
+    guard('verifyVendorPTJ');
+    var a = S.agent(agentId);
+    var v = vendorOf(a);
+    if (!v) throw new Error('Agent not found.');
+    if (v.vendorStatus !== 'Pending') {
+      throw new Error('Section 2 can only be completed once the agent has submitted Section 1.');
+    }
+    if (v.ptjVerified) throw new Error('Section 2 has already been completed.');
+    var st = S.state();
+    var info = S.roleInfo();
+    v.ptjVerified = true;
+    v.ptjPurpose = 'Recruitment agent commission payment';
+    v.ptjApplicantName = info.person;
+    v.ptjGrade = info.title;
+    v.ptjEmail = info.person.toLowerCase().replace(/[^a-z]+/g, '.') + '@usains.demo';
+    v.ptjDateLabel = fmt(st.nowIso);
+    logIt('vendor', a.id, 'Pending', 'Pending',
+      'Section 2 verified by PTJ — forwarded to the Bursary');
+    notify('payment', 'Vendor form ready for Supplier Code',
+      a.name + ' passed PTJ verification and is awaiting a Supplier Code.',
+      'vendor-registration.html?id=' + a.id, a.id);
+    S.save();
+    return a;
+  }
+
+  // Seksyen 3 — Bendahari mengeluarkan Kod Pembekal.
+  function issueSupplierCode(agentId, code) {
+    guard('issueSupplierCode');
+    var a = S.agent(agentId);
+    var v = vendorOf(a);
+    if (!v) throw new Error('Agent not found.');
+    if (v.vendorStatus === 'Registered') throw new Error('A Supplier Code has already been issued.');
+    if (v.vendorStatus !== 'Pending') {
+      throw new Error('The agent must submit the vendor registration form first.');
+    }
+    // R-2
+    if (!v.ptjVerified) {
+      throw new Error('Section 2 (PTJ verification) must be completed before the Bursary can issue a Supplier Code.');
+    }
+    var st = S.state();
+    var info = S.roleInfo();
+    code = String(code || '').trim();
+    if (!code) code = S.nextId('vendor', 'NT-' + toDate(st.nowIso).getFullYear() + '-');
+    v.supplierCode = code;
+    v.supplierCategory = 'NONTRADE';
+    v.processedBy = info.person;
+    v.verifiedBy = 'Haslina Mohd Yusof';
+    v.issuedDateLabel = fmt(st.nowIso);
+    v.vendorStatus = 'Registered';
+    logIt('vendor', a.id, 'Pending', 'Registered',
+      'Supplier Code ' + code + ' issued by the Bursary');
+    notify('all', 'Supplier Code issued',
+      a.name + ' is now a registered non-trade vendor (' + code + ').',
+      'vendor-registration.html?id=' + a.id, a.id);
+    S.save();
+    return a;
+  }
+
+  // --- Transisi: batch tuntutan Bendahari --------------------------------
+  var BATCH_READY = { APPROVED_PENDING_PAYMENT: 1, PAID: 1 };
+
+  function batchClaims(b) {
+    var out = [];
+    if (!b) return out;
+    for (var i = 0; i < b.claimIds.length; i++) {
+      var c = S.claim(b.claimIds[i]);
+      if (c) out.push(c);
+    }
+    return out;
+  }
+
+  // Jumlah DIKIRA, tidak disimpan.
+  function batchTotals(b) {
+    var list = batchClaims(b), rm = 0;
+    for (var i = 0; i < list.length; i++) rm += (list[i].firstYearFee || 0);
+    return { count: list.length, feeRm: rm, feeUsd: usdOf(rm) };
+  }
+
+  // Tuntutan yang layak dimasukkan ke batch baharu bagi satu ejen.
+  function batchableClaims(agentId) {
+    var all = S.claims(), out = [];
+    for (var i = 0; i < all.length; i++) {
+      var c = all[i];
+      if (c.agentId !== agentId) continue;
+      if (c.batchId) continue;
+      if (!BATCH_READY[c.claimStatus]) continue;
+      out.push(c);
+    }
+    return out;
+  }
+
+  function createBatch(agentId, claimIds) {
+    guard('createBatch');
+    var a = S.agent(agentId);
+    if (!a) throw new Error('Agent not found.');
+    if (!claimIds || !claimIds.length) {
+      throw new Error('Select at least one claim to build a batch.');
+    }
+    var st = S.state();
+    var picked = [];
+    for (var i = 0; i < claimIds.length; i++) {
+      var c = S.claim(claimIds[i]);
+      if (!c) throw new Error('Claim ' + claimIds[i] + ' not found.');
+      // R-4
+      if (c.agentId !== agentId) {
+        throw new Error('A batch may only contain claims from one agent — ' + c.id
+          + ' belongs to a different agent.');
+      }
+      if (!BATCH_READY[c.claimStatus]) {
+        throw new Error(c.id + ' has not passed the USM LEAP decision yet.');
+      }
+      // R-5
+      if (c.batchId) throw new Error(c.id + ' is already in batch ' + c.batchId + '.');
+      picked.push(c);
+    }
+    var seq = st.batches.length + 1;
+    var num = String(seq);
+    while (num.length < 3) num = '0' + num;
+    var months = st.config.bendahari.batchPeriodMonths;
+    var b = {
+      id: S.nextId('batch', 'BAT-'),
+      batchNo: 'BND/' + toDate(st.nowIso).getFullYear() + '/' + num,
+      agentId: a.id,
+      periodFromLabel: monthLabel(addMonths(st.nowIso, -(months - 1))),
+      periodToLabel: monthLabel(st.nowIso),
+      claimIds: [],
+      batchStatus: 'DRAFT',
+      preparedBy: S.roleInfo().person + ' (' + S.roleInfo().label + ')',
+      checkedBy: { name: '—', designation: '—', dateLabel: '—' },
+      approvedBy: { name: '—', designation: '—', dateLabel: '—' },
+      createdIso: st.nowIso, submittedIso: null,
+      isDemoCreated: true
+    };
+    for (var k = 0; k < picked.length; k++) {
+      picked[k].batchId = b.id;
+      b.claimIds.push(picked[k].id);
+    }
+    st.batches.unshift(b);
+    logIt('batch', b.id, '—', 'DRAFT',
+      'Bursary claim batch built for ' + a.name + ' — ' + b.claimIds.length + ' claim(s)');
+    notify('usains', 'Claim batch created',
+      b.batchNo + ' (' + a.name + ') is ready for checking.', 'claim-batch.html?id=' + b.id, a.id);
+    S.save();
+    return b;
+  }
+
+  // Sign-off "Disemak Oleh" — USAINS.
+  function checkBatch(batchId) {
+    guard('checkBatch');
+    var b = S.batch(batchId);
+    if (!b) throw new Error('Batch not found.');
+    if (b.batchStatus !== 'DRAFT') throw new Error('Only a Draft batch can be checked.');
+    if (!b.claimIds.length) throw new Error('An empty batch cannot be checked.');
+    var st = S.state(), info = S.roleInfo();
+    b.checkedBy = { name: info.person, designation: info.title + ', ' + info.label, dateLabel: fmt(st.nowIso) };
+    b.batchStatus = 'CHECKED';
+    logIt('batch', b.id, 'DRAFT', b.batchStatus, 'Batch checked by USAINS (Disemak Oleh)');
+    notify('leap', 'Claim batch awaiting approval',
+      b.batchNo + ' has been checked and needs USM LEAP approval.',
+      'claim-batch.html?id=' + b.id, b.agentId);
+    S.save();
+    return b;
+  }
+
+  // Sign-off "Diluluskan Oleh" — USM LEAP. R-6: mesti selepas checkBatch.
+  function approveBatch(batchId) {
+    guard('approveBatch');
+    var b = S.batch(batchId);
+    if (!b) throw new Error('Batch not found.');
+    if (b.batchStatus === 'DRAFT') {
+      throw new Error('USAINS must check this batch before USM LEAP can approve it.');
+    }
+    if (b.batchStatus !== 'CHECKED') throw new Error('Only a Checked batch can be approved.');
+    var st = S.state(), info = S.roleInfo();
+    b.approvedBy = { name: info.person, designation: info.title + ', ' + info.label, dateLabel: fmt(st.nowIso) };
+    b.batchStatus = 'APPROVED';
+    logIt('batch', b.id, 'CHECKED', b.batchStatus, 'Batch approved by USM LEAP (Diluluskan Oleh)');
+    notify('usains', 'Claim batch approved',
+      b.batchNo + ' is approved and ready to submit to the Bursary.',
+      'claim-batch.html?id=' + b.id, b.agentId);
+    S.save();
+    return b;
+  }
+
+  function submitBatchToBendahari(batchId) {
+    guard('submitBatchToBendahari');
+    var b = S.batch(batchId);
+    if (!b) throw new Error('Batch not found.');
+    if (b.batchStatus !== 'APPROVED') {
+      throw new Error('Only an Approved batch can be submitted to the Bursary.');
+    }
+    var st = S.state();
+    b.batchStatus = 'SUBMITTED_TO_BENDAHARI';
+    b.submittedIso = st.nowIso;
+    logIt('batch', b.id, 'APPROVED', b.batchStatus,
+      'Batch submitted to the Bursary in the prescribed format');
+    notify('payment', 'Claim batch received from USAINS',
+      b.batchNo + ' has been submitted to the Bursary for payment.',
+      'claim-batch.html?id=' + b.id, b.agentId);
+    S.save();
+    return b;
+  }
+
   NS.WF = {
     fmt: fmt, addDays: addDays, addYears: addYears, toIso: toIso,
     daysUntil: daysUntil, daysBetween: daysBetween, money: money,
@@ -700,6 +1012,15 @@
     docsOutstanding: docsOutstanding, referralCountThisYear: referralCountThisYear,
     APP_LABEL: APP_LABEL, AGENT_LABEL: AGENT_LABEL, CLAIM_LABEL: CLAIM_LABEL,
     REF_LABEL: REF_LABEL, AGR_LABEL: AGR_LABEL, DOC_LABEL: DOC_LABEL,
+    BATCH_LABEL: BATCH_LABEL, VENDOR_LABEL: VENDOR_LABEL,
+    monthLabel: monthLabel, addMonths: addMonths,
+    usdOf: usdOf, usdMoney: usdMoney,
+    isVendorRegistered: isVendorRegistered,
+    submitVendorForm: submitVendorForm, verifyVendorPTJ: verifyVendorPTJ,
+    issueSupplierCode: issueSupplierCode,
+    batchClaims: batchClaims, batchTotals: batchTotals, batchableClaims: batchableClaims,
+    createBatch: createBatch, checkBatch: checkBatch,
+    approveBatch: approveBatch, submitBatchToBendahari: submitBatchToBendahari,
     PARTY_LABEL: PARTY_LABEL,
     can: can,
     submitApplication: submitApplication, startReview: startReview,

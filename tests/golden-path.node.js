@@ -31,6 +31,17 @@ check('AG-2077 peringkat 1, SLA late', W.stageOf(S.agent('AG-2077')) === 1 && W.
 check('AG-2041 peringkat 4 (Active)', W.stageOf(S.agent('AG-2041')) === 4);
 check('AG-1875 peringkat 5 (Annual Review)', W.stageOf(S.agent('AG-1875')) === 5);
 check('komisen CL-0091 = 5400 (36000 x 15%)', W.commissionOf(S.claim('CL-0091')) === 5400);
+check('1 batch seed lengkap (BAT-0001)', S.batches().length === 1 && !!S.batch('BAT-0001'));
+check('BAT-0001 milik AG-2041 dengan 2 tuntutan',
+  S.batch('BAT-0001').agentId === 'AG-2041' && W.batchClaims(S.batch('BAT-0001')).length === 2);
+check('pelajar ada matric + USM ID + fakulti',
+  !!S.referral('REF-0201').matricNo && !!S.referral('REF-0201').usmIdNo && !!S.referral('REF-0201').faculty);
+check('tuntutan ada nombor rujukan Bendahari',
+  S.claim('CL-0079').referenceNumber === 'USM/AGC/2026/0079');
+check('AG-2041 sudah berdaftar vendor', W.isVendorRegistered(S.agent('AG-2041')));
+check('AG-2077 belum berdaftar vendor', !W.isVendorRegistered(S.agent('AG-2077')));
+check('USD dikira dari kadar DRAFT 4.70',
+  W.usdOf(34500) === Math.round(34500 / 4.70 * 100) / 100, String(W.usdOf(34500)));
 
 // --- komisen bergerak bila kadar ditukar ---
 step('0b', 'Kadar DRAF ditukar dalam Tetapan');
@@ -132,6 +143,57 @@ check('ejen kini ACTIVE', S.agent(a.id).agentStatus === 'ACTIVE');
 check('peringkat 4', W.stageOf(S.agent(a.id)) === 4);
 check('tarikh tamat = +2 tahun', S.agreement(agr.id).endIso === '2028-08-31', S.agreement(agr.id).endIso);
 
+// --- 6b. Pendaftaran vendor Bendahari (keputusan D-022) ---
+step('6b', 'Pendaftaran vendor — borang USM.FIS.AP.B.2023.01');
+check('ejen baharu bermula Not Registered',
+  S.agent(a.id).vendor.vendorStatus === 'Not Registered', S.agent(a.id).vendor.vendorStatus);
+check('Part A sedia terisi daripada borang permohonan',
+  S.agent(a.id).vendor.fullName === 'Nusantara Edu Partners Sdn Bhd');
+
+// R-1: tiada Kod Pembekal = tiada bayaran (disemak sekali lagi di langkah 11)
+S.setRole('payment');
+threw = false;
+try { W.recordPayment('CL-0102', { amount: 100, reference: 'X' }); } catch (e) { threw = true; }
+check('bayaran disekat tanpa Kod Pembekal', threw);
+
+S.setRole('agent');
+threw = false;
+try {
+  W.submitVendorForm(a.id, { bankName: 'Demo Bank', bankAccountNo: '9999-1', declarationAccepted: false });
+} catch (e) { threw = true; }
+check('deklarasi Part C wajib diterima', threw);
+threw = false;
+try {
+  W.submitVendorForm(a.id, { bankName: 'Demo Bank', declarationAccepted: true });
+} catch (e) { threw = true; }
+check('nombor akaun bank wajib diisi', threw);
+
+W.submitVendorForm(a.id, {
+  bankAccountHolder: 'Nusantara Edu Partners Sdn Bhd',
+  bankName: 'Demo Nusantara Bank', bankAccountNo: '9999-2100-4455',
+  bankAddress: 'Jl. Thamrin 20, Jakarta Pusat, Indonesia',
+  swiftCode: 'DEMOIDJA', bankBranch: 'Thamrin',
+  declarationIdNo: 'Passport C7781900', declarationAccepted: true
+});
+check('borang dihantar -> Pending', S.agent(a.id).vendor.vendorStatus === 'Pending');
+
+S.setRole('payment');
+threw = false;
+try { W.issueSupplierCode(a.id); } catch (e) { threw = true; }
+check('R-2 kod disekat sebelum PTJ sahkan Seksyen 2', threw);
+
+S.setRole('usains');
+W.verifyVendorPTJ(a.id);
+check('Seksyen 2 disahkan PTJ', S.agent(a.id).vendor.ptjVerified === true);
+
+S.setRole('payment');
+W.issueSupplierCode(a.id);
+check('Kod Pembekal dikeluarkan', W.isVendorRegistered(S.agent(a.id)),
+  S.agent(a.id).vendor.supplierCode);
+check('kategori NONTRADE', S.agent(a.id).vendor.supplierCategory === 'NONTRADE');
+
+S.setRole('agent'); // kembali ke peranan Agent untuk langkah seterusnya
+
 // --- 7. Rujuk pelajar ---
 step(7, 'Agent — rujuk pelajar');
 var ref = W.addReferral(a.id, {
@@ -176,6 +238,43 @@ step(10, 'USM LEAP — luluskan tuntutan');
 S.setRole('leap');
 W.decideClaim(c.id, 'approve');
 check('APPROVED_PENDING_PAYMENT', S.claim(c.id).claimStatus === 'APPROVED_PENDING_PAYMENT');
+
+// --- 10b. Batch tuntutan Bendahari ---
+step('10b', 'Batch tuntutan — format Bendahari');
+S.setRole('usains');
+check('tuntutan layak dimasukkan batch', W.batchableClaims(a.id).length === 1,
+  String(W.batchableClaims(a.id).length));
+var bat = W.createBatch(a.id, [c.id]);
+check('batch dicipta DRAFT', bat.batchStatus === 'DRAFT', bat.id + ' ' + bat.batchNo);
+check('tuntutan ditanda dengan batchId', S.claim(c.id).batchId === bat.id);
+check('jumlah RM batch = yuran tahun 1', W.batchTotals(bat).feeRm === 34500,
+  String(W.batchTotals(bat).feeRm));
+check('jumlah USD DIKIRA dari kadar DRAFT',
+  W.batchTotals(bat).feeUsd === Math.round(34500 / 4.70 * 100) / 100,
+  String(W.batchTotals(bat).feeUsd));
+
+threw = false;
+try { W.createBatch(a.id, [c.id]); } catch (e) { threw = true; }
+check('R-5 satu tuntutan hanya satu batch', threw);
+threw = false;
+try { W.createBatch(a.id, ['CL-0091']); } catch (e) { threw = true; }
+check('R-4 batch hanya satu ejen', threw);
+
+S.setRole('leap');
+threw = false;
+try { W.approveBatch(bat.id); } catch (e) { threw = true; }
+check('R-6 LEAP tidak boleh lulus sebelum USAINS semak', threw);
+S.setRole('usains');
+W.checkBatch(bat.id);
+check('CHECKED — Disemak Oleh direkod',
+  S.batch(bat.id).batchStatus === 'CHECKED' && S.batch(bat.id).checkedBy.name === 'Aiman Rashid');
+S.setRole('leap');
+W.approveBatch(bat.id);
+check('APPROVED — Diluluskan Oleh direkod',
+  S.batch(bat.id).batchStatus === 'APPROVED' && S.batch(bat.id).approvedBy.name === 'Dr. Farah Idris');
+S.setRole('usains');
+W.submitBatchToBendahari(bat.id);
+check('SUBMITTED_TO_BENDAHARI', S.batch(bat.id).batchStatus === 'SUBMITTED_TO_BENDAHARI');
 
 // --- 11. Payment Officer rekod bayaran ---
 step(11, 'Payment Officer — rekod bayaran');
@@ -223,6 +322,10 @@ check('kembali 6 ejen seed', S2.agents().length === 6);
 check('ejen demo hilang', S2.agent(a.id) === null);
 check('CL-0102 kembali DRAFT', S2.claim('CL-0102').claimStatus === 'DRAFT');
 check('kadar UG kembali 15%', S2.config().commission.ug.ratePercent === 15);
+check('kembali 1 batch seed', S2.batches().length === 1, String(S2.batches().length));
+check('AG-2041 kekal Registered selepas reset',
+  S2.agent('AG-2041').vendor.supplierCode === 'NT-2026-0041');
+check('kadar USD kembali 4.70', S2.config().currency.usdToRm === 4.70);
 
 console.log('\n=======================================');
 console.log('LULUS: ' + ok + '   GAGAL: ' + fail);
