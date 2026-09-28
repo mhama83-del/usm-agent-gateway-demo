@@ -38,6 +38,11 @@ dengan **Bootstrap 5 bersih**. Seed data sudah dikemas dalam `data/seed.js`.
 ## 3. Skop teknikal (peraturan keras)
 
 - **Front-end statik sahaja:** HTML5 + Bootstrap 5 + JavaScript vanilla.
+- **Cache-busting:** setiap rujukan CSS/JS tempatan dalam HTML membawa
+  `?v=<BUILD>`, dicop oleh `tools/stamp-version.js` daripada pemalar `BUILD`
+  dalam `js/app.js` (sumber versi tunggal). Naikkan `BUILD` dan jalankan
+  skrip itu sebelum setiap deploy. Demo tetap **tidak perlu build untuk
+  dijalankan** — HTML yang dicop sudah dalam repo.
 - **TIADA** backend, database, API, login sebenar, e-mel sebenar, e-signature sebenar.
 - **Data palsu** dalam JS (`data/seed.js`). State demo disimpan dalam
   **`localStorage`** supaya transisi status **kekal** semasa demo.

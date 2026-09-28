@@ -861,6 +861,61 @@ check('penanda footer sepadan App.BUILD',
 check('versi state dalam footer ialah VERSION semasa',
   footText.indexOf('state v' + S().state().version) >= 0, String(S().state().version));
 
+console.log('\n== 25c. Cache-busting: setiap aset tempatan dicop ?v= ==');
+// Tanpa tag versi, CDN dan pelayar boleh menghidangkan JS/CSS lama selepas
+// deploy — halaman nampak berfungsi tetapi ciri baharu "hilang". Ujian ini
+// memastikan tiada rujukan terlepas dicop.
+var BUILD = win.USMDEMO.App.BUILD;
+check('App.BUILD ditakrifkan', !!BUILD && /^[\w.-]+$/.test(BUILD), String(BUILD));
+
+var htmlFiles = ['index.html'];
+fs.readdirSync(path.join(REPO, 'pages')).forEach(function (f) {
+  if (f.slice(-5) === '.html') htmlFiles.push('pages/' + f);
+});
+check('12 skrin + index.html diperiksa', htmlFiles.length === 13, String(htmlFiles.length));
+
+var unstamped = [], wrongVer = [], cdn = 0, stamped = 0;
+htmlFiles.forEach(function (rel) {
+  var src = fs.readFileSync(path.join(REPO, rel), 'utf8');
+  var re = /(?:href|src)="([^"]+?\.(?:css|js))(\?v=[^"]*)?"/g;
+  var m;
+  while ((m = re.exec(src)) !== null) {
+    var url = m[1];
+    if (/^https?:|^\/\//.test(url)) { cdn++; continue; }   // CDN: sengaja dilangkau
+    if (!m[2]) { unstamped.push(rel + ' → ' + url); continue; }
+    if (m[2] !== '?v=' + BUILD) { wrongVer.push(rel + ' → ' + url + m[2]); continue; }
+    stamped++;
+  }
+});
+check(stamped + ' rujukan aset tempatan dicop ?v=' + BUILD, stamped >= 100, String(stamped));
+check('TIADA rujukan tempatan tanpa ?v=', unstamped.length === 0, unstamped.slice(0, 6).join(' | '));
+check('setiap ?v= sepadan App.BUILD', wrongVer.length === 0, wrongVer.slice(0, 6).join(' | '));
+// Bootstrap dari CDN sudah tidak berubah mengikut versi dalam laluannya
+// (bootstrap@5.3.3), jadi ?v= hanya akan membatalkan cache CDN yang sah.
+// Setiap satu daripada 12 skrin merujuknya dua kali (CSS + JS bundle);
+// index.html hanya memuatkan app.css, jadi tiada rujukan CDN di sana.
+var expectCdn = (htmlFiles.length - 1) * 2;
+check(cdn + ' rujukan CDN sengaja dibiar tanpa ?v= (12 skrin x 2)',
+  cdn === expectCdn, cdn + ' vs jangka ' + expectCdn);
+
+// Aset yang disuntik semasa larian mesti ikut peraturan yang sama.
+check('App.asset() menambah tag versi',
+  win.USMDEMO.App.asset('a/b.svg') === 'a/b.svg?v=' + BUILD,
+  win.USMDEMO.App.asset('a/b.svg'));
+setRole('agent');
+openPage('vendor-registration', '?id=AG-2041');
+var topLogo = win.document.querySelector('.usm-logo');
+check('logo topbar dicop', !!topLogo && topLogo.getAttribute('src').indexOf('?v=' + BUILD) > 0,
+  topLogo && topLogo.getAttribute('src'));
+var prLogo = win.document.querySelector('.print-logo');
+check('logo pengepala cetak dicop', !!prLogo && prLogo.getAttribute('src').indexOf('?v=' + BUILD) > 0,
+  prLogo && prLogo.getAttribute('src'));
+setRole('usains');
+openPage('claim-batch', '?id=BAT-0001');
+var bLogo = win.document.querySelector('.print-logo');
+check('logo cetak batch dicop', !!bLogo && bLogo.getAttribute('src').indexOf('?v=' + BUILD) > 0,
+  bLogo && bLogo.getAttribute('src'));
+
 console.log('\n== 25b. Stylesheet cetak ==');
 var cssText = fs.readFileSync(path.join(REPO, 'assets/css/app.css'), 'utf8');
 check('hanya SATU blok @media print',

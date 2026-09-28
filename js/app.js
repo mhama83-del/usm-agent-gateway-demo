@@ -28,6 +28,14 @@
 
   function el(id) { return document.getElementById(id); }
 
+  // Tag versi untuk aset yang disuntik semasa larian (logo dalam topbar dan
+  // pengepala cetak). Rujukan dalam HTML dicop oleh tools/stamp-version.js;
+  // ini memberi aset yang dibina dalam JS peraturan cache-busting yang sama,
+  // daripada pemalar BUILD yang sama.
+  function asset(url) {
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'v=' + BUILD;
+  }
+
   function toast(msg, kind) {
     var host = el('toast-host');
     if (!host) {
@@ -140,6 +148,6 @@
   NS.App = {
     register: register, boot: boot, qs: qs, el: el, toast: toast, run: run,
     money: money, go: go, pageTitle: pageTitle, onAction: onAction, BASE: BASE,
-    BUILD: BUILD
+    BUILD: BUILD, asset: asset
   };
 })(window);

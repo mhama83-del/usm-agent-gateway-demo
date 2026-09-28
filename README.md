@@ -111,9 +111,40 @@ mungkin berbeza sedikit ikut versi):
 5. **Uji:** buka `https://agents.durianbytes.com` dan larikan seluruh golden path
    serta butang **Reset Demo**.
 
-> Nota: `README.md`, `CLAUDE.md`, `.gitignore`, `docs/` dan `tests/` tidak perlu
-> diupload ke Hostinger — ia untuk repo sahaja. Yang perlu naik hanyalah
-> `index.html`, `.htaccess`, `assets/`, `js/`, `data/` dan `pages/`.
+> Nota: `README.md`, `CLAUDE.md`, `.gitignore`, `docs/`, `tests/` dan `tools/`
+> tidak perlu diupload ke Hostinger — ia untuk repo sahaja. Yang perlu naik
+> hanyalah `index.html`, `.htaccess`, `assets/`, `js/`, `data/` dan `pages/`.
+
+### Prosedur keluaran (sebelum setiap deploy)
+
+Setiap rujukan CSS/JS tempatan dalam HTML membawa tag versi, contoh
+`js/app.js?v=2026-09-28d`. Tag itu menukar URL setiap keluaran, jadi pelayar
+dan CDN tidak boleh memadankan cache lama dan fail baharu sentiasa diambil.
+
+**Sumber versi tunggal** ialah pemalar `BUILD` dalam `js/app.js`. Tiada tempat
+lain mentakrifkan versi.
+
+```bash
+# 1. Naikkan BUILD dalam js/app.js, contoh '2026-09-28d' -> '2026-09-29a'
+# 2. Cop semula setiap rujukan aset
+node tools/stamp-version.js
+# 3. Sahkan tiada yang terlepas (mod semakan, tidak menulis apa-apa)
+node tools/stamp-version.js --check
+# 4. Commit HTML yang dicop
+```
+
+Skrip itu **idempoten** — menjalankannya semula hanya menggantikan tag sedia
+ada. Ujian `ui-golden-path.jsdom.js` §25c turut menguatkuasakannya: ia gagal
+jika ada satu rujukan tempatan tanpa `?v=`, atau jika mana-mana tag tidak
+sepadan `BUILD`.
+
+> URL Bootstrap dari CDN **sengaja tidak dicop**. Ia sudah tidak berubah
+> mengikut versi dalam laluannya (`bootstrap@5.3.3`), jadi menambah `?v=`
+> hanya akan membatalkan cache CDN yang sah tanpa faedah.
+
+> Demo sendiri tetap **tidak memerlukan build untuk dijalankan** — HTML yang
+> dicop sudah berada dalam repo. `tools/` ialah alat pembangun, sama seperti
+> `tests/`, dan tidak perlu diupload ke Hostinger.
 
 ### Semak build yang sedang dijalankan pelayar
 
@@ -198,6 +229,7 @@ js/components/sidenav.js      Navigasi ikut peranan + kiraan tugasan
 js/components/sla-chip.js     Chip SLA (Within / Approaching / Overdue)
 js/components/status-trail.js Status trail 5-peringkat
 js/components/list-card.js    Kad, jadual boleh-tindan, lencana DRAFT
+tools/stamp-version.js        Cop tag versi ?v= pada rujukan aset (pembangun)
 js/pages/<skrin>.js           Logik setiap skrin (satu fail satu skrin)
 pages/<skrin>.html            Setiap skrin = satu fail HTML (12 skrin)
 pages/claim-batch.html        Batch tuntutan dalam format lajur Bendahari

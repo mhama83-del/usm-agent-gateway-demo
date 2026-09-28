@@ -167,7 +167,7 @@
       // Pengepala ini tersembunyi pada skrin (.print-only) dan muncul hanya
       // pada cetakan, meniru kepala borang rasmi.
       var printHead = '<div class="print-only print-sheet-head">'
-        + '<img src="' + App.BASE + 'assets/img/usm-apex-logo.svg" class="print-logo" '
+        + '<img src="' + C.esc(App.asset(App.BASE + 'assets/img/usm-apex-logo.svg')) + '" class="print-logo" '
         + 'alt="Universiti Sains Malaysia · APEX">'
         + '<div>'
         + '<div class="print-sheet-org">OFFICE OF THE BURSAR</div>'

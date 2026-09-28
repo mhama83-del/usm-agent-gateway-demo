@@ -68,7 +68,7 @@
       + '<header class="usm-topbar py-2">'
       + '  <div class="container-xl d-flex align-items-center gap-2 gap-sm-3 flex-wrap">'
       + '    <a href="' + base + 'pages/dashboard.html" class="d-flex align-items-center gap-2 flex-shrink-0">'
-      + '      <img src="' + base + 'assets/img/usm-apex-logo.svg" class="usm-logo"'
+      + '      <img src="' + esc(NS.App.asset(base + 'assets/img/usm-apex-logo.svg')) + '" class="usm-logo"'
       + '           alt="Universiti Sains Malaysia · APEX">'
       + '      <span class="d-none d-sm-block">'
       + '        <span class="usm-brand-title d-block">USM Agent Gateway</span>'
