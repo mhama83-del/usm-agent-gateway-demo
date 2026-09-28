@@ -55,6 +55,7 @@ sistem, dengan data seed sedia terisi.
 | **D-021** | **`feeRM` TIDAK ditambah.** `firstYearFee` kekal **sumber tunggal** nilai RM; `feeUSD` **DIKIRA** daripada `CONFIG_DRAFT.currency.usdToRm`. Elak dua sumber kebenaran, dan menyokong hujah utama demo: tukar kadar → semua amaun bergerak (selaras `CLAUDE.md` §3.1(1)). | Disahkan |
 | **D-022** | Golden path dipanjangkan: perjanjian ditandatangani → **ACTIVE** → **pendaftaran vendor** → **Bendahari keluarkan supplierCode** → rujukan → tuntutan → **batch** → bayaran. `submitApplication()` mencipta `vendorStatus = 'Not Registered'`. | Disahkan |
 | **D-023** | Seksyen 2 & 3 borang vendor (asal Bahasa Melayu) **diterjemah ke English** — satu bahasa satu skrin, selaras keputusan bahasa 8 Sep 2026. Kod dokumen `USM.FIS.AP.B.2023.01` dan label `USM Office Use Only` **kekal seperti asal**. | Disahkan |
+| **D-025** | **Label sign-off borang Bendahari turut diterjemah ke English** (28 Sep 2026): `Reviewed By :`, `Approved By :`, `Signature :`, `Date :`, `Name & Position Stamp :`. Ia label borang, bukan kod. **Tiada pengecualian bahasa pada UI** — hanya kod dokumen dan `USM Office Use Only` kekal verbatim. | Disahkan |
 | **D-024** | Nota rujukan ini ditulis sebagai sebahagian repo, menjadi rujukan fasa produksi. | Disahkan |
 
 ---
@@ -100,14 +101,18 @@ blok `FEEDBACK FROM USM` (dalam Excel, `O3:R3` bercantum).
 
 ### 4.3 Blok sign-off (daripada CONTOH)
 
-| Label | Pihak |
-|---|---|
-| `Disemak Oleh :` | USAINS |
-| `Diluluskan Oleh :` | USM LEAP |
-| `Tandatangan :` · `Tarikh :` · `Cap Nama & Jawatan :` | medan bagi kedua-dua pihak |
+| Label asal (Excel) | Label demo (English) | Pihak |
+|---|---|---|
+| `Disemak Oleh :` | `Reviewed By :` | USAINS |
+| `Diluluskan Oleh :` | `Approved By :` | USM LEAP |
+| `Tandatangan :` | `Signature :` | kedua-dua pihak |
+| `Tarikh :` | `Date :` | kedua-dua pihak |
+| `Cap Nama & Jawatan :` | `Name & Position Stamp :` | kedua-dua pihak |
 
-Label sign-off **kekal Bahasa Melayu** kerana ia petikan verbatim daripada
-borang Bendahari, sama seperti kod dokumen. Ia bukan teks UI yang dikarang.
+Label sign-off **diterjemah ke English** (keputusan D-025, 28 Sep 2026) kerana
+ia label borang, bukan kod. **Tiada pengecualian bahasa pada UI.** Yang kekal
+verbatim hanyalah kod dokumen `USM.FIS.AP.B.2023.01` dan label
+`USM Office Use Only` — kedua-duanya pengenal dokumen.
 
 ### 4.4 Eksport
 

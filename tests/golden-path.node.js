@@ -266,11 +266,11 @@ try { W.approveBatch(bat.id); } catch (e) { threw = true; }
 check('R-6 LEAP tidak boleh lulus sebelum USAINS semak', threw);
 S.setRole('usains');
 W.checkBatch(bat.id);
-check('CHECKED — Disemak Oleh direkod',
+check('CHECKED — Reviewed By direkod',
   S.batch(bat.id).batchStatus === 'CHECKED' && S.batch(bat.id).checkedBy.name === 'Aiman Rashid');
 S.setRole('leap');
 W.approveBatch(bat.id);
-check('APPROVED — Diluluskan Oleh direkod',
+check('APPROVED — Approved By direkod',
   S.batch(bat.id).batchStatus === 'APPROVED' && S.batch(bat.id).approvedBy.name === 'Dr. Farah Idris');
 S.setRole('usains');
 W.submitBatchToBendahari(bat.id);

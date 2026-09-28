@@ -421,11 +421,10 @@ check(checked + ' pautan disemak merentas 10 skrin × 5 peranan — tiada yang m
   dead.length === 0, dead.slice(0, 6).join(' | '));
 console.log('\n== 21. UI English (tiada teks BM tertinggal) ==');
 
-// PENGECUALIAN yang disengajakan: label sign-off borang Bendahari
-// (Disemak Oleh, Diluluskan Oleh, Tandatangan, Tarikh, Cap Nama & Jawatan)
-// KEKAL Bahasa Melayu — ia petikan verbatim borang rasmi, bukan teks UI yang
-// dikarang (keputusan D-023). Senarai di bawah huruf kecil dan padanan
-// case-sensitive, jadi label bermula huruf besar itu tidak tertangkap.
+// TIADA pengecualian bahasa lagi: label sign-off borang Bendahari kini
+// English juga (keputusan owner 28 Sep 2026). Perkataannya ditambah ke
+// senarai di bawah supaya ia DITANGKAP jika sesiapa memasukkannya semula.
+// Hanya kod dokumen USM.FIS.AP.B.2023.01 dan "USM Office Use Only" kekal.
 // Penanda BM. Nama bulan yang SAMA dalam English (April, Jun, September,
 // November) sengaja tidak disenaraikan; hanya yang benar-benar BM.
 var BM_WORDS = [
@@ -446,8 +445,32 @@ var BM_WORDS = [
   'Januari', 'Februari', 'Julai', 'Ogos', 'Oktober', 'Disember',
   'Mei', 'Mac', 'Okt', 'Dis',
   // lencana lama
-  'DRAF<', '>DRAF<', 'AKTIF'
+  'DRAF<', '>DRAF<', 'AKTIF',
+  // label sign-off borang Bendahari (kini English)
+  'Disemak', 'Diluluskan', 'Tandatangan', 'Tarikh', 'Cap Nama', 'Jawatan'
 ];
+
+// textContent mencantum nod teks TANPA pemisah, jadi "…DRAFT" + "Disemak"
+// menjadi "DRAFTDisemak" dan sempadan [^A-Za-z] gagal — perkataan BM yang
+// melekat pada elemen sebelumnya terlepas. Kutip nod teks satu per satu dan
+// cantumkan dengan ruang. Atribut title/aria-label turut diimbas kerana ia
+// teks yang dilihat pengguna (tooltip).
+function uiText(el) {
+  var parts = [];
+  (function walk(n) {
+    if (!n) return;
+    if (n.nodeType === 3) { parts.push(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    if (n.getAttribute) {
+      var ttl = n.getAttribute('title');
+      if (ttl) parts.push(ttl);
+      var lbl = n.getAttribute('aria-label');
+      if (lbl) parts.push(lbl);
+    }
+    for (var i = 0; i < n.childNodes.length; i++) walk(n.childNodes[i]);
+  })(el);
+  return parts.join(' ');
+}
 
 function bmWordIn(text) {
   for (var w = 0; w < BM_WORDS.length; w++) {
@@ -466,9 +489,9 @@ for (var bp = 0; bp < PAGES.length; bp++) {
     S().setRole(ROLES[br]);
     openPage(PAGES[bp]);
     var regions = [
-      ['chrome', win.document.getElementById('chrome-top').textContent],
-      ['body', win.document.getElementById('page').textContent],
-      ['footer', win.document.getElementById('chrome-bottom').textContent]
+      ['chrome', uiText(win.document.getElementById('chrome-top'))],
+      ['body', uiText(win.document.getElementById('page'))],
+      ['footer', uiText(win.document.getElementById('chrome-bottom'))]
     ];
     for (var rg = 0; rg < regions.length; rg++) {
       var word = bmWordIn(regions[rg][1] || '');
@@ -632,8 +655,10 @@ check('notifikasi BM lama hilang', bmWordIn(JSON.stringify(S().notifications()))
 check('log BM lama hilang', bmWordIn(JSON.stringify(S().log())) === null);
 check('label CONFIG_DRAFT BM lama hilang',
   S().config().commission.ug.label === 'Undergraduate (UG)', S().config().commission.ug.label);
+var upgradedText = uiText(win.document.getElementById('chrome-top'))
+  + ' ' + uiText(win.document.getElementById('page'));
 check('tiada teks BM pada dashboard selepas naik taraf',
-  bmWordIn(chrome() + body()) === null, String(bmWordIn(chrome() + body())));
+  bmWordIn(upgradedText) === null, String(bmWordIn(upgradedText)));
 
 console.log('\n== 23. Skrin Claim Batch — format lajur Bendahari ==');
 setRole('usains');
@@ -683,9 +708,11 @@ check('setiap baris ada 19 sel',
   String(dataRows[0].querySelectorAll('td').length));
 
 // Blok sign-off — label verbatim borang Bendahari.
-check('blok sign-off Disemak Oleh ada', body().indexOf('Disemak Oleh :') >= 0);
-check('blok sign-off Diluluskan Oleh ada', body().indexOf('Diluluskan Oleh :') >= 0);
-check('medan Cap Nama & Jawatan ada', body().indexOf('Cap Nama') >= 0);
+check('blok sign-off Reviewed By ada', body().indexOf('Reviewed By :') >= 0);
+check('blok sign-off Approved By ada', body().indexOf('Approved By :') >= 0);
+check('medan Name & Position Stamp ada', body().indexOf('Name &amp; Position Stamp :') >= 0);
+check('medan Signature dan Date ada',
+  body().indexOf('Signature :') >= 0 && body().indexOf('Date :') >= 0);
 check('tajuk helaian ikut template',
   body().indexOf('Foreign Student Recruitment Agent Student List for Commission Claim') >= 0);
 check('tempoh batch dipaparkan', body().indexOf('Batch Date From :') >= 0);
@@ -702,7 +729,10 @@ check('CSV guna nombor mentah, bukan berformat',
 check('sel kosong CSV betul-betul kosong (bukan em-dash)',
   csvLines[7].indexOf('"—"') < 0, csvLines[7]);
 check('CSV ditutup dengan blok sign-off',
-  csv.indexOf('Disemak Oleh :') >= 0 && csv.indexOf('Diluluskan Oleh :') >= 0);
+  csv.indexOf('Reviewed By :') >= 0 && csv.indexOf('Approved By :') >= 0);
+check('CSV guna label sign-off English sepenuhnya',
+  csv.indexOf('Signature :') >= 0 && csv.indexOf('Date :') >= 0
+  && csv.indexOf('Name & Position Stamp :') >= 0);
 check('nama penyemak & pelulus ada dalam CSV',
   csv.indexOf('Aiman Rashid') >= 0 && csv.indexOf('Dr. Farah Idris') >= 0);
 check('USD dalam CSV dikira dari kadar DRAFT',
@@ -729,13 +759,13 @@ check('LEAP tiada butang Approve sebelum USAINS semak',
 setRole('usains');
 openPage('claim-batch', '?id=' + newBatch.id);
 click('[data-action="check"]');
-check('CHECKED — Disemak Oleh direkod',
+check('CHECKED — Reviewed By direkod',
   S().batch(newBatch.id).batchStatus === 'CHECKED'
   && S().batch(newBatch.id).checkedBy.name === 'Aiman Rashid');
 setRole('leap');
 openPage('claim-batch', '?id=' + newBatch.id);
 click('[data-action="approve"]');
-check('APPROVED — Diluluskan Oleh direkod',
+check('APPROVED — Approved By direkod',
   S().batch(newBatch.id).batchStatus === 'APPROVED'
   && S().batch(newBatch.id).approvedBy.name === 'Dr. Farah Idris');
 setRole('usains');

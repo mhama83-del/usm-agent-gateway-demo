@@ -946,7 +946,7 @@
     return b;
   }
 
-  // Sign-off "Disemak Oleh" — USAINS.
+  // Sign-off "Reviewed By" — USAINS.
   function checkBatch(batchId) {
     guard('checkBatch');
     var b = S.batch(batchId);
@@ -956,7 +956,7 @@
     var st = S.state(), info = S.roleInfo();
     b.checkedBy = { name: info.person, designation: info.title + ', ' + info.label, dateLabel: fmt(st.nowIso) };
     b.batchStatus = 'CHECKED';
-    logIt('batch', b.id, 'DRAFT', b.batchStatus, 'Batch checked by USAINS (Disemak Oleh)');
+    logIt('batch', b.id, 'DRAFT', b.batchStatus, 'Batch checked by USAINS (Reviewed By)');
     notify('leap', 'Claim batch awaiting approval',
       b.batchNo + ' has been checked and needs USM LEAP approval.',
       'claim-batch.html?id=' + b.id, b.agentId);
@@ -964,7 +964,7 @@
     return b;
   }
 
-  // Sign-off "Diluluskan Oleh" — USM LEAP. R-6: mesti selepas checkBatch.
+  // Sign-off "Approved By" — USM LEAP. R-6: mesti selepas checkBatch.
   function approveBatch(batchId) {
     guard('approveBatch');
     var b = S.batch(batchId);
@@ -976,7 +976,7 @@
     var st = S.state(), info = S.roleInfo();
     b.approvedBy = { name: info.person, designation: info.title + ', ' + info.label, dateLabel: fmt(st.nowIso) };
     b.batchStatus = 'APPROVED';
-    logIt('batch', b.id, 'CHECKED', b.batchStatus, 'Batch approved by USM LEAP (Diluluskan Oleh)');
+    logIt('batch', b.id, 'CHECKED', b.batchStatus, 'Batch approved by USM LEAP (Approved By)');
     notify('usains', 'Claim batch approved',
       b.batchNo + ' is approved and ready to submit to the Bursary.',
       'claim-batch.html?id=' + b.id, b.agentId);

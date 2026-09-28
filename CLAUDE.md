@@ -109,10 +109,11 @@ dengan **Bootstrap 5 bersih**. Seed data sudah dikemas dalam `data/seed.js`.
      perjanjian ditandatangani → ACTIVE → **pendaftaran vendor** → **Kod
      Pembekal** → rujukan → tuntutan → **batch** → bayaran.
    - **D-023** Seksyen 2 & 3 borang vendor (asal BM) diterjemah ke English.
-     Kod dokumen `USM.FIS.AP.B.2023.01` dan label `USM Office Use Only` kekal.
-     Label sign-off borang Bendahari (`Disemak Oleh :`, `Diluluskan Oleh :`,
-     `Tandatangan :`, `Tarikh :`, `Cap Nama & Jawatan :`) **kekal Bahasa
-     Melayu** kerana ia petikan verbatim borang rasmi, bukan teks UI dikarang.
+     **Dikemas kini 28 Sep 2026:** label sign-off borang Bendahari turut
+     diterjemah — `Reviewed By :`, `Approved By :`, `Signature :`, `Date :`,
+     `Name & Position Stamp :`. **Tiada pengecualian bahasa pada UI.** Yang
+     kekal verbatim hanyalah **kod dokumen** `USM.FIS.AP.B.2023.01` dan label
+     `USM Office Use Only`, kerana itu pengenal dokumen, bukan teks UI.
    - **D-024** Nota rujukan ditulis ke dalam repo untuk fasa produksi.
 7. **Bayaran disekat tanpa Kod Pembekal.** `recordPayment()` gagal jika ejen
    tiada `vendor.supplierCode` dan `vendorStatus === 'Registered'`.

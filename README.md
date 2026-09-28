@@ -135,7 +135,7 @@ kad *"Next step"* pada Dashboard:
 | 9 | Agent | **Build claim** → **Submit claim** |
 | 10 | USAINS | *Commission Claims* → tanda 5 syarat kelayakan → **Send for LEAP decision** |
 | 11 | USM LEAP | *Commission Claims* → **Approve** |
-| 11b | USAINS → LEAP → USAINS | *Claim Batch* → **Create batch** → **Check** (Disemak Oleh) → **Approve** (Diluluskan Oleh) → **Submit to Bursary** → **Export to Bendahari (CSV)** |
+| 11b | USAINS → LEAP → USAINS | *Claim Batch* → **Create batch** → **Check** (Reviewed By) → **Approve** (Approved By) → **Submit to Bursary** → **Export to Bendahari (CSV)** |
 | 12 | Payment Officer | *Commission Claims* → **Record payment** (amaun, tarikh, rujukan) |
 | 13 | USM LEAP | *Annual Review* → **Open review** → **Renew** |
 

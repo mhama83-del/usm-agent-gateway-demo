@@ -5,6 +5,10 @@
    daripada CONTOH EXCEL SUBMIT BENDAHARI.xlsx. Lihat keputusan D-020 dalam
    docs/USM-Agent-Gateway-Integrasi-Bendahari-Vendor.md.
 
+   Label sign-off diterjemah ke English (keputusan owner 28 Sep 2026) — ia
+   label borang, bukan kod. Hanya kod dokumen dan "USM Office Use Only" kekal
+   verbatim.
+
    JANGAN "kemas" ejaan header — ruang berganda dan garis miring dikekalkan
    persis seperti dalam Excel, dan ujian memadankannya secara tepat. */
 (function (root) {
@@ -129,10 +133,10 @@
     var rows = rowsFor(S, W, batch, true);
     for (var r = 0; r < rows.length; r++) lines.push(csvRow(rows[r]));
     lines.push('');
-    lines.push(csvRow(['', '', '', '', '', 'Disemak Oleh :', 'Diluluskan Oleh :']));
-    lines.push(csvRow(['', '', '', '', 'Tandatangan :', batch.checkedBy.name, batch.approvedBy.name]));
-    lines.push(csvRow(['', '', '', '', 'Tarikh :', batch.checkedBy.dateLabel, batch.approvedBy.dateLabel]));
-    lines.push(csvRow(['', '', '', '', 'Cap Nama & Jawatan :', batch.checkedBy.designation, batch.approvedBy.designation]));
+    lines.push(csvRow(['', '', '', '', '', 'Reviewed By :', 'Approved By :']));
+    lines.push(csvRow(['', '', '', '', 'Signature :', batch.checkedBy.name, batch.approvedBy.name]));
+    lines.push(csvRow(['', '', '', '', 'Date :', batch.checkedBy.dateLabel, batch.approvedBy.dateLabel]));
+    lines.push(csvRow(['', '', '', '', 'Name & Position Stamp :', batch.checkedBy.designation, batch.approvedBy.designation]));
     return lines.join('\r\n');
   }
 
@@ -190,11 +194,11 @@
         + App.money(tot.feeRm) + ' · USD ' + W.usdMoney(tot.feeRm)
         + C.draf('USD converted at the DRAFT rate ' + S.config().currency.usdToRm) + '</div>';
 
-      // Blok sign-off daripada CONTOH EXCEL SUBMIT BENDAHARI.xlsx.
-      // Label kekal Bahasa Melayu — petikan verbatim borang Bendahari.
+      // Blok sign-off daripada CONTOH EXCEL SUBMIT BENDAHARI.xlsx, diterjemah
+      // ke English mengikut keputusan owner 28 Sep 2026.
       h += '<div class="row g-3 mt-2 signoff-block">'
-        + signCol('Disemak Oleh :', b.checkedBy)
-        + signCol('Diluluskan Oleh :', b.approvedBy)
+        + signCol('Reviewed By :', b.checkedBy)
+        + signCol('Approved By :', b.approvedBy)
         + '</div>';
       return h;
     }
@@ -203,13 +207,13 @@
       return '<div class="col-sm-6"><div class="border rounded p-3 h-100">'
         + '<div class="fw-semibold small mb-2">' + C.esc(title) + '</div>'
         + '<dl class="row mb-0 small">'
-        + '<dt class="col-5 text-muted fw-normal">Tandatangan :</dt>'
+        + '<dt class="col-5 text-muted fw-normal">Signature :</dt>'
         + '<dd class="col-7">' + (who && who.name && who.name !== '—'
             ? '<span class="badge bg-success">Signed</span> ' + C.esc(who.name)
             : '<span class="text-muted">—</span>') + '</dd>'
-        + '<dt class="col-5 text-muted fw-normal">Tarikh :</dt>'
+        + '<dt class="col-5 text-muted fw-normal">Date :</dt>'
         + '<dd class="col-7">' + C.esc((who && who.dateLabel) || '—') + '</dd>'
-        + '<dt class="col-5 text-muted fw-normal">Cap Nama &amp; Jawatan :</dt>'
+        + '<dt class="col-5 text-muted fw-normal">Name &amp; Position Stamp :</dt>'
         + '<dd class="col-7">' + C.esc((who && who.designation) || '—') + '</dd>'
         + '</dl></div></div>';
     }
@@ -288,10 +292,10 @@
         var a = S.agent(current.agentId);
         var acts = [];
         if (W.can('checkBatch') && current.batchStatus === 'DRAFT') {
-          acts.push('<button class="btn btn-sm btn-usm" data-action="check">Check batch (Disemak Oleh)</button>');
+          acts.push('<button class="btn btn-sm btn-usm" data-action="check">Check batch (Reviewed By)</button>');
         }
         if (W.can('approveBatch') && current.batchStatus === 'CHECKED') {
-          acts.push('<button class="btn btn-sm btn-usm" data-action="approve">Approve batch (Diluluskan Oleh)</button>');
+          acts.push('<button class="btn btn-sm btn-usm" data-action="approve">Approve batch (Approved By)</button>');
         }
         if (W.can('submitBatchToBendahari') && current.batchStatus === 'APPROVED') {
           acts.push('<button class="btn btn-sm btn-usm" data-action="submit-bendahari">Submit to Bursary</button>');
@@ -337,8 +341,8 @@
         + buildPanel()
         + C.card('Sign-off order',
             '<ol class="small ps-3 mb-0">'
-            + '<li><strong>USAINS</strong> checks the batch — <em>Disemak Oleh</em>.</li>'
-            + '<li><strong>USM LEAP</strong> approves it — <em>Diluluskan Oleh</em>.</li>'
+            + '<li><strong>USAINS</strong> checks the batch — <em>Reviewed By</em>.</li>'
+            + '<li><strong>USM LEAP</strong> approves it — <em>Approved By</em>.</li>'
             + '<li><strong>USAINS</strong> submits it to the Bursary.</li>'
             + '<li><strong>Payment Officer</strong> records each payment on the claim.</li>'
             + '</ol>')
